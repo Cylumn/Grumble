@@ -22,7 +22,7 @@ struct SettingsView: View {
             HStack{
                 Text("Settings")
                     .font(.custom("Ubuntu-Bold", size: self.geometry.size.width / 13))
-                    .foregroundColor(getBlue(0))
+                    .foregroundColor(gColor(.blue0))
                 
                 Spacer()
                 Image("ColoredLogo")
@@ -40,13 +40,21 @@ struct SettingsView: View {
                     Text("Social")
                 }
                 Section{
-                    Text("Log Out")
-                }.listRowBackground(getBlue(4))
+                    Button(action: self.logOutUser, label: {
+                        Text("Log Out")
+                    })
+                }.listRowBackground(gColor(.blue4))
             }.listStyle(GroupedListStyle())
             
             Spacer()
         }.font(.custom("Ubuntu-Light", size: 15))
         .edgesIgnoringSafeArea(.all)
+    }
+    
+    func logOutUser(){
+        withAnimation {
+            onLogout()
+        }
     }
 }
 

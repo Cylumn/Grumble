@@ -9,20 +9,19 @@
 import SwiftUI
 
 struct TabView: View {
-    @ObservedObject var viewRouter: ViewRouter
+    @ObservedObject private var tr: TabRouter = TabRouter.tr()
     private var geometry: GeometryProxy
     private var contentView: ContentView
     var iconHeight: CGFloat = 25
     
-    init(_ viewRouter: ViewRouter, _ geometry: GeometryProxy, _ contentView: ContentView){
-        self.viewRouter = viewRouter
+    init(_ geometry: GeometryProxy, _ contentView: ContentView){
         self.geometry = geometry
         self.contentView = contentView
     }
     
     var body: some View {
         HStack{
-            if self.viewRouter.currentView == "list" {
+            if self.tr.tab() == .list {
                 Image(systemName: "bag.fill").resizable().aspectRatio(contentMode: .fit).frame(width: geometry.size.width/2, height: self.iconHeight).contentShape(Rectangle())
                     .onTapGesture{
                         self.toList()
@@ -34,7 +33,7 @@ struct TabView: View {
                 }
             }
             
-            if self.viewRouter.currentView == "settings" {
+            if self.tr.tab() == .settings {
                 Image(systemName: "gear").resizable().aspectRatio(contentMode: .fit).frame(width: geometry.size.width/2, height: self.iconHeight).contentShape(Rectangle())
                     .font(Font.title.weight(.black))
                     .onTapGesture{
@@ -54,13 +53,12 @@ struct TabView: View {
     }
     
     func toList(){
-        self.viewRouter.currentView = "list"
-        
+        self.tr.changeTab(.list)
         contentView.toList(false)
     }
     
     func toSettings(){
-        self.viewRouter.currentView = "settings"
+        self.tr.changeTab(.settings)
     }
 }
 

@@ -2,12 +2,11 @@
 //  GrumbleTests.swift
 //  GrumbleTests
 //
-//  Created by Allen Chang on 3/20/20.
+//  Created by Allen Chang on 3/29/20.
 //  Copyright © 2020 Cylumn, Inc. All rights reserved.
 //
 
 import XCTest
-@testable import Grumble
 
 class GrumbleTests: XCTestCase {
 
@@ -26,7 +25,7 @@ class GrumbleTests: XCTestCase {
 
     func testPerformanceExample() {
         // This is an example of a performance test case.
-        self.measure {
+        measure {
             // Put the code you want to measure the time of here.
         }
     }

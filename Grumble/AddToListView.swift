@@ -9,11 +9,11 @@
 import SwiftUI
 
 struct AddToListView: View {
-    @ObservedObject var viewRouter: ViewRouter
-    @State var id: String = " "
-    @State var food: String = " "
-    @State var price: String =  " "
-    @State var address: String = " "
+    @ObservedObject private var uc: UserCookie = UserCookie.uc()
+    @State var id: String = ""
+    @State var food: String = ""
+    @State var price: String =  ""
+    @State var address: String = ""
     private var geometry: GeometryProxy
     private var contentView: ContentView
     
@@ -26,8 +26,7 @@ struct AddToListView: View {
         return f
     }()
     
-    init(_ viewRouter: ViewRouter, _ geometry: GeometryProxy, _ contentView: ContentView){
-        self.viewRouter = viewRouter
+    init(_ geometry: GeometryProxy, _ contentView: ContentView){
         self.geometry = geometry
         self.contentView = contentView
     }
@@ -55,13 +54,13 @@ struct AddToListView: View {
             }
             .padding(.top, self.safeAreaTop)
             .frame(width: self.geometry.size.width, height: self.geometry.size.width * self.navBarHeight + self.safeAreaTop)
-            .background(getBlue(0))
+            .background(gColor(.blue0))
             
             VStack(alignment: .leading, spacing: 30){
                 HStack{
                 VStack(alignment: .leading, spacing: 0){
-                    Text("Restaurant Name")
-                    .foregroundColor(getBlue(0))
+                    Text("Restaurant Name *")
+                        .foregroundColor(gColor(.blue0))
                     .font(.custom("Ubuntu-Medium", size: self.geometry.size.width / 25))
                     
                     ZStack{
@@ -72,22 +71,16 @@ struct AddToListView: View {
                                     .padding(.leading, 5)
                                     .padding(.top, 10)
                                     .padding(.bottom, 15)
-                                .foregroundColor(getBlue(0))
+                                    .foregroundColor(gColor(.blue0))
 
                                 Spacer()
                             }.offset(y: 3)
 
-                            Rectangle().fill(getBlue(0)).frame(height: 5)
+                            Rectangle().fill(gColor(.blue0)).frame(height: 5)
                         }
                         
-                        TextField("",text: self.$id)
-                        .padding(.leading, 30)
-                        .padding(.trailing, 15)
-                        .padding([.top, .bottom], 5)
-                        .font(.custom("Teko-SemiBold", size: self.geometry.size.width / 17))
-                        .foregroundColor(getBlue(2))
-                        .frame(height: 50)
-                        .onAppear { self.id = "" }
+                        FieldContainer("", text: self.$id, geometry, 0)
+                            .frame(width: self.geometry.size.width * 0.7, height: 50)
                     }
                 }.frame(width: self.geometry.size.width * 0.7)
                     Spacer()
@@ -95,8 +88,8 @@ struct AddToListView: View {
                 
                 HStack{
                 VStack(alignment: .leading, spacing: 0){
-                    Text("Food")
-                    .foregroundColor(getBlue(0))
+                    Text("Food *")
+                    .foregroundColor(gColor(.blue0))
                     .font(.custom("Ubuntu-Medium", size: self.geometry.size.width / 25))
                     
                     ZStack{
@@ -107,22 +100,16 @@ struct AddToListView: View {
                                     .padding(.leading, 5)
                                     .padding(.top, 10)
                                     .padding(.bottom, 15)
-                                .foregroundColor(getBlue(0))
+                                .foregroundColor(gColor(.blue0))
 
                                 Spacer()
                             }.offset(y: 3)
 
-                            Rectangle().fill(getBlue(0)).frame(height: 5)
+                            Rectangle().fill(gColor(.blue0)).frame(height: 5)
                         }
                         
-                        TextField("", text: self.$food)
-                        .padding(.leading, 30)
-                        .padding(.trailing, 15)
-                        .padding([.top, .bottom], 5)
-                        .font(.custom("Teko-SemiBold", size: self.geometry.size.width / 17))
-                        .foregroundColor(getBlue(2))
-                        .frame(height: 50)
-                        .onAppear { self.food = "" }
+                        FieldContainer("", text: self.$food, geometry, 1)
+                            .frame(width: self.geometry.size.width * 0.45, height: 50)
                     }
                 }.frame(width: self.geometry.size.width * 0.45)
                 
@@ -130,7 +117,7 @@ struct AddToListView: View {
                     
                 VStack(alignment: .leading, spacing: 0){
                     Text("Price")
-                    .foregroundColor(getBlue(0))
+                    .foregroundColor(gColor(.blue0))
                     .font(.custom("Ubuntu-Medium", size: self.geometry.size.width / 25))
                     
                     ZStack{
@@ -141,18 +128,17 @@ struct AddToListView: View {
                                     .padding(.leading, 5)
                                     .padding(.top, 10)
                                     .padding(.bottom, 15)
-                                .foregroundColor(getBlue(0))
+                                .foregroundColor(gColor(.blue0))
 
                                 Spacer()
                             }.offset(y: 3)
 
-                            Rectangle().fill(getBlue(0)).frame(height: 5)
+                            Rectangle().fill(gColor(.blue0)).frame(height: 5)
                         }
                         
                         ZStack{
-                            PriceFieldContainer("", text: self.$price, geometry
-                            ).frame(width: 150, height: 50)
-                            .onAppear { self.price = "" }
+                            FieldContainer("", text: self.$price, geometry, 2, isPriceField: true)
+                                .frame(width: 150, height: 50)
                         }.frame(width: self.geometry.size.width * 0.35)
                     }
                 }.frame(width: self.geometry.size.width * 0.35)
@@ -161,7 +147,7 @@ struct AddToListView: View {
                 HStack{
                 VStack(alignment: .leading, spacing: 0){
                     Text("Address")
-                    .foregroundColor(getBlue(0))
+                    .foregroundColor(gColor(.blue0))
                     .font(.custom("Ubuntu-Medium", size: self.geometry.size.width / 25))
                     
                     ZStack{
@@ -172,22 +158,16 @@ struct AddToListView: View {
                                     .padding(.leading, 5)
                                     .padding(.top, 10)
                                     .padding(.bottom, 15)
-                                .foregroundColor(getBlue(0))
+                                .foregroundColor(gColor(.blue0))
 
                                 Spacer()
                             }.offset(y: 3)
 
-                            Rectangle().fill(getBlue(0)).frame(height: 5)
+                            Rectangle().fill(gColor(.blue0)).frame(height: 5)
                         }
                         
-                        TextField("", text: self.$address)
-                        .padding(.leading, 30)
-                        .padding(.trailing, 15)
-                        .padding([.top, .bottom], 5)
-                        .font(.custom("Teko-SemiBold", size: self.geometry.size.width / 17))
-                        .foregroundColor(getBlue(2))
-                        .frame(height: 50)
-                        .onAppear { self.address = "" }
+                        FieldContainer("", text: self.$address, geometry, 4)
+                            .frame(width: self.geometry.size.width * 0.9, height: 50)
                     }
                 }.frame(width: self.geometry.size.width * 0.9)
                 }
@@ -195,14 +175,17 @@ struct AddToListView: View {
             
             Button(action: self.addItem, label:{
                 Text("+ ADD ITEM")
-                    .foregroundColor(getBlue(4))
                     .font(.custom("Ubuntu-Bold", size: self.geometry.size.width / 25))
                     .padding(10)
                     .frame(width: geometry.size.width * 0.7)
-                .overlay(RoundedRectangle(cornerRadius: 8)
-                .stroke(getBlue(4), lineWidth: 8))
-            }).background(getInputColor(1))
-                .cornerRadius(8)
+                    .animation(nil)
+                    .foregroundColor((self.id.isEmpty || self.food.isEmpty) ? gColor(.lightTurquoise).opacity(0.3) : gColor(.blue4))
+                    .overlay(RoundedRectangle(cornerRadius: 8)
+                        .stroke((self.id.isEmpty || self.food.isEmpty) ? gColor(.lightTurquoise).opacity(0.3) : gColor(.blue4), lineWidth: 8))
+                    .animation(.easeInOut(duration: 0.1))
+            }).background((self.id.isEmpty || self.food.isEmpty) ? gColor(.lightTurquoise).opacity(0.3) : gColor(.lightTurquoise).opacity(0.7))
+            .cornerRadius(8)
+            .disabled(self.id.isEmpty || self.food.isEmpty)
             
             Spacer()
         }
@@ -211,12 +194,44 @@ struct AddToListView: View {
     }
     
     func addItem(){
+        var foodItem = [:] as [String: Any]
+        foodItem["address"] = !self.address.isEmpty ? self.address : nil
+        foodItem["food"] = !self.food.isEmpty ? self.food : "undefined"
+        foodItem["price"] = parsePriceField(self.price)
+        
+        let foodDictionary = foodItem as NSDictionary
+        self.uc.appendFoodList(self.id, Restaurant(foodDictionary))
+        appendLocalFood(self.id, foodDictionary)
+        appendCloudFood(self.id, foodDictionary)
+        
         self.id = ""
         self.food = ""
         self.price = ""
         self.address = ""
         
         contentView.toList()
+    }
+    
+    func parsePriceField(_ text: String) -> Double? {
+        var text = text
+        
+        text.removeAll(where: {$0 == "$" || $0 == "."})
+        if let firstZero = text.firstIndex(where: {$0 != "0"}) {
+            text.removeSubrange(text.startIndex..<firstZero)
+        } else {
+            text = ""
+        }
+        
+        if text.isEmpty {
+            return nil
+        } else {
+            while text.count < 3 {
+                text = "0" + text
+            }
+            text.insert(contentsOf: ".", at: text.index(text.endIndex, offsetBy: -2))
+            
+            return Double(text)
+        }
     }
 }
 

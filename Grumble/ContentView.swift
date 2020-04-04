@@ -9,81 +9,29 @@
 import SwiftUI
 
 struct ContentView: View {
-    @ObservedObject var viewRouter =  ViewRouter()
-    @State var lastDragPosition: DragGesture.Value?
-    @State private var baseOffset: CGFloat = 0
-    @State private var dragOffset: CGFloat = 0
+    @ObservedObject private var uc: UserCookie = UserCookie.uc()
+    @ObservedObject private var tr: TabRouter = TabRouter.tr()
+    @State private var index: Int = 0
+    
+    func onAppear(perform action: (() -> Void)? = nil) {
+        action?()
+        self.toList()
+    }
     
     var body: some View {
         GeometryReader{ geometry in
         VStack(spacing: 0){
-            if self.viewRouter.currentView == "list" {
-                HStack(spacing: 0){
-                    ListView(self.viewRouter, geometry, self)
-                        .offset(x: geometry.size.width / 2 +  0.2 * (self.dragOffset - self.baseOffset * geometry.size.width))
-                        /*.gesture(
-                            DragGesture()
-                            .onChanged { gesture in
-                                if (gesture.translation.width < 0 && gesture.translation.width > -geometry.size.width){
-                                    self.dragOffset = gesture.translation.width
-                                }
-                                
-                                self.lastDragPosition = gesture
-                            }
-
-                            .onEnded { gesture in
-                                let timeDiff = gesture.time.timeIntervalSince(self.lastDragPosition!.time)
-                                let speed = (self.dragOffset - gesture.translation.width) / CGFloat(timeDiff)
-                                
-                                withAnimation{
-                                    if self.dragOffset < -geometry.size.width / 2 || speed > 130 {
-                                        self.baseOffset = 1
-                                    } else {
-                                        self.baseOffset = 0
-                                    }
-                                    
-                                    self.dragOffset = 0
-                                }
-                            }
-                        )*/
-                    
-                    AddToListView(self.viewRouter, geometry, self)
-                        .offset(x: geometry.size.width / 2 + self.dragOffset - self.baseOffset * geometry.size.width)
-                        .gesture(
-                            DragGesture()
-                            .onChanged { gesture in
-                                if (gesture.translation.width > 0 && gesture.translation.width < geometry.size.width){
-                                    self.dragOffset = gesture.translation.width
-                                }
-                                
-                                self.lastDragPosition = gesture
-                            }
-
-                            .onEnded { gesture in
-                                let timeDiff = gesture.time.timeIntervalSince(self.lastDragPosition!.time)
-                                let speed = (gesture.translation.width - self.dragOffset) / CGFloat(timeDiff)
-                                
-                                withAnimation{
-                                    if self.dragOffset > geometry.size.width / 2 || speed > 130 {
-                                        self.baseOffset = 0
-                                        
-                                        UIApplication.shared.endEditing()
-                                    } else {
-                                        self.baseOffset = 1
-                                    }
-                                    
-                                    self.dragOffset = 0
-                                }
-                            }
-                        )
-                }
-            } else if self.viewRouter.currentView == "settings" {
+            if self.tr.tab() == .list {
+                SlideView(index: self.$index, offsetFactor: 0.3, padding: 0, views: [
+                    AnyView(ListView(geometry, self)),
+                    AnyView(AddToListView(geometry, self))],
+                          draggable: [false, true])
+            } else if self.tr.tab() == .settings {
                 SettingsView(geometry)
             }
             
-            if self.viewRouter.currentView == "list" ||
-                self.viewRouter.currentView == "settings" {
-                TabView(self.viewRouter, geometry, self)
+            if self.tr.tab() == .list || self.tr.tab() == .settings { //always true
+                TabView(geometry, self)
             }
         }
         }.edgesIgnoringSafeArea(.bottom)
@@ -96,21 +44,25 @@ struct ContentView: View {
     func toList(_ withAnim: Bool = true){
         if withAnim {
             withAnimation{
-                self.baseOffset = 0
+                   self.index = 0
             }
         } else {
-            self.baseOffset = 0
+            self.index = 0
         }
         
         UIApplication.shared.endEditing()
     }
     
     func toAddToList(){
-        withAnimation{
-            self.baseOffset = 1
+        withAnimation(.easeOut(duration: 0.3)) {
+            self.index = 1
         }
         
         UIApplication.shared.endEditing()
+        
+        Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
+            GFormRouter.gfr().callFirstResponder(.addFood)
+        }
     }
 }
 

@@ -7,17 +7,18 @@
 //
 
 import SwiftUI
+import Firebase
 
 struct MainView: View {
-    @EnvironmentObject var userID: UserID
-
+    @ObservedObject private var uc: UserCookie = UserCookie.uc()
+    
     var body: some View {
         GeometryReader{ geometry in
             ZStack{
-                if self.userID.loggedIn {
+                if self.uc.loggedIn() {
                     ContentView()
                 } else {
-                    LoginView(geometry).environmentObject(self.userID)
+                    LoginView(geometry)
                 }
             }
         }.edgesIgnoringSafeArea(.all)

@@ -7,22 +7,34 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		34BC42A9D1B264DF3139D05B /* libPods-Grumble.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 09A0F8D54073F13B1BD8520C /* libPods-Grumble.a */; };
+		550272B9BC3A3C81F2E41812 /* libPods-Grumble.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1214F3538C175B0472B32C67 /* libPods-Grumble.a */; };
+		D502922F2437A9FE008A5BFC /* TabRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D502922E2437A9FE008A5BFC /* TabRouter.swift */; };
+		D50292312437ACF5008A5BFC /* GFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50292302437ACF5008A5BFC /* GFont.swift */; };
+		D50292332437AE06008A5BFC /* Axis.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50292322437AE06008A5BFC /* Axis.swift */; };
+		D50292352437AECF008A5BFC /* GColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50292342437AECF008A5BFC /* GColor.swift */; };
+		D50292382437D6E1008A5BFC /* GAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50292372437D6E1008A5BFC /* GAnimation.swift */; };
+		D502923A2437F7B3008A5BFC /* GForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50292392437F7B3008A5BFC /* GForm.swift */; };
+		D51FECC9243131FA00BF129C /* KeyboardObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51FECC8243131FA00BF129C /* KeyboardObserver.swift */; };
+		D51FECCB24316DC600BF129C /* SheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51FECCA24316DC600BF129C /* SheetView.swift */; };
+		D51FECD2243171A100BF129C /* SignupSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51FECD1243171A100BF129C /* SignupSheetView.swift */; };
+		D51FECD62432C43600BF129C /* UserButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51FECD52432C43600BF129C /* UserButton.swift */; };
+		D51FECD82434189300BF129C /* SlideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51FECD72434189300BF129C /* SlideView.swift */; };
+		D51FECDE24370B1500BF129C /* UserCookie.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51FECDD24370B1500BF129C /* UserCookie.swift */; };
+		D524481B24310C9700903BE3 /* GrumbleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D524481A24310C9700903BE3 /* GrumbleTests.swift */; };
+		D524482924310C9E00903BE3 /* GrumbleUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D524482824310C9E00903BE3 /* GrumbleUITests.swift */; };
 		D55EEBA024271FBB0079922E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D55EEB9F24271FBB0079922E /* SettingsView.swift */; };
 		D55EEBA2242839310079922E /* AddToListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D55EEBA1242839310079922E /* AddToListView.swift */; };
 		D55EEBA4242867710079922E /* TabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D55EEBA3242867710079922E /* TabView.swift */; };
-		D58C599D242B057B00137546 /* PriceFieldContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D58C599C242B057B00137546 /* PriceFieldContainer.swift */; };
+		D5636C4E242EEC3A00476DCB /* data.plist in Resources */ = {isa = PBXBuildFile; fileRef = D5636C4D242EEC3A00476DCB /* data.plist */; };
+		D573A82824386DDC00DB6067 /* GField.swift in Sources */ = {isa = PBXBuildFile; fileRef = D573A82724386DDC00DB6067 /* GField.swift */; };
 		D58C59A4242C07AC00137546 /* Teko-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D58C599F242C07AC00137546 /* Teko-Regular.ttf */; };
 		D58C59A5242C07AC00137546 /* Teko-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D58C59A0242C07AC00137546 /* Teko-Medium.ttf */; };
 		D58C59A6242C07AC00137546 /* Teko-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D58C59A1242C07AC00137546 /* Teko-Light.ttf */; };
 		D58C59A7242C07AC00137546 /* Teko-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D58C59A2242C07AC00137546 /* Teko-Bold.ttf */; };
 		D58C59A8242C07AC00137546 /* Teko-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D58C59A3242C07AC00137546 /* Teko-SemiBold.ttf */; };
+		D5948798242D17E900D25BFD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D5948797242D17E900D25BFD /* GoogleService-Info.plist */; };
 		D5AA593A2425E996000BEC5C /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA59392425E996000BEC5C /* MainView.swift */; };
-		D5AA593C2426BFA2000BEC5C /* Restaurant.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA593B2426BFA2000BEC5C /* Restaurant.swift */; };
 		D5AA593E2426C24F000BEC5C /* IOManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA593D2426C24F000BEC5C /* IOManager.swift */; };
-		D5AA59452426C806000BEC5C /* mylist.json in Resources */ = {isa = PBXBuildFile; fileRef = D5AA59442426C806000BEC5C /* mylist.json */; };
-		D5AA5947242700BD000BEC5C /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA5946242700BD000BEC5C /* ColorManager.swift */; };
-		D5AA594924271264000BEC5C /* ViewRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA594824271264000BEC5C /* ViewRouter.swift */; };
 		D5AA594B24271366000BEC5C /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA594A24271366000BEC5C /* ListView.swift */; };
 		D5AA594D24271391000BEC5C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA594C24271391000BEC5C /* ContentView.swift */; };
 		D5AD27612425B06100462F1C /* Caveat-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD27572425B06100462F1C /* Caveat-Regular.ttf */; };
@@ -35,26 +47,25 @@
 		D5AD27782425B0D400462F1C /* Ubuntu-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD27692425B07B00462F1C /* Ubuntu-Medium.ttf */; };
 		D5AD27792425B0D400462F1C /* Ubuntu-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD276A2425B07C00462F1C /* Ubuntu-MediumItalic.ttf */; };
 		D5AD277A2425B0D400462F1C /* Ubuntu-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD276B2425B07C00462F1C /* Ubuntu-Regular.ttf */; };
+		D5BA571F2430384E0056F91B /* FieldContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5BA571E2430384D0056F91B /* FieldContainer.swift */; };
 		D5F0894E24253AC4000D375D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F0894D24253AC4000D375D /* AppDelegate.swift */; };
 		D5F0895024253AC4000D375D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F0894F24253AC4000D375D /* SceneDelegate.swift */; };
 		D5F0895224253AC4000D375D /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F0895124253AC4000D375D /* LoginView.swift */; };
 		D5F0895424253AC6000D375D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D5F0895324253AC6000D375D /* Assets.xcassets */; };
 		D5F0895724253AC6000D375D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D5F0895624253AC6000D375D /* Preview Assets.xcassets */; };
 		D5F0895A24253AC6000D375D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D5F0895824253AC6000D375D /* LaunchScreen.storyboard */; };
-		D5F0896524253AC6000D375D /* GrumbleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F0896424253AC6000D375D /* GrumbleTests.swift */; };
-		D5F0897024253AC6000D375D /* GrumbleUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F0896F24253AC6000D375D /* GrumbleUITests.swift */; };
 		D5F0898A24257849000D375D /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = D5F0898924257849000D375D /* Podfile */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		D5F0896124253AC6000D375D /* PBXContainerItemProxy */ = {
+		D524481D24310C9700903BE3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D5F0894224253AC4000D375D /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = D5F0894924253AC4000D375D;
 			remoteInfo = Grumble;
 		};
-		D5F0896C24253AC6000D375D /* PBXContainerItemProxy */ = {
+		D524482B24310C9E00903BE3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D5F0894224253AC4000D375D /* Project object */;
 			proxyType = 1;
@@ -64,23 +75,40 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		09A0F8D54073F13B1BD8520C /* libPods-Grumble.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Grumble.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		5AB401C6E5D9A621E12DC532 /* Pods-Grumble.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Grumble.release.xcconfig"; path = "Target Support Files/Pods-Grumble/Pods-Grumble.release.xcconfig"; sourceTree = "<group>"; };
+		1214F3538C175B0472B32C67 /* libPods-Grumble.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Grumble.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		55860C160751486799A6F633 /* Pods-Grumble.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Grumble.debug.xcconfig"; path = "Target Support Files/Pods-Grumble/Pods-Grumble.debug.xcconfig"; sourceTree = "<group>"; };
+		847F996DF78FDA286818A6BD /* Pods-Grumble.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Grumble.release.xcconfig"; path = "Target Support Files/Pods-Grumble/Pods-Grumble.release.xcconfig"; sourceTree = "<group>"; };
+		D502922E2437A9FE008A5BFC /* TabRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabRouter.swift; sourceTree = "<group>"; };
+		D50292302437ACF5008A5BFC /* GFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GFont.swift; sourceTree = "<group>"; };
+		D50292322437AE06008A5BFC /* Axis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Axis.swift; sourceTree = "<group>"; };
+		D50292342437AECF008A5BFC /* GColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GColor.swift; sourceTree = "<group>"; };
+		D50292372437D6E1008A5BFC /* GAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GAnimation.swift; sourceTree = "<group>"; };
+		D50292392437F7B3008A5BFC /* GForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GForm.swift; sourceTree = "<group>"; };
+		D51FECC8243131FA00BF129C /* KeyboardObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardObserver.swift; sourceTree = "<group>"; };
+		D51FECCA24316DC600BF129C /* SheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetView.swift; sourceTree = "<group>"; };
+		D51FECD1243171A100BF129C /* SignupSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupSheetView.swift; sourceTree = "<group>"; };
+		D51FECD52432C43600BF129C /* UserButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserButton.swift; sourceTree = "<group>"; };
+		D51FECD72434189300BF129C /* SlideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideView.swift; sourceTree = "<group>"; };
+		D51FECDD24370B1500BF129C /* UserCookie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCookie.swift; sourceTree = "<group>"; };
+		D524481824310C9700903BE3 /* GrumbleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GrumbleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D524481A24310C9700903BE3 /* GrumbleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrumbleTests.swift; sourceTree = "<group>"; };
+		D524481C24310C9700903BE3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D524482624310C9E00903BE3 /* GrumbleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GrumbleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D524482824310C9E00903BE3 /* GrumbleUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrumbleUITests.swift; sourceTree = "<group>"; };
+		D524482A24310C9E00903BE3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D55EEB9F24271FBB0079922E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D55EEBA1242839310079922E /* AddToListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddToListView.swift; sourceTree = "<group>"; };
 		D55EEBA3242867710079922E /* TabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabView.swift; sourceTree = "<group>"; };
-		D58C599C242B057B00137546 /* PriceFieldContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceFieldContainer.swift; sourceTree = "<group>"; };
+		D5636C4D242EEC3A00476DCB /* data.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = data.plist; sourceTree = "<group>"; };
+		D573A82724386DDC00DB6067 /* GField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GField.swift; sourceTree = "<group>"; };
 		D58C599F242C07AC00137546 /* Teko-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Teko-Regular.ttf"; sourceTree = "<group>"; };
 		D58C59A0242C07AC00137546 /* Teko-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Teko-Medium.ttf"; sourceTree = "<group>"; };
 		D58C59A1242C07AC00137546 /* Teko-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Teko-Light.ttf"; sourceTree = "<group>"; };
 		D58C59A2242C07AC00137546 /* Teko-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Teko-Bold.ttf"; sourceTree = "<group>"; };
 		D58C59A3242C07AC00137546 /* Teko-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Teko-SemiBold.ttf"; sourceTree = "<group>"; };
+		D5948797242D17E900D25BFD /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D5AA59392425E996000BEC5C /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
-		D5AA593B2426BFA2000BEC5C /* Restaurant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Restaurant.swift; sourceTree = "<group>"; };
 		D5AA593D2426C24F000BEC5C /* IOManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOManager.swift; sourceTree = "<group>"; };
-		D5AA59442426C806000BEC5C /* mylist.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = mylist.json; sourceTree = "<group>"; };
-		D5AA5946242700BD000BEC5C /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
-		D5AA594824271264000BEC5C /* ViewRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewRouter.swift; sourceTree = "<group>"; };
 		D5AA594A24271366000BEC5C /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
 		D5AA594C24271391000BEC5C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D5AD27572425B06100462F1C /* Caveat-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Caveat-Regular.ttf"; sourceTree = "<group>"; };
@@ -93,6 +121,7 @@
 		D5AD276D2425B07C00462F1C /* Ubuntu-LightItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-LightItalic.ttf"; sourceTree = "<group>"; };
 		D5AD276E2425B07C00462F1C /* Ubuntu-BoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-BoldItalic.ttf"; sourceTree = "<group>"; };
 		D5AD276F2425B07C00462F1C /* Ubuntu-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-Italic.ttf"; sourceTree = "<group>"; };
+		D5BA571E2430384D0056F91B /* FieldContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldContainer.swift; sourceTree = "<group>"; };
 		D5F0894A24253AC4000D375D /* Grumble.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Grumble.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5F0894D24253AC4000D375D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D5F0894F24253AC4000D375D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -101,48 +130,124 @@
 		D5F0895624253AC6000D375D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		D5F0895924253AC6000D375D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D5F0895B24253AC6000D375D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D5F0896024253AC6000D375D /* GrumbleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GrumbleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5F0896424253AC6000D375D /* GrumbleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrumbleTests.swift; sourceTree = "<group>"; };
 		D5F0896624253AC6000D375D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D5F0896B24253AC6000D375D /* GrumbleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GrumbleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5F0896F24253AC6000D375D /* GrumbleUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrumbleUITests.swift; sourceTree = "<group>"; };
 		D5F0897124253AC6000D375D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D5F0898924257849000D375D /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		ED149BE92003F8141B511C8E /* Pods-Grumble.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Grumble.debug.xcconfig"; path = "Target Support Files/Pods-Grumble/Pods-Grumble.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		D524481524310C9700903BE3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D524482324310C9E00903BE3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D5F0894724253AC4000D375D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				34BC42A9D1B264DF3139D05B /* libPods-Grumble.a in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D5F0895D24253AC6000D375D /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D5F0896824253AC6000D375D /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				550272B9BC3A3C81F2E41812 /* libPods-Grumble.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		C8B12A5EA3443A5CFCB4AC05 /* Frameworks */ = {
+		23A45FBDC84284007BA810EB /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				09A0F8D54073F13B1BD8520C /* libPods-Grumble.a */,
+				1214F3538C175B0472B32C67 /* libPods-Grumble.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D50292362437D69F008A5BFC /* Observable Instances */ = {
+			isa = PBXGroup;
+			children = (
+				D51FECDD24370B1500BF129C /* UserCookie.swift */,
+				D502922E2437A9FE008A5BFC /* TabRouter.swift */,
+				D50292392437F7B3008A5BFC /* GForm.swift */,
+				D51FECC8243131FA00BF129C /* KeyboardObserver.swift */,
+			);
+			path = "Observable Instances";
+			sourceTree = "<group>";
+		};
+		D502923D2438159E008A5BFC /* Structures */ = {
+			isa = PBXGroup;
+			children = (
+				D573A82724386DDC00DB6067 /* GField.swift */,
+			);
+			name = Structures;
+			sourceTree = "<group>";
+		};
+		D51FECCC24316FAC00BF129C /* Login */ = {
+			isa = PBXGroup;
+			children = (
+				D5F0895124253AC4000D375D /* LoginView.swift */,
+				D51FECD1243171A100BF129C /* SignupSheetView.swift */,
+				D51FECD52432C43600BF129C /* UserButton.swift */,
+			);
+			name = Login;
+			sourceTree = "<group>";
+		};
+		D51FECCD24316FC600BF129C /* Tabs */ = {
+			isa = PBXGroup;
+			children = (
+				D51FECCE24316FE900BF129C /* List */,
+				D55EEB9F24271FBB0079922E /* SettingsView.swift */,
+			);
+			name = Tabs;
+			sourceTree = "<group>";
+		};
+		D51FECCE24316FE900BF129C /* List */ = {
+			isa = PBXGroup;
+			children = (
+				D5AA594C24271391000BEC5C /* ContentView.swift */,
+				D5AA594A24271366000BEC5C /* ListView.swift */,
+				D55EEBA1242839310079922E /* AddToListView.swift */,
+			);
+			name = List;
+			sourceTree = "<group>";
+		};
+		D51FECDC24370B0500BF129C /* Accessible */ = {
+			isa = PBXGroup;
+			children = (
+				D50292322437AE06008A5BFC /* Axis.swift */,
+				D50292302437ACF5008A5BFC /* GFont.swift */,
+				D50292342437AECF008A5BFC /* GColor.swift */,
+				D50292372437D6E1008A5BFC /* GAnimation.swift */,
+				D5AA593D2426C24F000BEC5C /* IOManager.swift */,
+				D50292362437D69F008A5BFC /* Observable Instances */,
+			);
+			path = Accessible;
+			sourceTree = "<group>";
+		};
+		D524481924310C9700903BE3 /* GrumbleTests */ = {
+			isa = PBXGroup;
+			children = (
+				D524481A24310C9700903BE3 /* GrumbleTests.swift */,
+				D524481C24310C9700903BE3 /* Info.plist */,
+			);
+			path = GrumbleTests;
+			sourceTree = "<group>";
+		};
+		D524482724310C9E00903BE3 /* GrumbleUITests */ = {
+			isa = PBXGroup;
+			children = (
+				D524482824310C9E00903BE3 /* GrumbleUITests.swift */,
+				D524482A24310C9E00903BE3 /* Info.plist */,
+			);
+			path = GrumbleUITests;
 			sourceTree = "<group>";
 		};
 		D58C599E242C079200137546 /* Teko */ = {
@@ -161,7 +266,7 @@
 			isa = PBXGroup;
 			children = (
 				D5AD27672425B07000462F1C /* Fonts */,
-				D5AA59442426C806000BEC5C /* mylist.json */,
+				D5636C4D242EEC3A00476DCB /* data.plist */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -171,7 +276,6 @@
 			children = (
 				D5F0894D24253AC4000D375D /* AppDelegate.swift */,
 				D5F0894F24253AC4000D375D /* SceneDelegate.swift */,
-				D5AA594824271264000BEC5C /* ViewRouter.swift */,
 			);
 			name = Delegates;
 			sourceTree = "<group>";
@@ -181,13 +285,12 @@
 			children = (
 				D5F0895824253AC6000D375D /* LaunchScreen.storyboard */,
 				D5AA59392425E996000BEC5C /* MainView.swift */,
-				D5F0895124253AC4000D375D /* LoginView.swift */,
-				D5AA594C24271391000BEC5C /* ContentView.swift */,
+				D51FECCC24316FAC00BF129C /* Login */,
+				D51FECCD24316FC600BF129C /* Tabs */,
+				D51FECCA24316DC600BF129C /* SheetView.swift */,
+				D51FECD72434189300BF129C /* SlideView.swift */,
 				D55EEBA3242867710079922E /* TabView.swift */,
-				D5AA594A24271366000BEC5C /* ListView.swift */,
-				D55EEBA1242839310079922E /* AddToListView.swift */,
-				D58C599C242B057B00137546 /* PriceFieldContainer.swift */,
-				D55EEB9F24271FBB0079922E /* SettingsView.swift */,
+				D502923D2438159E008A5BFC /* Structures */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -214,6 +317,7 @@
 		D5AD27722425B0CC00462F1C /* Ubuntu */ = {
 			isa = PBXGroup;
 			children = (
+				D5AD276B2425B07C00462F1C /* Ubuntu-Regular.ttf */,
 				D5AD27682425B07B00462F1C /* Ubuntu-Bold.ttf */,
 				D5AD276E2425B07C00462F1C /* Ubuntu-BoldItalic.ttf */,
 				D5AD276F2425B07C00462F1C /* Ubuntu-Italic.ttf */,
@@ -221,7 +325,6 @@
 				D5AD276D2425B07C00462F1C /* Ubuntu-LightItalic.ttf */,
 				D5AD27692425B07B00462F1C /* Ubuntu-Medium.ttf */,
 				D5AD276A2425B07C00462F1C /* Ubuntu-MediumItalic.ttf */,
-				D5AD276B2425B07C00462F1C /* Ubuntu-Regular.ttf */,
 			);
 			path = Ubuntu;
 			sourceTree = "<group>";
@@ -233,9 +336,11 @@
 				D5F0894C24253AC4000D375D /* Grumble */,
 				D5F0896324253AC6000D375D /* GrumbleTests */,
 				D5F0896E24253AC6000D375D /* GrumbleUITests */,
+				D524481924310C9700903BE3 /* GrumbleTests */,
+				D524482724310C9E00903BE3 /* GrumbleUITests */,
 				D5F0894B24253AC4000D375D /* Products */,
 				F9A4E1E97E7865952106D24C /* Pods */,
-				C8B12A5EA3443A5CFCB4AC05 /* Frameworks */,
+				23A45FBDC84284007BA810EB /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -243,8 +348,8 @@
 			isa = PBXGroup;
 			children = (
 				D5F0894A24253AC4000D375D /* Grumble.app */,
-				D5F0896024253AC6000D375D /* GrumbleTests.xctest */,
-				D5F0896B24253AC6000D375D /* GrumbleUITests.xctest */,
+				D524481824310C9700903BE3 /* GrumbleTests.xctest */,
+				D524482624310C9E00903BE3 /* GrumbleUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -252,14 +357,14 @@
 		D5F0894C24253AC4000D375D /* Grumble */ = {
 			isa = PBXGroup;
 			children = (
+				D51FECDC24370B0500BF129C /* Accessible */,
 				D5AA59422426C44D000BEC5C /* Delegates */,
 				D5AA59432426C457000BEC5C /* Views */,
-				D5AA5946242700BD000BEC5C /* ColorManager.swift */,
-				D5AA593D2426C24F000BEC5C /* IOManager.swift */,
-				D5AA593B2426BFA2000BEC5C /* Restaurant.swift */,
+				D5BA571E2430384D0056F91B /* FieldContainer.swift */,
 				D5AA593F2426C3BA000BEC5C /* Resources */,
 				D5F0895324253AC6000D375D /* Assets.xcassets */,
 				D5F0895B24253AC6000D375D /* Info.plist */,
+				D5948797242D17E900D25BFD /* GoogleService-Info.plist */,
 				D5F0895524253AC6000D375D /* Preview Content */,
 			);
 			path = Grumble;
@@ -294,8 +399,8 @@
 		F9A4E1E97E7865952106D24C /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				ED149BE92003F8141B511C8E /* Pods-Grumble.debug.xcconfig */,
-				5AB401C6E5D9A621E12DC532 /* Pods-Grumble.release.xcconfig */,
+				55860C160751486799A6F633 /* Pods-Grumble.debug.xcconfig */,
+				847F996DF78FDA286818A6BD /* Pods-Grumble.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -303,15 +408,51 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		D524481724310C9700903BE3 /* GrumbleTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D524481F24310C9700903BE3 /* Build configuration list for PBXNativeTarget "GrumbleTests" */;
+			buildPhases = (
+				D524481424310C9700903BE3 /* Sources */,
+				D524481524310C9700903BE3 /* Frameworks */,
+				D524481624310C9700903BE3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D524481E24310C9700903BE3 /* PBXTargetDependency */,
+			);
+			name = GrumbleTests;
+			productName = GrumbleTests;
+			productReference = D524481824310C9700903BE3 /* GrumbleTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D524482524310C9E00903BE3 /* GrumbleUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D524482D24310C9E00903BE3 /* Build configuration list for PBXNativeTarget "GrumbleUITests" */;
+			buildPhases = (
+				D524482224310C9E00903BE3 /* Sources */,
+				D524482324310C9E00903BE3 /* Frameworks */,
+				D524482424310C9E00903BE3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D524482C24310C9E00903BE3 /* PBXTargetDependency */,
+			);
+			name = GrumbleUITests;
+			productName = GrumbleUITests;
+			productReference = D524482624310C9E00903BE3 /* GrumbleUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		D5F0894924253AC4000D375D /* Grumble */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D5F0897424253AC6000D375D /* Build configuration list for PBXNativeTarget "Grumble" */;
 			buildPhases = (
-				510C9CBD87DC7DCFD4031F67 /* [CP] Check Pods Manifest.lock */,
+				C17C0C5D397311DB0F09F8E3 /* [CP] Check Pods Manifest.lock */,
 				D5F0894624253AC4000D375D /* Sources */,
 				D5F0894724253AC4000D375D /* Frameworks */,
 				D5F0894824253AC4000D375D /* Resources */,
-				C3FA3BA3097126BA7916DF07 /* [CP] Copy Pods Resources */,
+				0BD276CDC25C119B9D61F87A /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -321,42 +462,6 @@
 			productName = Grumble;
 			productReference = D5F0894A24253AC4000D375D /* Grumble.app */;
 			productType = "com.apple.product-type.application";
-		};
-		D5F0895F24253AC6000D375D /* GrumbleTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D5F0897724253AC6000D375D /* Build configuration list for PBXNativeTarget "GrumbleTests" */;
-			buildPhases = (
-				D5F0895C24253AC6000D375D /* Sources */,
-				D5F0895D24253AC6000D375D /* Frameworks */,
-				D5F0895E24253AC6000D375D /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				D5F0896224253AC6000D375D /* PBXTargetDependency */,
-			);
-			name = GrumbleTests;
-			productName = GrumbleTests;
-			productReference = D5F0896024253AC6000D375D /* GrumbleTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		D5F0896A24253AC6000D375D /* GrumbleUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D5F0897A24253AC6000D375D /* Build configuration list for PBXNativeTarget "GrumbleUITests" */;
-			buildPhases = (
-				D5F0896724253AC6000D375D /* Sources */,
-				D5F0896824253AC6000D375D /* Frameworks */,
-				D5F0896924253AC6000D375D /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				D5F0896D24253AC6000D375D /* PBXTargetDependency */,
-			);
-			name = GrumbleUITests;
-			productName = GrumbleUITests;
-			productReference = D5F0896B24253AC6000D375D /* GrumbleUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
@@ -368,16 +473,16 @@
 				LastUpgradeCheck = 1130;
 				ORGANIZATIONNAME = "Cylumn, Inc.";
 				TargetAttributes = {
+					D524481724310C9700903BE3 = {
+						CreatedOnToolsVersion = 11.3.1;
+						TestTargetID = D5F0894924253AC4000D375D;
+					};
+					D524482524310C9E00903BE3 = {
+						CreatedOnToolsVersion = 11.3.1;
+						TestTargetID = D5F0894924253AC4000D375D;
+					};
 					D5F0894924253AC4000D375D = {
 						CreatedOnToolsVersion = 11.3.1;
-					};
-					D5F0895F24253AC6000D375D = {
-						CreatedOnToolsVersion = 11.3.1;
-						TestTargetID = D5F0894924253AC4000D375D;
-					};
-					D5F0896A24253AC6000D375D = {
-						CreatedOnToolsVersion = 11.3.1;
-						TestTargetID = D5F0894924253AC4000D375D;
 					};
 				};
 			};
@@ -395,19 +500,32 @@
 			projectRoot = "";
 			targets = (
 				D5F0894924253AC4000D375D /* Grumble */,
-				D5F0895F24253AC6000D375D /* GrumbleTests */,
-				D5F0896A24253AC6000D375D /* GrumbleUITests */,
+				D524481724310C9700903BE3 /* GrumbleTests */,
+				D524482524310C9E00903BE3 /* GrumbleUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		D524481624310C9700903BE3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D524482424310C9E00903BE3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D5F0894824253AC4000D375D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				D5AD27792425B0D400462F1C /* Ubuntu-MediumItalic.ttf in Resources */,
-				D5AA59452426C806000BEC5C /* mylist.json in Resources */,
 				D58C59A7242C07AC00137546 /* Teko-Bold.ttf in Resources */,
 				D5F0898A24257849000D375D /* Podfile in Resources */,
 				D5AD27632425B06100462F1C /* Caveat-Bold.ttf in Resources */,
@@ -419,6 +537,7 @@
 				D5AD27772425B0D400462F1C /* Ubuntu-LightItalic.ttf in Resources */,
 				D5AD27762425B0D400462F1C /* Ubuntu-Light.ttf in Resources */,
 				D58C59A6242C07AC00137546 /* Teko-Light.ttf in Resources */,
+				D5636C4E242EEC3A00476DCB /* data.plist in Resources */,
 				D5F0895A24253AC6000D375D /* LaunchScreen.storyboard in Resources */,
 				D5AD27732425B0D400462F1C /* Ubuntu-Bold.ttf in Resources */,
 				D5AD27612425B06100462F1C /* Caveat-Regular.ttf in Resources */,
@@ -426,27 +545,31 @@
 				D5AD27782425B0D400462F1C /* Ubuntu-Medium.ttf in Resources */,
 				D58C59A4242C07AC00137546 /* Teko-Regular.ttf in Resources */,
 				D5F0895424253AC6000D375D /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D5F0895E24253AC6000D375D /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D5F0896924253AC6000D375D /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				D5948798242D17E900D25BFD /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		510C9CBD87DC7DCFD4031F67 /* [CP] Check Pods Manifest.lock */ = {
+		0BD276CDC25C119B9D61F87A /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Grumble/Pods-Grumble-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Grumble/Pods-Grumble-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Grumble/Pods-Grumble-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C17C0C5D397311DB0F09F8E3 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -468,75 +591,68 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C3FA3BA3097126BA7916DF07 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Grumble/Pods-Grumble-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Grumble/Pods-Grumble-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Grumble/Pods-Grumble-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		D524481424310C9700903BE3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D524481B24310C9700903BE3 /* GrumbleTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D524482224310C9E00903BE3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D524482924310C9E00903BE3 /* GrumbleUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D5F0894624253AC4000D375D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D5AA594924271264000BEC5C /* ViewRouter.swift in Sources */,
 				D5F0894E24253AC4000D375D /* AppDelegate.swift in Sources */,
 				D55EEBA4242867710079922E /* TabView.swift in Sources */,
+				D50292382437D6E1008A5BFC /* GAnimation.swift in Sources */,
 				D5AA594B24271366000BEC5C /* ListView.swift in Sources */,
+				D502922F2437A9FE008A5BFC /* TabRouter.swift in Sources */,
 				D5F0895024253AC4000D375D /* SceneDelegate.swift in Sources */,
+				D51FECD2243171A100BF129C /* SignupSheetView.swift in Sources */,
+				D50292352437AECF008A5BFC /* GColor.swift in Sources */,
+				D502923A2437F7B3008A5BFC /* GForm.swift in Sources */,
+				D51FECD62432C43600BF129C /* UserButton.swift in Sources */,
 				D5AA593E2426C24F000BEC5C /* IOManager.swift in Sources */,
-				D5AA593C2426BFA2000BEC5C /* Restaurant.swift in Sources */,
+				D50292332437AE06008A5BFC /* Axis.swift in Sources */,
+				D5BA571F2430384E0056F91B /* FieldContainer.swift in Sources */,
 				D5AA594D24271391000BEC5C /* ContentView.swift in Sources */,
+				D573A82824386DDC00DB6067 /* GField.swift in Sources */,
 				D5AA593A2425E996000BEC5C /* MainView.swift in Sources */,
+				D51FECC9243131FA00BF129C /* KeyboardObserver.swift in Sources */,
+				D51FECDE24370B1500BF129C /* UserCookie.swift in Sources */,
 				D5F0895224253AC4000D375D /* LoginView.swift in Sources */,
+				D51FECD82434189300BF129C /* SlideView.swift in Sources */,
 				D55EEBA2242839310079922E /* AddToListView.swift in Sources */,
-				D5AA5947242700BD000BEC5C /* ColorManager.swift in Sources */,
-				D58C599D242B057B00137546 /* PriceFieldContainer.swift in Sources */,
+				D50292312437ACF5008A5BFC /* GFont.swift in Sources */,
+				D51FECCB24316DC600BF129C /* SheetView.swift in Sources */,
 				D55EEBA024271FBB0079922E /* SettingsView.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D5F0895C24253AC6000D375D /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				D5F0896524253AC6000D375D /* GrumbleTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D5F0896724253AC6000D375D /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				D5F0897024253AC6000D375D /* GrumbleUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		D5F0896224253AC6000D375D /* PBXTargetDependency */ = {
+		D524481E24310C9700903BE3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D5F0894924253AC4000D375D /* Grumble */;
-			targetProxy = D5F0896124253AC6000D375D /* PBXContainerItemProxy */;
+			targetProxy = D524481D24310C9700903BE3 /* PBXContainerItemProxy */;
 		};
-		D5F0896D24253AC6000D375D /* PBXTargetDependency */ = {
+		D524482C24310C9E00903BE3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D5F0894924253AC4000D375D /* Grumble */;
-			targetProxy = D5F0896C24253AC6000D375D /* PBXContainerItemProxy */;
+			targetProxy = D524482B24310C9E00903BE3 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -552,6 +668,84 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		D524482024310C9700903BE3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7M276LB969;
+				INFOPLIST_FILE = GrumbleTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cylumn.GrumbleTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Grumble.app/Grumble";
+			};
+			name = Debug;
+		};
+		D524482124310C9700903BE3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7M276LB969;
+				INFOPLIST_FILE = GrumbleTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cylumn.GrumbleTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Grumble.app/Grumble";
+			};
+			name = Release;
+		};
+		D524482E24310C9E00903BE3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7M276LB969;
+				INFOPLIST_FILE = GrumbleUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cylumn.GrumbleUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Grumble;
+			};
+			name = Debug;
+		};
+		D524482F24310C9E00903BE3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7M276LB969;
+				INFOPLIST_FILE = GrumbleUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cylumn.GrumbleUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Grumble;
+			};
+			name = Release;
+		};
 		D5F0897224253AC6000D375D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -668,7 +862,7 @@
 		};
 		D5F0897524253AC6000D375D /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = ED149BE92003F8141B511C8E /* Pods-Grumble.debug.xcconfig */;
+			baseConfigurationReference = 55860C160751486799A6F633 /* Pods-Grumble.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -689,7 +883,7 @@
 		};
 		D5F0897624253AC6000D375D /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5AB401C6E5D9A621E12DC532 /* Pods-Grumble.release.xcconfig */;
+			baseConfigurationReference = 847F996DF78FDA286818A6BD /* Pods-Grumble.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -708,93 +902,27 @@
 			};
 			name = Release;
 		};
-		D5F0897824253AC6000D375D /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 7M276LB969;
-				INFOPLIST_FILE = GrumbleTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.cylumn.GrumbleTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Grumble.app/Grumble";
-			};
-			name = Debug;
-		};
-		D5F0897924253AC6000D375D /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 7M276LB969;
-				INFOPLIST_FILE = GrumbleTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.cylumn.GrumbleTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Grumble.app/Grumble";
-			};
-			name = Release;
-		};
-		D5F0897B24253AC6000D375D /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 7M276LB969;
-				INFOPLIST_FILE = GrumbleUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.cylumn.GrumbleUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Grumble;
-			};
-			name = Debug;
-		};
-		D5F0897C24253AC6000D375D /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 7M276LB969;
-				INFOPLIST_FILE = GrumbleUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.cylumn.GrumbleUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Grumble;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		D524481F24310C9700903BE3 /* Build configuration list for PBXNativeTarget "GrumbleTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D524482024310C9700903BE3 /* Debug */,
+				D524482124310C9700903BE3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D524482D24310C9E00903BE3 /* Build configuration list for PBXNativeTarget "GrumbleUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D524482E24310C9E00903BE3 /* Debug */,
+				D524482F24310C9E00903BE3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D5F0894524253AC4000D375D /* Build configuration list for PBXProject "Grumble" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -809,24 +937,6 @@
 			buildConfigurations = (
 				D5F0897524253AC6000D375D /* Debug */,
 				D5F0897624253AC6000D375D /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		D5F0897724253AC6000D375D /* Build configuration list for PBXNativeTarget "GrumbleTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				D5F0897824253AC6000D375D /* Debug */,
-				D5F0897924253AC6000D375D /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		D5F0897A24253AC6000D375D /* Build configuration list for PBXNativeTarget "GrumbleUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				D5F0897B24253AC6000D375D /* Debug */,
-				D5F0897C24253AC6000D375D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
