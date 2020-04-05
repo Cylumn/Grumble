@@ -10,24 +10,100 @@ import SwiftUI
 import GoogleSignIn
 import Firebase
 
-struct LoginView: View {
-    @ObservedObject private var ko = KeyboardObserver.ko()
-    @State private var email: String = ""
-    @State private var pass: String = ""
-    private var geometry: GeometryProxy
-    @State private var loginError: String = " "
-    @State private var errorColor: Color = gColor(.lightTurquoise)
+private let formID: GFormID = GFormID.login
+
+public struct LoginView: View, GFieldDelegate {
+    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko()
+    @ObservedObject private var gft: GFormText = GFormText.gft(formID)
     
     @State private var currentHeight: CGFloat = sHeight()
     @State private var movingOffset: CGFloat = sHeight()
     
-    init(_ geometry: GeometryProxy){
-        self.geometry = geometry
-        
+    //Initializer
+    public init() {
         self.ko.appendField(.login)
+        self.gft.setError(FieldIndex.email.rawValue, " ")
+    }
+    
+    private enum FieldIndex: Int {
+        case email = 0
+        case password = 1
+    }
+    
+    //Getter Methods
+    private func canSubmit() -> Bool {
+        return !self.gft.text(FieldIndex.email.rawValue).isEmpty && !self.gft.text(FieldIndex.password.rawValue).isEmpty
+    }
+    
+    //Function Methods
+    private func forgotPassword() {
+        
+    }
+    
+    private func attemptSignup() {
+        withAnimation(gAnim(.spring)) {
+            self.$movingOffset.wrappedValue = 0
+            self.$currentHeight.wrappedValue = 0
+            
+            self.ko.removeField(.login)
+            self.ko.appendField(.signup, true)
+            GFormRouter.gfr().callCurrentResponder(.signup)
+        }
+    }
+    
+    public func attemptLogin(email: String, pass: String) {
+        Auth.auth().signIn(withEmail: email, password: pass) { authResult, error in
+            if let error = error as NSError? {
+                switch error.code {
+                    case AuthErrorCode.invalidEmail.rawValue:
+                        self.gft.setError(FieldIndex.email.rawValue, "Invalid Email")
+                    default:
+                        self.gft.setError(FieldIndex.email.rawValue, "Incorrect Password")
+                }
+                return
+            }
+            onLogin()
+        }
+    }
+    
+    private func attemptLogin() {
+        attemptLogin(email: self.gft.text(FieldIndex.email.rawValue), pass: self.gft.text(FieldIndex.password.rawValue))
+    }
+    
+    private func attemptLoginGoogle() {
+        GIDSignIn.sharedInstance()?.signIn()
+    }
+    
+    //GFieldDelegate Implementation Methods
+    public func style(_ index: Int, _ textField: GTextField) {
+        textField.setInsets(top: 15, left: 15, bottom: 15, right: 15)
+        textField.font = gFont(.ubuntuLight, .width, 2.5)
+        textField.textColor = UIColor.white
+        textField.textContentType = .newPassword
+        if index == FieldIndex.password.rawValue {
+            textField.isSecureTextEntry = true
+            textField.returnKeyType = .continue
+        }
+    }
+    
+    public func proceedField() -> Bool {
+        switch GFormRouter.gfr().index(formID) {
+            case FieldIndex.email.rawValue:
+                return GFormRouter.gfr().callNextResponder(formID)
+            case FieldIndex.password.rawValue:
+                attemptLogin()
+                return false
+            default:
+                return false
+        }
+    }
+    
+    public func parseInput(_ index: Int, _ textField: UITextField, _ string: String) -> String {
+        self.gft.setError(FieldIndex.email.rawValue, " ")
+        return textField.text! + string
     }
  
-    var body: some View {
+    public var body: some View {
         ZStack{
             Image("Background")
             .resizable()
@@ -37,9 +113,9 @@ struct LoginView: View {
             })
             
             VStack{
-                VStack(spacing: self.geometry.size.height / (self.ko.visible(.login) ? 40: 25)){
+                VStack(spacing: sHeight() / (self.ko.visible(.login) ? 40: 25)){
                     if self.ko.visible(.login) {
-                        Spacer().frame(height: self.geometry.size.height * 0.05)
+                        Spacer().frame(height: sHeight() * 0.05)
                     } else {
                         Image("Logo")
                             .resizable()
@@ -47,12 +123,12 @@ struct LoginView: View {
                     }
                     
                     Text("Grumble")
-                        .font(.custom("Ubuntu-Bold", size: self.geometry.size.height / 17))
+                        .font(.custom("Ubuntu-Bold", size: sHeight() / 17))
                         .fontWeight(.bold)
                         .foregroundColor(Color.white)
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
-                }.padding(.top, self.geometry.size.height / (self.ko.visible(.login) ? 40: 15))
+                }.padding(.top, sHeight() / (self.ko.visible(.login) ? 40: 15))
                 
                 if !self.ko.visible(.login) {
                     Spacer()
@@ -61,7 +137,7 @@ struct LoginView: View {
                         Button(action: self.attemptSignup, label: {
                             Text("Sign Up")
                                 .padding(15)
-                                .font(.custom("Ubuntu-Medium", size: self.geometry.size.width / 22))
+                                .font(.custom("Ubuntu-Medium", size: sWidth() / 22))
                                 .foregroundColor(Color(red: 1, green: 1, blue: 1, opacity: 1))
                                 .overlay(RoundedRectangle(cornerRadius: 8)
                                     .stroke(Color(red: 1, green: 1, blue: 1, opacity: 1), lineWidth: 1))
@@ -72,93 +148,74 @@ struct LoginView: View {
                         Button(action: self.attemptLoginGoogle, label: {
                             HStack{
                                 Image("GoogleIcon")
-                                    .frame(width: self.geometry.size.width / 22, height: self.geometry.size.width / 22)
+                                    .frame(width: sWidth() / 22, height: sWidth() / 22)
                                 Text("Log in with Google")
-                                    .font(.custom("Ubuntu-Bold", size: self.geometry.size.width / 22))
+                                    .font(.custom("Ubuntu-Bold", size: sWidth() / 22))
                                     .foregroundColor(Color.gray)
                                 .lineLimit(1)
                             }
                         })
-                            .padding(EdgeInsets(top: 15, leading: self.geometry.size.width / 30, bottom: 15, trailing: self.geometry.size.width / 30))
+                            .padding(EdgeInsets(top: 15, leading: sWidth() / 30, bottom: 15, trailing: sWidth() / 30))
                             .background(Color.white)
                             .cornerRadius(8.0)
                             .buttonStyle(PlainButtonStyle())
-                    }.frame(width: self.geometry.size.width * 0.85)
+                    }.frame(width: sWidth() * 0.85)
                 } else {
-                    Spacer().frame(height: self.geometry.size.height / (self.ko.visible(.login) ? 40 : 20))
+                    Spacer().frame(height: sHeight() / (self.ko.visible(.login) ? 40 : 20))
                 }
                 
                 HStack{
-                    Text(self.loginError)
+                    Text(self.gft.error(FieldIndex.email.rawValue))
+                        .frame(height: sWidth() / 22)
                         .padding(3)
-                        .foregroundColor(self.errorColor)
-                        .font(.custom("Teko-SemiBold", size: self.geometry.size.width / 22))
+                        .foregroundColor(gColor(.lightTurquoise))
+                        .font(.custom("Teko-SemiBold", size: sWidth() / 22))
                     
                     Spacer()
-                }.frame(height: self.geometry.size.width / 30)
+                }.frame(height: sWidth() / 30)
                 .offset(y: self.ko.visible(.login) ? 10 : 5)
                 
-                VStack(spacing: self.geometry.size.height / (self.ko.visible(.login) ? 60 : 40)){
+                VStack(spacing: sHeight() / (self.ko.visible(.login) ? 60 : 40)){
                     ZStack(alignment: .leading) {
-                        if self.email.isEmpty {
+                        if self.gft.text(FieldIndex.email.rawValue).isEmpty {
                             Text("Email")
                                 .foregroundColor(Color(red: 1, green: 1, blue: 1, opacity: 0.7))
                                 .padding(15)
-                                .font(.custom("Ubuntu-Light", size: self.geometry.size.width / 22))
+                                .font(.custom("Ubuntu-Light", size: sWidth() / 22))
                         }
-                        TextField("", text: Binding<String>(get:{
-                            self.email
-                        }, set: {
-                            self.loginError = " "
-                            self.email = $0
-                        }))
-                            .textContentType(.oneTimeCode)
-                            .padding(15)
-                            .frame(width: self.geometry.size.width * 0.85)
-                            .font(.custom("Ubuntu-Light", size: self.geometry.size.width / 22))
-                            .foregroundColor(Color.white)
+                        GField(formID, FieldIndex.email.rawValue, self).frame(width: sWidth() * 0.85, height: 50)
                     }.background(gColor(.lightTurquoise).opacity(0.7))
                     .cornerRadius(8)
                     
                     ZStack(alignment: .leading) {
-                        if self.pass.isEmpty {
+                        if self.gft.text(FieldIndex.password.rawValue).isEmpty {
                             Text("Password")
                                 .foregroundColor(Color(red: 1, green: 1, blue: 1, opacity: 0.7))
                                 .padding(15)
-                                .font(.custom("Ubuntu-Light", size: self.geometry.size.width / 22))
+                                .font(.custom("Ubuntu-Light", size: sWidth() / 22))
                         }
-                        SecureField("", text: Binding<String>(get:{
-                            self.pass
-                        }, set: {
-                            self.loginError = " "
-                            self.pass = $0
-                        }))
-                            .textContentType(.oneTimeCode)
-                            .padding(15)
-                            .frame(width: self.geometry.size.width * 0.85)
-                            .font(.custom("Ubuntu-Light", size: self.geometry.size.width / 22))
-                            .foregroundColor(Color.white)
+                        GField(formID, FieldIndex.password.rawValue, self).frame(width: sWidth() * 0.85, height: 50)
                     }.background(gColor(.lightTurquoise).opacity(0.7))
                     .cornerRadius(8)
                     
-                    UserButton(action: self.attemptLogin, empty: (self.email.isEmpty || self.pass.isEmpty), text: "Log In")
+                    UserButton(action: self.attemptLogin, disabled: !self.canSubmit(), text: "Log In")
                 }
                 
-                Spacer().frame(height: self.geometry.size.height / 50)
+                Spacer().frame(height: sHeight() / 50)
                 
                 Button(action: self.forgotPassword, label: {
                     Text("Forgot Password? [wip]")
                         .padding(5)
-                        .font(.custom("Ubuntu-Medium", size: self.geometry.size.width / 22))
+                        .font(.custom("Ubuntu-Medium", size: sWidth() / 22))
                         .foregroundColor(Color.white)
                 })
                 
                 if self.ko.visible(.login) {
                     Spacer().frame(height: self.ko.height(.login))
                 } else {
-                    Spacer().frame(height: self.geometry.size.height / 30)
+                    Spacer().frame(height: sHeight() / 30)
                 }
-            }.padding(self.geometry.size.height / 25)
+            }.padding(sHeight() / 25)
             
             SignupSheetView(currentHeight: self.$currentHeight, movingOffset: self.$movingOffset, onDragEnd: { pos in
                 if pos == .down {
@@ -168,50 +225,6 @@ struct LoginView: View {
                 }
             }, login: self.attemptLogin)
         }
-    }
-    
-    func attemptSignup() {
-        withAnimation(.spring(dampingFraction: 0.7)) {
-            self.$movingOffset.wrappedValue = 0
-            self.$currentHeight.wrappedValue = 0
-            
-            self.ko.removeField(.login)
-            self.ko.appendField(.signup, true)
-            GFormRouter.gfr().callCurrentResponder(.signup)
-        }
-    }
-    
-    func attemptLogin(){
-        attemptLogin(email: self.email, pass: self.pass)
-    }
-    
-    func attemptLogin(email: String, pass: String) {
-        Auth.auth().signIn(withEmail: email, password: pass) { authResult, error in
-            if let error = error as NSError? {
-                self.loginError = "Incorrect Password"
-                if error.code == AuthErrorCode.invalidEmail.rawValue {
-                    self.loginError = "Invalid Email"
-                }
-                
-                self.errorColor = gColor(.lightTurquoise)
-                
-                /* if future use, make so that timer cant be set off multiple times
-                Timer.scheduledTimer(withTimeInterval: 3, repeats: false) { _ in
-                    self.errorColor = Color.clear
-                }*/
-                return
-            }
-            
-            onLogin()
-        }
-    }
-    
-    func attemptLoginGoogle() {
-        GIDSignIn.sharedInstance()?.signIn()
-    }
-    
-    func forgotPassword() {
-        
     }
 }
 

@@ -17,6 +17,7 @@ public enum GFont: String {
     case ubuntuBold = "Ubuntu-Bold"
     case ubuntuBoldItalic = "Ubuntu-BoldItalic"
     case ubuntuItalic = "Ubuntu-Italic"
+    case ubuntuLight = "Ubuntu-Light"
     case ubuntuLightItalic = "Ubuntu-LightItalic"
     case ubuntuMedium = "Ubuntu-Medium"
     case ubuntuMediumItalic = "Ubuntu-MediumItalic"

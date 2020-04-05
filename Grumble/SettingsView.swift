@@ -8,20 +8,22 @@
 
 import SwiftUI
 
-struct SettingsView: View {
-    private var geometry: GeometryProxy
+public struct SettingsView: View {
     
-    init(_ geometry: GeometryProxy){
-        self.geometry = geometry
+    //Function Methods
+    private func logOutUser(){
+        withAnimation(gAnim(.spring)) {
+            onLogout()
+        }
     }
     
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading){
-            Spacer().frame(height: self.geometry.size.height / 13)
+            Spacer().frame(height: sHeight() / 13)
             
             HStack{
                 Text("Settings")
-                    .font(.custom("Ubuntu-Bold", size: self.geometry.size.width / 13))
+                    .font(.custom("Ubuntu-Bold", size: sWidth() / 13))
                     .foregroundColor(gColor(.blue0))
                 
                 Spacer()
@@ -49,12 +51,6 @@ struct SettingsView: View {
             Spacer()
         }.font(.custom("Ubuntu-Light", size: 15))
         .edgesIgnoringSafeArea(.all)
-    }
-    
-    func logOutUser(){
-        withAnimation {
-            onLogout()
-        }
     }
 }
 

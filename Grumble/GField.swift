@@ -39,7 +39,6 @@ public class GTextField: UITextField {
 }
 
 public struct GField: UIViewRepresentable {
-    @ObservedObject private var gft: GFormText = GFormText.gft()
     private var formID: GFormID
     private var index: Int
     private var placeholder: String
@@ -64,17 +63,32 @@ public struct GField: UIViewRepresentable {
 
     public func makeUIView(context: UIViewRepresentableContext<GField>) -> UITextField {
         let textField = GTextField()
-        textField.text = self.gft.text(self.formID, self.index)
+        textField.text = GFormText.gft(self.formID).text(self.index)
         textField.delegate = context.coordinator
         
         //Universal Style Goes Here
+        textField.backgroundColor = UIColor.clear
+        textField.setInsets(top: 5, left: 15, bottom: 5, right: 15)
+        textField.layer.borderWidth = 0
+        textField.layer.borderColor = CGColor(srgbRed: 0, green: 0, blue: 0, alpha: 0)
+        textField.attributedPlaceholder = NSAttributedString(string: "", attributes: [NSAttributedString.Key.foregroundColor: gColor(.blue0).withAlphaComponent(0.5)])
+        textField.font = gFont(.ubuntu, .width, 2.5)
+        textField.textColor = gColor(.blue0)
+        textField.keyboardType = .alphabet
+        textField.keyboardAppearance = .light
+        textField.textAlignment = .left
+        textField.returnKeyType = .next
+        textField.autocorrectionType = UITextAutocorrectionType.no
+        textField.setContentCompressionResistancePriority(.sceneSizeStayPut, for: .horizontal)
+        textField.frame.size.height = 20
+        
         self.delegate.style(self.index, textField)
-        GFormRouter.gfr().setRespondingField(.signup, self.index, textField)
+        GFormRouter.gfr().setRespondingField(self.formID, self.index, textField)
         return textField
     }
 
     public func updateUIView(_ uiView: UITextField, context: UIViewRepresentableContext<GField>) {
-        uiView.text = self.gft.text(self.formID, self.index)
+        uiView.text = GFormText.gft(self.formID).text(self.index)
     }
 
     public class Coordinator: NSObject, UITextFieldDelegate {
@@ -87,7 +101,7 @@ public struct GField: UIViewRepresentable {
         
         //Implemented UITextFieldDelegate Methods
         public func textFieldDidBeginEditing(_ textField: UITextField) {
-            GFormRouter.gfr().setIndex(.signup, self.parent.index)
+            GFormRouter.gfr().setIndex(self.parent.formID, self.parent.index)
         }
         
         public func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
@@ -107,10 +121,14 @@ public struct GField: UIViewRepresentable {
             if textField.text == nil {
                 textField.text = ""
             }
+            
             //Universal Parse Rules Go Here
+            if string.isEmpty {
+                textField.text!.removeLast()
+            }
             
             textField.text = self.parent.delegate.parseInput(self.parent.index, textField, string)
-            GFormText.gft().setText(self.parent.formID, self.parent.index, textField.text!)
+            GFormText.gft(self.parent.formID).setText(self.parent.index, textField.text!)
             return false
         }
     }

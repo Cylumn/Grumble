@@ -9,36 +9,37 @@
 import SwiftUI
 import Firebase
 
-private let formID = GFormID.signup
+private let formID: GFormID = GFormID.signup
 
 public struct SignupSheetView: View {
     private var currentHeight: Binding<CGFloat>
     private var movingOffset: Binding<CGFloat>
-    private var onDragEnd: (Position) -> ()
+    private var onDragEnd: (SheetPosition) -> ()
     
     @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko()
     @State private var slideIndex: Int = 0
     private var login: (String, String) -> Void
     
     //Initializer
-    public init(currentHeight: Binding<CGFloat>, movingOffset: Binding<CGFloat>, onDragEnd: @escaping (Position) -> (), login: @escaping (String, String) -> Void) {
+    public init(currentHeight: Binding<CGFloat>, movingOffset: Binding<CGFloat>, onDragEnd: @escaping (SheetPosition) -> (), login: @escaping (String, String) -> Void) {
         self.currentHeight = currentHeight
         self.movingOffset = movingOffset
         self.onDragEnd = onDragEnd
         
         self.login = login
 
-        GFormText.gft().setNames(formID, ["Email", "Password", "Confirm Password", "Full Name", "Username"])
-        GFormText.gft().setSymbols(formID, ["envelope.fill", "lock.fill", "lock.shield", "person", "person.crop.circle"])
+        GFormText.gft(formID).setNames(["Email", "Password", "Confirm Password", "Full Name", "Username"])
+        GFormText.gft(formID).setSymbols(["envelope.fill", "lock.fill", "lock.shield", "person", "person.crop.circle"])
     }
+
     
     //Signup Enums
-    enum PanelIndex: Int {
+    private enum SignupPanelIndex: Int {
         case first = 0
         case final = 1
     }
     
-    enum FieldIndex: Int {
+    private enum FieldIndex: Int {
         case email = 0
         case password = 1
         case confPass = 2
@@ -47,8 +48,8 @@ public struct SignupSheetView: View {
     }
     
     //Panel Control Methods
-    func nextPanel(_ proceed: @escaping () -> Void) {
-        if self.slideIndex < PanelIndex.final.rawValue {
+    private func nextPanel(_ proceed: @escaping () -> Void) {
+        if self.slideIndex < SignupPanelIndex.final.rawValue {
             GFormRouter.gfr().setIndex(formID, FieldIndex.name.rawValue)
             GFormRouter.gfr().callCurrentResponder(formID)
             withAnimation(gAnim(.easeOut)) {
@@ -56,29 +57,29 @@ public struct SignupSheetView: View {
             }
             proceed()
         } else {
-            Auth.auth().createUser(withEmail: GFormText.gft().text(formID, FieldIndex.email.rawValue), password: GFormText.gft().text(formID, FieldIndex.password.rawValue)) { authResult, error in
+            Auth.auth().createUser(withEmail: GFormText.gft(formID).text(FieldIndex.email.rawValue), password: GFormText.gft(formID).text(FieldIndex.password.rawValue)) { authResult, error in
                 if let error = error as NSError? {
                     switch error.code {
                         case AuthErrorCode.invalidEmail.rawValue:
-                            GFormText.gft().setError(formID, FieldIndex.email.rawValue, "Invalid Email")
+                            GFormText.gft(formID).setError(FieldIndex.email.rawValue, "Invalid Email")
                         case AuthErrorCode.emailAlreadyInUse.rawValue:
-                            GFormText.gft().setError(formID, FieldIndex.email.rawValue, "Email Already In Use")
+                            GFormText.gft(formID).setError(FieldIndex.email.rawValue, "Email Already In Use")
                         case AuthErrorCode.weakPassword.rawValue:
-                            GFormText.gft().setError(formID, FieldIndex.password.rawValue, "Weak Password")
+                            GFormText.gft(formID).setError(FieldIndex.password.rawValue, "Weak Password")
                         default:
-                            GFormText.gft().setError(formID, FieldIndex.email.rawValue, "Unknown Error")
+                            GFormText.gft(formID).setError(FieldIndex.email.rawValue, "Unknown Error")
                     }
                     self.previousPanel()
                     proceed()
                     return
                 }
                 let user = Auth.auth().currentUser!.createProfileChangeRequest()
-                user.displayName = GFormText.gft().text(formID, FieldIndex.username.rawValue)
+                user.displayName = GFormText.gft(formID).text(FieldIndex.username.rawValue)
                 user.commitChanges() { error in
                     if let error = error {
                         print("error:\(error)")
                     } else {
-                        self.login(GFormText.gft().text(formID, FieldIndex.email.rawValue), GFormText.gft().text(formID, FieldIndex.password.rawValue))
+                        self.login(GFormText.gft(formID).text(FieldIndex.email.rawValue), GFormText.gft(formID).text(FieldIndex.password.rawValue))
                     }
                 }
                 proceed()
@@ -86,8 +87,8 @@ public struct SignupSheetView: View {
         }
     }
     
-    func previousPanel() {
-        if self.slideIndex > PanelIndex.first.rawValue {
+    private func previousPanel() {
+        if self.slideIndex > SignupPanelIndex.first.rawValue {
             GFormRouter.gfr().setIndex(.signup, FieldIndex.email.rawValue)
             GFormRouter.gfr().callCurrentResponder(.signup)
             withAnimation(gAnim(.easeOut)) {
@@ -96,17 +97,24 @@ public struct SignupSheetView: View {
         }
     }
     
-    struct SignupPanelView: View {
-        @ObservedObject private var gft: GFormText = GFormText.gft()
-        var startIndex: Int
-        var length: Int
-        var nextPanel: (@escaping () -> Void) -> Void
-        @State var disableButton = false
+    fileprivate struct SignupPanelView: View, GFieldDelegate {
+        @ObservedObject private var gft: GFormText = GFormText.gft(formID)
+        private var startIndex: Int
+        private var length: Int
+        private var nextPanel: (@escaping () -> Void) -> Void
+        @State private var disableButton = false
+        
+        //Initializer
+        fileprivate init(startIndex: Int, length: Int, nextPanel: @escaping (@escaping () -> Void) -> Void) {
+            self.startIndex = startIndex
+            self.length = length
+            self.nextPanel = nextPanel
+        }
         
         //Getter Methods
-        func canNextPanel() -> Bool {
+        private func canNextPanel() -> Bool {
             for index in self.startIndex..<self.startIndex + self.length {
-                if self.gft.text(formID, index).isEmpty || !self.gft.error(formID, index).isEmpty {
+                if self.gft.text(index).isEmpty || !self.gft.error(index).isEmpty {
                     return false
                 }
             }
@@ -114,19 +122,7 @@ public struct SignupSheetView: View {
         }
         
         //Panel Control Methods
-        func proceed() -> Bool {
-            let index = GFormRouter.gfr().index(formID)
-            if index == FieldIndex.confPass.rawValue || index == FieldIndex.username.rawValue {
-                if self.canNextPanel() {
-                    self.onNextButton()
-                    return true
-                }
-                return false
-            }
-            return GFormRouter.gfr().callNextResponder(formID)
-        }
-        
-        func onNextButton() {
+        private func onNextButton() {
             if self.startIndex >= FieldIndex.name.rawValue {
                 self.disableButton = true
             }
@@ -140,142 +136,133 @@ public struct SignupSheetView: View {
         }
         
         //Parsing Methods
-        func calculateError(_ text: String) {
+        private func calculateError(_ text: String) {
             let i = GFormRouter.gfr().index(formID)
             switch(i) {
                 case FieldIndex.email.rawValue:
                     Auth.auth().fetchSignInMethods(forEmail: text, completion: { (providers, error) in
                         guard let _ = error else {
-                            self.gft.setError(formID, i, "")
+                            self.gft.setError(i, "")
                             return
                         }
-                        self.gft.setError(formID, i, "Invalid Email Address")
+                        self.gft.setError(i, "Invalid Email Address")
                     })
                 case FieldIndex.password.rawValue:
                     if text.count < 6 {
-                        self.gft.setError(formID, i, "Password Must Be At Least 6 Characters")
+                        self.gft.setError(i, "Password Must Be At Least 6 Characters")
                     } else {
-                        self.gft.setError(formID, i, "")
+                        self.gft.setError(i, "")
                     }
-                    if !self.gft.text(formID, FieldIndex.confPass.rawValue).isEmpty && self.gft.text(formID, FieldIndex.confPass.rawValue) != text {
-                        self.gft.setError(formID, FieldIndex.confPass.rawValue, "Passwords Must Match")
+                    if !self.gft.text(FieldIndex.confPass.rawValue).isEmpty && self.gft.text(FieldIndex.confPass.rawValue) != text {
+                        self.gft.setError(FieldIndex.confPass.rawValue, "Passwords Must Match")
                     } else {
-                        self.gft.setError(formID, FieldIndex.confPass.rawValue, "")
+                        self.gft.setError(FieldIndex.confPass.rawValue, "")
                     }
                 case FieldIndex.confPass.rawValue:
-                    if self.gft.text(formID, FieldIndex.password.rawValue) != text {
-                        self.gft.setError(formID, i, "Passwords Must Match")
+                    if self.gft.text(FieldIndex.password.rawValue) != text {
+                        self.gft.setError(i, "Passwords Must Match")
                     } else {
-                        self.gft.setError(formID, i, "")
+                        self.gft.setError(i, "")
                     }
                 case FieldIndex.name.rawValue:
                     //errorField.wrappedValue = "Bad Name"
-                    self.gft.setError(formID, i, "")
+                    self.gft.setError(i, "")
                 case FieldIndex.username.rawValue:
                     //errorField.wrappedValue = "Bad Username"
-                    self.gft.setError(formID, i, "")
+                    self.gft.setError(i, "")
                 default:
-                    self.gft.setError(formID, i, "Error")
+                    self.gft.setError(i, "Error")
             }
         }
         
-        struct SignupFieldDelegate: GFieldDelegate {
-            var proceed: () -> Bool
-            var calcError: (String) -> Void
-            
-            //Implemented GFieldDelegate Methods
-            func style(_ index: Int, _ textField: GTextField) {
-                textField.attributedPlaceholder = NSAttributedString(string: "", attributes: [NSAttributedString.Key.foregroundColor: gColor(.blue0).withAlphaComponent(0.5)])
-                textField.font = gFont(.ubuntu, .width, 2.5)
-                textField.setInsets(top: 5, left: 30, bottom: 5, right: 15)
-                textField.backgroundColor = UIColor.clear
-                textField.layer.borderWidth = 0
-                textField.layer.borderColor = CGColor(srgbRed: 0, green: 0, blue: 0, alpha: 0)
-                textField.textColor = gColor(.blue0)
-                if index == 1 || index == 2 {
+        //Implemented GFieldDelegate Methods
+        fileprivate func style(_ index: Int, _ textField: GTextField) {
+            textField.setInsets(top: 5, left: 30, bottom: 5, right: 15)
+            switch(index){
+                case FieldIndex.email.rawValue:
+                    textField.textContentType = .newPassword
+                case FieldIndex.password.rawValue, FieldIndex.confPass.rawValue:
+                    textField.textContentType = .newPassword
                     textField.isSecureTextEntry = true
-                }
-                textField.keyboardType = .alphabet
-                textField.keyboardAppearance = .light
-                textField.autocorrectionType = UITextAutocorrectionType.no
-                textField.setContentCompressionResistancePriority(.sceneSizeStayPut, for: .horizontal)
-                textField.frame.size.height = 20
-                
-                switch(index){
-                    case 0:
-                        textField.textContentType = .newPassword
-                    case 1, 2:
-                        textField.textContentType = .newPassword
-                    case 3:
-                        textField.textContentType = .name
-                    case 4:
-                        textField.textContentType = .nickname
-                    default:
-                        textField.textContentType = .none
-                }
-                
-                if index != 4 {
-                    textField.returnKeyType = .next
-                } else {
+                case FieldIndex.name.rawValue:
+                    textField.textContentType = .name
+                case FieldIndex.username.rawValue:
+                    textField.textContentType = .nickname
                     textField.returnKeyType = .continue
-                }
-            }
-            
-            func proceedField() -> Bool {
-                return self.proceed()
-            }
-            
-            func parseInput(_ index: Int, _ textField: UITextField, _ string: String) -> String {
-                if string.isEmpty {
-                    textField.text?.removeLast()
-                } else if string == " " {
-                    if index != 3 || (textField.text?.last ?? " " as Character) == " " {
-                        return textField.text!
-                    }
-                } else if textField.text?.count ?? 0 > 15 {
-                    switch(index){
-                        case 0:
-                            if textField.text?.count ?? 0 > 30 {
-                                return textField.text!
-                            }
-                        case 1..<2:
-                            return textField.text!
-                        default:
-                            return textField.text!
-                    }
-                }
-                
-                textField.text = textField.text! + string
-                self.calcError(textField.text!)
-                return textField.text!
+                default:
+                    textField.textContentType = .none
             }
         }
         
-        var body: some View {
+        fileprivate func proceedField() -> Bool {
+            let index = GFormRouter.gfr().index(formID)
+            if index == FieldIndex.confPass.rawValue || index == FieldIndex.username.rawValue {
+                if self.canNextPanel() {
+                    self.onNextButton()
+                    return true
+                }
+                return false
+            }
+            return GFormRouter.gfr().callNextResponder(formID)
+        }
+        
+        fileprivate func parseInput(_ index: Int, _ textField: UITextField, _ string: String) -> String {
+            var text = textField.text!
+            var string = string
+            switch index {
+                case FieldIndex.email.rawValue:
+                    string = removeSpecialChars(string, allow: "@!.")
+                case FieldIndex.password.rawValue, FieldIndex.confPass.rawValue:
+                    text = cut(text + trim(string), maxLength: 20)
+                    calculateError(text)
+                    return text
+                default:
+                    string = removeSpecialChars(string)
+            }
+            text += smartCase(text, appendInput: string)
+            switch index {
+                case FieldIndex.name.rawValue:
+                    text = trim(text, allowSingleChars: true)
+                default:
+                    text = trim(text)
+            }
+            switch index {
+                case FieldIndex.email.rawValue:
+                    text = text.lowercased()
+                    text = cut(text, maxLength: 30)
+                default:
+                    text = cut(text, maxLength: 15)
+            }
+            
+            self.calculateError(text)
+            return text
+        }
+        
+        fileprivate var body: some View {
             VStack(spacing: 0){
                 VStack(spacing: 20){
                     ForEach(self.startIndex..<self.startIndex + self.length) { index in
                         ZStack(alignment: .leading) {
-                            Image(systemName: self.gft.symbol(formID, index)).foregroundColor(Color(white: 0.6)).offset(x: 2)
+                            Image(systemName: self.gft.symbol(index)).foregroundColor(Color(white: 0.6)).offset(x: 2)
                             HStack{
-                                Text(self.gft.name(formID, index)).font(gFont(.tekoSemiBold, .width, 2)).foregroundColor(Color(white: 0.3))
+                                Text(self.gft.name(index)).font(gFont(.tekoSemiBold, .width, 2)).foregroundColor(Color(white: 0.3))
                                 Spacer()
-                                Text(self.gft.error(formID, index)).font(gFont(.tekoSemiBold, .width, 2)).foregroundColor(gColor(.blue4))
+                                Text(self.gft.error(index)).font(gFont(.tekoSemiBold, .width, 2)).foregroundColor(gColor(.blue4))
                             }.offset(y: -25)
                             Rectangle().frame(height:2).offset(y: 23)
-                            GField(formID, index, SignupFieldDelegate(proceed: self.proceed, calcError: self.calculateError)).frame(height: 50)
+                            GField(formID, index, self).frame(height: 50)
                         }.foregroundColor(Color(white: 0.5))
                     }
                 }.frame(width: sWidth() * 0.85)
                 Spacer()
-                UserButton(action: self.onNextButton, empty: !self.canNextPanel(), text: self.disableButton ? "..." : (startIndex == 0) ? "Next" : "Submit", fgEmpty: gColor(.blue0).opacity(0.3), fgFull: Color.white, bgFull: self.disableButton ? gColor(.blue0).opacity(0.3) : gColor(.blue0), padding: 15)
+                UserButton(action: self.onNextButton, disabled: !self.canNextPanel(), text: self.disableButton ? "..." : (startIndex == 0) ? "Next" : "Submit", fgEmpty: gColor(.blue0).opacity(0.3), fgFull: Color.white, bgFull: self.disableButton ? gColor(.blue0).opacity(0.3) : gColor(.blue0), padding: 15)
                     .disabled(self.disableButton)
             }.frame(width: sWidth())
         }
     }
     
     public var body: some View {
-        SheetView(currentHeight: self.currentHeight, movingOffset: self.movingOffset, smallHeight: sHeight() * 0.9, onDragEnd: self.onDragEnd) {
+        SheetView(currentHeight: self.currentHeight, movingOffset: self.movingOffset, gapFromTop: sHeight() * 0.9, onDragEnd: self.onDragEnd) {
             VStack(spacing: 15) {
                 Rectangle()
                     .frame(width: 80, height: 7)

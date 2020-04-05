@@ -8,22 +8,50 @@
 
 import SwiftUI
 
-enum Direction: CGFloat {
+public enum Direction: CGFloat {
     case leftToRight = 1
     case rightToLeft = -1
 }
 
-struct SlideView: View {
-    @Binding var index: Int
-    var direction = Direction.leftToRight
-    var offsetFactor: CGFloat = 1
-    @State var dragOffset: CGFloat = 0
-    var padding: CGFloat = 10
-    var views: [AnyView]
-    var draggable: [Bool]
-    @State var lastDragPosition: DragGesture.Value? = nil
+public struct SlideView: View {
+    private var index: Binding<Int>
+    private var direction: Direction
+    private var offsetFactor: CGFloat
+    private var views: [AnyView]
+    private var padding: CGFloat
     
-    var body: some View {
+    @State private var dragOffset: CGFloat = 0
+    private var draggable: [Bool]
+    @State private var lastDragPosition: DragGesture.Value? = nil
+    
+    //Initializer
+    public init(index: Binding<Int>, direction: Direction = Direction.leftToRight, offsetFactor: CGFloat = 1, views: [AnyView], padding: CGFloat = 10, draggable: [Bool]) {
+        self.index = index
+        self.direction = direction
+        self.offsetFactor = offsetFactor
+        self.views = views
+        self.padding = padding
+        
+        self.draggable = draggable
+    }
+    
+    //Getter Methods
+    private func offsetValue(_ index: Int) -> CGFloat {
+        switch index {
+            case _ where index < self.index.wrappedValue - 1:
+                return self.direction.rawValue * self.offsetFactor * sWidth()
+            case self.index.wrappedValue - 1:
+                return self.direction.rawValue * self.offsetFactor * (self.dragOffset - sWidth())
+            case self.index.wrappedValue:
+                return self.direction.rawValue * self.offsetFactor * self.dragOffset
+            case self.index.wrappedValue + 1:
+                return self.direction.rawValue * (self.dragOffset + sWidth())
+            default:
+                return self.direction.rawValue * sWidth()
+        }
+    }
+    
+    public var body: some View {
         ZStack{
             ForEach(0..<self.views.count) { i in
                 self.views[i]
@@ -35,12 +63,12 @@ struct SlideView: View {
                     .gesture(self.draggable[i] ?
                         DragGesture()
                          .onChanged { drag in
-                            if self.index == 0 {
+                            if self.index.wrappedValue == 0 {
                                 if self.direction.rawValue * drag.translation.width < 0 {
                                     self.dragOffset = self.direction.rawValue * drag.translation.width
                                     self.lastDragPosition = drag
                                 }
-                            } else if self.index == self.views.count - 1 {
+                            } else if self.index.wrappedValue == self.views.count - 1 {
                                 if self.direction.rawValue * drag.translation.width > 0 {
                                     self.dragOffset = self.direction.rawValue * drag.translation.width
                                     self.lastDragPosition = drag
@@ -57,16 +85,16 @@ struct SlideView: View {
                                 adjustedOffset = self.dragOffset + speed * 1.3
                             }
                             
-                            if self.index > 0 && adjustedOffset > sWidth() * 0.5 {
+                            if self.index.wrappedValue > 0 && adjustedOffset > sWidth() * 0.5 {
                                 withAnimation(.easeOut(duration: 0.3)) {
                                     self.dragOffset = 0
-                                    self.index -= 1
+                                    self.index.wrappedValue -= 1
                                     UIApplication.shared.endEditing()
                                 }
-                            } else if self.index < self.views.count - 1 && adjustedOffset < -sWidth() * 0.5 {
+                            } else if self.index.wrappedValue < self.views.count - 1 && adjustedOffset < -sWidth() * 0.5 {
                                 withAnimation(.easeOut(duration: 0.3)) {
                                     self.dragOffset = 0
-                                    self.index += 1
+                                    self.index.wrappedValue += 1
                                     UIApplication.shared.endEditing()
                                 }
                             } else {
@@ -76,24 +104,6 @@ struct SlideView: View {
                             }
                         } : DragGesture().onChanged(){_ in}.onEnded(){_ in})
             }
-        }
-    }
-    
-    func offsetValue(_ index: Int) -> CGFloat {
-        if index <= self.index - 1 {
-            if index == self.index - 1 {
-                return self.direction.rawValue * self.offsetFactor * (self.dragOffset - sWidth())
-            } else {
-                return self.direction.rawValue * self.offsetFactor * sWidth()
-            }
-        } else if index > self.index {
-            if index == self.index + 1 {
-                return self.direction.rawValue * (self.dragOffset + sWidth())
-            } else {
-                return self.direction.rawValue * sWidth()
-            }
-        } else {
-            return self.direction.rawValue * self.offsetFactor * self.dragOffset
         }
     }
 }

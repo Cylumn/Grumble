@@ -8,26 +8,58 @@
 
 import SwiftUI
 
-struct ContentView: View {
+public struct ContentView: View {
     @ObservedObject private var uc: UserCookie = UserCookie.uc()
     @ObservedObject private var tr: TabRouter = TabRouter.tr()
-    @State private var index: Int = 0
+    @State private var slideIndex: Int = PanelIndex.listHome.rawValue
     
-    func onAppear(perform action: (() -> Void)? = nil) {
-        action?()
-        self.toList()
+    //Initializer
+    public init() {
+        self.tr.changeTab(.list)
     }
     
-    var body: some View {
+    private enum PanelIndex: Int {
+        case listHome = 0
+        case addFood = 1
+    }
+    
+    //Slide changes
+    public func toListHome(_ withAnim: Bool = true) {
+        if withAnim {
+            withAnimation(gAnim(.easeOut)){
+                self.slideIndex = PanelIndex.listHome.rawValue
+            }
+        } else {
+            self.slideIndex = PanelIndex.listHome.rawValue
+        }
+        UIApplication.shared.endEditing()
+    }
+    
+    public func toListHome() {
+        self.toListHome(true)
+    }
+    
+    func toAddFood() {
+        withAnimation(gAnim(.easeOut)) {
+            self.slideIndex = PanelIndex.addFood.rawValue
+        }
+        UIApplication.shared.endEditing()
+        
+        Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
+            GFormRouter.gfr().callFirstResponder(.addFood)
+        }
+    }
+    
+    public var body: some View {
         GeometryReader{ geometry in
         VStack(spacing: 0){
             if self.tr.tab() == .list {
-                SlideView(index: self.$index, offsetFactor: 0.3, padding: 0, views: [
-                    AnyView(ListView(geometry, self)),
-                    AnyView(AddToListView(geometry, self))],
-                          draggable: [false, true])
+                SlideView(index: self.$slideIndex, offsetFactor: 0.3, views: [
+                    AnyView(ListView(self)),
+                    AnyView(AddToListView(self))],
+                           padding: 0, draggable: [false, true])
             } else if self.tr.tab() == .settings {
-                SettingsView(geometry)
+                SettingsView()
             }
             
             if self.tr.tab() == .list || self.tr.tab() == .settings { //always true
@@ -35,34 +67,6 @@ struct ContentView: View {
             }
         }
         }.edgesIgnoringSafeArea(.bottom)
-    }
-    
-    func toList(){
-        self.toList(true)
-    }
-    
-    func toList(_ withAnim: Bool = true){
-        if withAnim {
-            withAnimation{
-                   self.index = 0
-            }
-        } else {
-            self.index = 0
-        }
-        
-        UIApplication.shared.endEditing()
-    }
-    
-    func toAddToList(){
-        withAnimation(.easeOut(duration: 0.3)) {
-            self.index = 1
-        }
-        
-        UIApplication.shared.endEditing()
-        
-        Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
-            GFormRouter.gfr().callFirstResponder(.addFood)
-        }
     }
 }
 

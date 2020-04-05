@@ -54,7 +54,7 @@ struct TabView: View {
     
     func toList(){
         self.tr.changeTab(.list)
-        contentView.toList(false)
+        contentView.toListHome(false)
     }
     
     func toSettings(){

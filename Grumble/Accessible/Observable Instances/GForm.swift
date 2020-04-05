@@ -10,96 +10,106 @@ import Foundation
 import SwiftUI
 
 public enum GFormID: Int {
-    case signup = 5
-    case login = 2
-    case filterList = 1
-    case addFood = 4
+    case signup = 0
+    case login = 1
+    case filterList = 2
+    case addFood = 3
+    
+    case size = 4
+}
+
+public func size(_ formID: GFormID) -> Int {
+    switch formID {
+        case .signup:
+            return 5
+        case .login:
+            return 2
+        case .filterList:
+            return 1
+        case .addFood:
+            return 4
+        default:
+            return 0
+    }
 }
 
 public class GFormText: ObservableObject {
-    private static var instance: GFormText?
-    @Published private var textName: [GFormID: [Int: String]] = [:]
-    @Published private var textSymbol: [GFormID: [Int: String]] = [:]
-    @Published private var textError: [GFormID: [Int: String]] = [:]
-    @Published private var textFields: [GFormID: [Int: String]] = [:]
+    private static var instances: [GFormText?]?
+    @Published private var textName: [String]
+    @Published private var textSymbol: [String]
+    @Published private var textError: [String]
+    @Published private var textFields: [String]
+    
+    //Initializer
+    private init(_ formID: GFormID) {
+        self.textName = Array(repeating: "", count: size(formID))
+        self.textSymbol = Array(repeating: "", count: size(formID))
+        self.textError = Array(repeating: "", count: size(formID))
+        self.textFields = Array(repeating: "", count: size(formID))
+    }
     
     //Getter Methods
-    public static func gft() -> GFormText {
-        if GFormText.instance == nil {
-            GFormText.instance = GFormText()
+    public static func gft(_ formID: GFormID) -> GFormText {
+        if GFormText.instances == nil {
+            GFormText.instances = Array(repeating: nil, count: GFormID.size.rawValue)
         }
-        return GFormText.instance!
+        if GFormText.instances![formID.rawValue] == nil {
+            GFormText.instances![formID.rawValue] = GFormText(formID)
+        }
+        return GFormText.instances![formID.rawValue]!
     }
     
-    public func name(_ formID: GFormID, _ index: Int) -> String {
-        return self.textName[formID]?[index] ?? ""
+    public func name(_ index: Int) -> String {
+        return self.textName[index]
     }
     
-    public func symbol(_ formID: GFormID, _ index: Int) -> String {
-        return self.textSymbol[formID]?[index] ?? ""
+    public func symbol(_ index: Int) -> String {
+        return self.textSymbol[index]
     }
     
-    public func error(_ formID: GFormID, _ index: Int) -> String {
-        return self.textError[formID]?[index] ?? ""
+    public func error(_ index: Int) -> String {
+        return self.textError[index]
     }
     
-    public func text(_ formID: GFormID, _ index: Int) -> String {
-        return self.textFields[formID]?[index] ?? ""
+    public func text(_ index: Int) -> String {
+        return self.textFields[index]
     }
     
     //Setter Methods
-    public func setName(_ formID: GFormID, _ index: Int, _ text: String) {
-        if self.textName[formID] == nil {
-            self.textName[formID] = [:]
-        }
-        self.textName[formID]![index] = text
+    public func setName(_ index: Int, _ text: String) {
+        self.textName[index] = text
     }
     
-    public func setNames(_ formID: GFormID, _ names: [String]) {
-        if self.textName[formID] == nil {
-            self.textName[formID] = [:]
-        }
+    public func setNames(_ names: [String]) {
         for i in 0..<names.count {
-            self.setName(formID, i, names[i])
+            self.setName(i, names[i])
         }
     }
     
-    public func setSymbol(_ formID: GFormID, _ index: Int, _ text: String) {
-        if self.textSymbol[formID] == nil {
-            self.textSymbol[formID] = [:]
-        }
-        self.textSymbol[formID]![index] = text
+    public func setSymbol(_ index: Int, _ text: String) {
+        self.textSymbol[index] = text
     }
     
-    public func setSymbols(_ formID: GFormID, _ symbols: [String]) {
-        if self.textSymbol[formID] == nil {
-            self.textSymbol[formID] = [:]
-        }
+    public func setSymbols(_ symbols: [String]) {
         for i in 0..<symbols.count {
-            self.setSymbol(formID, i, symbols[i])
+            self.setSymbol(i, symbols[i])
         }
     }
     
-    public func setError(_ formID: GFormID, _ index: Int, _ text: String) {
-        if self.textError[formID] == nil {
-            self.textError[formID] = [:]
-        }
-        self.textError[formID]![index] = text
+    public func setError(_ index: Int, _ text: String) {
+        self.textError[index] = text
     }
     
-    public func setText(_ formID: GFormID, _ index: Int, _ text: String) {
-        if self.textFields[formID] == nil {
-            self.textFields[formID] = [:]
-        }
-        self.textFields[formID]![index] = text
+    public func setText(_ index: Int, _ text: String) {
+        self.textFields[index] = text
     }
 }
 
 
 public class GFormRouter: ObservableObject {
     private static var instance: GFormRouter?
-    private var respondingFields: [GFormID: [UITextField?]] = [:]
-    private var currentIndices: [GFormID: Int] = [:]
+    private var respondingFields: [[UITextField?]?] = Array(repeating: nil, count: GFormID.size.rawValue)
+    private var currentIndices: [Int] = Array(repeating: 0, count: GFormID.size.rawValue)
     
     //Getter Methods
     public static func gfr() -> GFormRouter {
@@ -110,28 +120,25 @@ public class GFormRouter: ObservableObject {
     }
     
     public func index(_ formID: GFormID) -> Int {
-        return self.currentIndices[formID] ?? 0
+        return self.currentIndices[formID.rawValue]
     }
     
     //Setter Methods
     public func setRespondingField(_ formID: GFormID, _ index: Int, _ field: UITextField) {
-        if self.respondingFields[formID] == nil {
-            self.respondingFields[formID] = Array(repeating: nil, count: formID.rawValue)
+        if self.respondingFields[formID.rawValue] == nil {
+            self.respondingFields[formID.rawValue] = Array(repeating: nil, count: size(formID))
         }
-        self.respondingFields[formID]!.insert(field, at: index)
+        self.respondingFields[formID.rawValue]![index] = field
     }
     
     public func setIndex(_ formID: GFormID, _ index: Int) {
-        self.currentIndices[formID] = index
+        self.currentIndices[formID.rawValue] = index
     }
     
     private func incrementIndex(_ formID: GFormID) -> Bool {
-        if self.currentIndices[formID] == nil {
-            self.setIndex(formID, 0)
-        }
-        if self.currentIndices[formID]! < self.respondingFields[formID]!.count {
-            self.currentIndices[formID]! += 1
-            return self.currentIndices[formID]! < formID.rawValue
+        if self.currentIndices[formID.rawValue] < size(formID) {
+            self.currentIndices[formID.rawValue] += 1
+            return self.currentIndices[formID.rawValue] < size(formID)
         } else {
             return false
         }
@@ -139,10 +146,7 @@ public class GFormRouter: ObservableObject {
     
     //Caller Methods
     public func callCurrentResponder(_ formID: GFormID) {
-        if self.currentIndices[formID] == nil {
-            self.setIndex(formID, 0)
-        }
-        self.respondingFields[formID]![self.currentIndices[formID]!]!.becomeFirstResponder()
+        self.respondingFields[formID.rawValue]![self.currentIndices[formID.rawValue]]!.becomeFirstResponder()
     }
     
     public func callFirstResponder(_ formID: GFormID) {
