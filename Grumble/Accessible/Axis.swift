@@ -22,6 +22,21 @@ public func sHeight() -> CGFloat {
     return UIScreen.main.bounds.size.height
 }
 
+public func safeAreaInset(_ edge: Edge.Set) -> CGFloat {
+    switch edge {
+        case .top:
+            return UIApplication.shared.windows[0].safeAreaInsets.top
+        case .leading:
+            return UIApplication.shared.windows[0].safeAreaInsets.left
+        case .bottom:
+            return UIApplication.shared.windows[0].safeAreaInsets.bottom
+        case .trailing:
+            return UIApplication.shared.windows[0].safeAreaInsets.right
+        default:
+            return 0
+    }
+}
+
 public func isX() -> Bool {
     let phoneRatio = String(format: "%.3f", sWidth() / sHeight())
     let refRatio = String(format: "%.3f",  9.0 / 16.0)

@@ -22,7 +22,8 @@ public struct LoginView: View, GFieldDelegate {
     //Initializer
     public init() {
         self.ko.appendField(.login)
-        self.gft.setError(FieldIndex.email.rawValue, " ")
+        self.gft.setName(FieldIndex.email.rawValue, "Email")
+        self.gft.setName(FieldIndex.password.rawValue, "Password")
     }
     
     private enum FieldIndex: Int {
@@ -76,7 +77,9 @@ public struct LoginView: View, GFieldDelegate {
     
     //GFieldDelegate Implementation Methods
     public func style(_ index: Int, _ textField: GTextField) {
-        textField.setInsets(top: 15, left: 15, bottom: 15, right: 15)
+        textField.backgroundColor = gColor(.lightTurquoise).withAlphaComponent(0.5)
+        textField.setInsets(top: 10, left: 13, bottom: 10, right: 13)
+        textField.attributedPlaceholder = NSAttributedString(string: self.gft.name(index), attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.8)])
         textField.font = gFont(.ubuntuLight, .width, 2.5)
         textField.textColor = UIColor.white
         textField.textContentType = .newPassword
@@ -99,129 +102,107 @@ public struct LoginView: View, GFieldDelegate {
     }
     
     public func parseInput(_ index: Int, _ textField: UITextField, _ string: String) -> String {
-        self.gft.setError(FieldIndex.email.rawValue, " ")
+        self.gft.setError(FieldIndex.email.rawValue, "")
         return textField.text! + string
     }
  
     public var body: some View {
-        ZStack{
-            Image("Background")
-            .resizable()
-            .edgesIgnoringSafeArea(.all)
-            .gesture(DragGesture().onChanged(){_ in
-                UIApplication.shared.endEditing()
-            })
+        ZStack {
+            gGradient()
+                .edgesIgnoringSafeArea(.all)
+                .gesture(DragGesture().onChanged() { _ in
+                    UIApplication.shared.endEditing()
+                })
             
-            VStack{
-                VStack(spacing: sHeight() / (self.ko.visible(.login) ? 40: 25)){
-                    if self.ko.visible(.login) {
-                        Spacer().frame(height: sHeight() * 0.05)
-                    } else {
+            VStack(spacing: sHeight() * 0.03) {
+                Spacer().frame(height: sHeight() * (self.ko.visible(formID) ? 0.07 : 0.05))
+                
+                VStack(spacing: 0){
+                    if !self.ko.visible(formID) {
                         Image("Logo")
                             .resizable()
                             .frame(width: 80, height: 80)
+                        Spacer().frame(height: sHeight() * 0.04)
                     }
-                    
                     Text("Grumble")
-                        .font(.custom("Ubuntu-Bold", size: sHeight() / 17))
-                        .fontWeight(.bold)
-                        .foregroundColor(Color.white)
-                        .multilineTextAlignment(.leading)
-                        .lineLimit(2)
-                }.padding(.top, sHeight() / (self.ko.visible(.login) ? 40: 15))
+                        .font(gFont(.ubuntuBold, .height, 3))
+                }
                 
-                if !self.ko.visible(.login) {
-                    Spacer()
+                Spacer()
                 
-                    HStack{
+                if !self.ko.visible(formID) {
+                    HStack(spacing: nil) {
                         Button(action: self.attemptSignup, label: {
                             Text("Sign Up")
-                                .padding(15)
-                                .font(.custom("Ubuntu-Medium", size: sWidth() / 22))
-                                .foregroundColor(Color(red: 1, green: 1, blue: 1, opacity: 1))
-                                .overlay(RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color(red: 1, green: 1, blue: 1, opacity: 1), lineWidth: 1))
-                        })
+                                .padding(13)
+                                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white, lineWidth: 1))
+                                .font(gFont(.ubuntuMedium, .width, 2))
+                        }).background(gColor(.blue2))
                         
                         Spacer()
                         
                         Button(action: self.attemptLoginGoogle, label: {
-                            HStack{
+                            HStack(spacing: 15) {
                                 Image("GoogleIcon")
-                                    .frame(width: sWidth() / 22, height: sWidth() / 22)
-                                Text("Log in with Google")
-                                    .font(.custom("Ubuntu-Bold", size: sWidth() / 22))
+                                    .frame(width: sWidth() * 0.04, height: sWidth() * 0.04)
+                                Text("Login with Google")
+                                    .font(gFont(.ubuntuBold, .width, 2))
                                     .foregroundColor(Color.gray)
-                                .lineLimit(1)
+                                    .lineLimit(1)
                             }
+                        }).padding(13)
+                        .background(Color.white)
+                        .cornerRadius(8)
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+
+                VStack(spacing: sHeight() * 0.02) {
+                    VStack(spacing: sHeight() * 0.01) {
+                        HStack(spacing: nil) {
+                            Text(self.gft.error(FieldIndex.email.rawValue))
+                                .padding(3)
+                                .foregroundColor(gColor(.lightTurquoise))
+                                .font(gFont(.tekoSemiBold, .width, 2.5))
+                                .animation(gAnim(.spring))
+                            
+                            Spacer()
+                        }.frame(height: sHeight() * 0.02)
+                        
+                        GField(formID, FieldIndex.email.rawValue, self)
+                            .frame(height: 48)
+                            .cornerRadius(8)
+                    }
+                    
+                    GField(formID, FieldIndex.password.rawValue, self)
+                        .frame(height: 48)
+                        .cornerRadius(8)
+                    
+                    VStack(spacing: sHeight() * 0.02) {
+                        UserButton(action: self.attemptLogin, disabled: !self.canSubmit(), text: "Log In")
+                        
+                        Button(action: self.forgotPassword, label: {
+                            Text("Forgot Password? [wip]")
+                                .padding(5)
+                                .font(gFont(.ubuntuMedium, .width, 2.5))
                         })
-                            .padding(EdgeInsets(top: 15, leading: sWidth() / 30, bottom: 15, trailing: sWidth() / 30))
-                            .background(Color.white)
-                            .cornerRadius(8.0)
-                            .buttonStyle(PlainButtonStyle())
-                    }.frame(width: sWidth() * 0.85)
-                } else {
-                    Spacer().frame(height: sHeight() / (self.ko.visible(.login) ? 40 : 20))
+                    }
                 }
                 
-                HStack{
-                    Text(self.gft.error(FieldIndex.email.rawValue))
-                        .frame(height: sWidth() / 22)
-                        .padding(3)
-                        .foregroundColor(gColor(.lightTurquoise))
-                        .font(.custom("Teko-SemiBold", size: sWidth() / 22))
-                    
-                    Spacer()
-                }.frame(height: sWidth() / 30)
-                .offset(y: self.ko.visible(.login) ? 10 : 5)
-                
-                VStack(spacing: sHeight() / (self.ko.visible(.login) ? 60 : 40)){
-                    ZStack(alignment: .leading) {
-                        if self.gft.text(FieldIndex.email.rawValue).isEmpty {
-                            Text("Email")
-                                .foregroundColor(Color(red: 1, green: 1, blue: 1, opacity: 0.7))
-                                .padding(15)
-                                .font(.custom("Ubuntu-Light", size: sWidth() / 22))
-                        }
-                        GField(formID, FieldIndex.email.rawValue, self).frame(width: sWidth() * 0.85, height: 50)
-                    }.background(gColor(.lightTurquoise).opacity(0.7))
-                    .cornerRadius(8)
-                    
-                    ZStack(alignment: .leading) {
-                        if self.gft.text(FieldIndex.password.rawValue).isEmpty {
-                            Text("Password")
-                                .foregroundColor(Color(red: 1, green: 1, blue: 1, opacity: 0.7))
-                                .padding(15)
-                                .font(.custom("Ubuntu-Light", size: sWidth() / 22))
-                        }
-                        GField(formID, FieldIndex.password.rawValue, self).frame(width: sWidth() * 0.85, height: 50)
-                    }.background(gColor(.lightTurquoise).opacity(0.7))
-                    .cornerRadius(8)
-                    
-                    UserButton(action: self.attemptLogin, disabled: !self.canSubmit(), text: "Log In")
-                }
-                
-                Spacer().frame(height: sHeight() / 50)
-                
-                Button(action: self.forgotPassword, label: {
-                    Text("Forgot Password? [wip]")
-                        .padding(5)
-                        .font(.custom("Ubuntu-Medium", size: sWidth() / 22))
-                        .foregroundColor(Color.white)
-                })
-                
-                if self.ko.visible(.login) {
-                    Spacer().frame(height: self.ko.height(.login))
-                } else {
-                    Spacer().frame(height: sHeight() / 30)
-                }
-            }.padding(sHeight() / 25)
+                Spacer().frame(height: self.ko.height(formID) + sHeight() * (self.ko.visible(formID) ? 0.01 : 0.04))
+            }.frame(width: sWidth() * 0.85)
+            .foregroundColor(Color.white)
             
             SignupSheetView(currentHeight: self.$currentHeight, movingOffset: self.$movingOffset, onDragEnd: { pos in
-                if pos == .down {
-                    UIApplication.shared.endEditing()
-                    self.ko.removeField(.signup)
-                    self.ko.appendField(.login, false)
+                switch pos {
+                    case .up:
+                        self.ko.removeField(.login)
+                        self.ko.appendField(.signup, true)
+                        GFormRouter.gfr().callCurrentResponder(.signup)
+                    case .down:
+                        UIApplication.shared.endEditing()
+                        self.ko.removeField(.signup)
+                        self.ko.appendField(.login, false)
                 }
             }, login: self.attemptLogin)
         }

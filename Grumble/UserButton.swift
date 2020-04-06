@@ -31,19 +31,18 @@ public struct UserButton: View {
     }
     
     public var body: some View {
-        ZStack{
+        ZStack {
             Button(action: self.action, label: {
                 Text(self.text)
-                    .font(gFont(.ubuntuMedium, .width, 2.5))
                     .padding(self.padding)
                     .frame(width: sWidth() * 0.85)
                     .background(self.disabled ? self.bgEmpty : self.bgFull)
+                    .font(gFont(.ubuntuMedium, .width, 2.5))
                     .cornerRadius(8)
                     .animation(.easeInOut)
-            })
-            .disabled(self.disabled)
-                .foregroundColor(self.disabled ? self.fgEmpty : self.fgFull)
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(self.disabled ? self.fgEmpty : self.fgFull, lineWidth: 2))
-        }.shadow(color: Color.clear, radius: 0)
+            }).disabled(self.disabled)
+            .foregroundColor(self.disabled ? self.fgEmpty : self.fgFull)
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(self.disabled ? self.fgEmpty : self.fgFull, lineWidth: 2))
+        }
     }
 }

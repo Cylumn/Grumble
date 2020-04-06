@@ -34,7 +34,7 @@ public struct SignupSheetView: View {
 
     
     //Signup Enums
-    private enum SignupPanelIndex: Int {
+    private enum PanelIndex: Int {
         case first = 0
         case final = 1
     }
@@ -49,7 +49,7 @@ public struct SignupSheetView: View {
     
     //Panel Control Methods
     private func nextPanel(_ proceed: @escaping () -> Void) {
-        if self.slideIndex < SignupPanelIndex.final.rawValue {
+        if self.slideIndex < PanelIndex.final.rawValue {
             GFormRouter.gfr().setIndex(formID, FieldIndex.name.rawValue)
             GFormRouter.gfr().callCurrentResponder(formID)
             withAnimation(gAnim(.easeOut)) {
@@ -88,7 +88,7 @@ public struct SignupSheetView: View {
     }
     
     private func previousPanel() {
-        if self.slideIndex > SignupPanelIndex.first.rawValue {
+        if self.slideIndex > PanelIndex.first.rawValue {
             GFormRouter.gfr().setIndex(.signup, FieldIndex.email.rawValue)
             GFormRouter.gfr().callCurrentResponder(.signup)
             withAnimation(gAnim(.easeOut)) {
@@ -262,14 +262,15 @@ public struct SignupSheetView: View {
     }
     
     public var body: some View {
-        SheetView(currentHeight: self.currentHeight, movingOffset: self.movingOffset, gapFromTop: sHeight() * 0.9, onDragEnd: self.onDragEnd) {
+        SheetView(currentHeight: self.currentHeight, movingOffset: self.movingOffset, onDragEnd: self.onDragEnd) {
             VStack(spacing: 15) {
                 Rectangle()
                     .frame(width: 80, height: 7)
                     .cornerRadius(5)
                     .foregroundColor(Color(white: 0.8))
-                ZStack{
-                    VStack(spacing: 0){
+                
+                ZStack {
+                    VStack(spacing: 0) {
                         Text("New User?")
                             .font(gFont(.ubuntuBold, .width, 3))
                             .foregroundColor(gColor(.blue0))
@@ -278,26 +279,30 @@ public struct SignupSheetView: View {
                             .foregroundColor(Color(white: 0.4))
                             .offset(y: 5)
                     }
-                    if self.slideIndex != 0 {
-                        HStack{
+                    
+                    if self.slideIndex != PanelIndex.first.rawValue {
+                        HStack(spacing: nil) {
                             Button(action: self.previousPanel, label: {
                                 HStack{
                                     Image(systemName: "chevron.left")
                                     Text("Back").font(gFont(.ubuntu, .width, 2))
                                 }.foregroundColor(gColor(.blue0))
                             })
+                            
                             Spacer()
                         }.padding(.leading, 20)
                     }
                 }
+                
                 SlideView(index: self.$slideIndex, offsetFactor: 0.3, views: [
                     AnyView(SignupPanelView(startIndex: 0, length: 3, nextPanel: self.nextPanel)),
                     AnyView(SignupPanelView(startIndex: 3, length: 2, nextPanel: self.nextPanel))],
                     draggable: [false, false])
-                    .frame(height: self.ko.visible(.signup) ? 290 : 450)
+                    .frame(height: self.ko.visible(formID) ? 290 : 450)
+                
                 Spacer()
-            }.padding(.bottom, isX() ? 60 : 50)
-            .padding(.top, 15)
+            }.padding(.top, 15)
+            .padding(.bottom, isX() ? 60 : 50)
             .frame(height: sHeight())
         }
     }

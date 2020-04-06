@@ -9,6 +9,13 @@
 import Foundation
 import SwiftUI
 
+public extension UIApplication {
+    func endEditing() {
+        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        sendAction(#selector(UIView.endEditing), to: nil, from: nil, for: nil)
+    }
+}
+
 public class KeyboardObserver: ObservableObject {
     private static var instance: KeyboardObserver?
     private var notificationCenter: NotificationCenter

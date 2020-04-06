@@ -18,39 +18,37 @@ public struct SettingsView: View {
     }
     
     public var body: some View {
-        VStack(alignment: .leading){
-            Spacer().frame(height: sHeight() / 13)
-            
-            HStack{
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: nil) {
                 Text("Settings")
                     .font(.custom("Ubuntu-Bold", size: sWidth() / 13))
                     .foregroundColor(gColor(.blue0))
+                    .padding(20)
                 
                 Spacer()
+                
                 Image("ColoredLogo")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 50, height: 50)
-            }.padding([.leading, .trailing], 20)
-            
+                    .frame(height: 50)
+                    .padding([.leading, .trailing], 20)
+            }.padding(.bottom, 10)
             List{
-                Section(header: Text("General")){
-                    Text("About")
-                    Text("Security")
+                Section(header: Text("General [WIP]")){
+                    Text("About [WIP]")
+                    Text("Security [WIP]")
                 }
                 Section{
-                    Text("Social")
+                    Text("Social [WIP]")
                 }
                 Section{
                     Button(action: self.logOutUser, label: {
                         Text("Log Out")
-                    })
+                    }).foregroundColor(Color.white)
                 }.listRowBackground(gColor(.blue4))
             }.listStyle(GroupedListStyle())
-            
             Spacer()
-        }.font(.custom("Ubuntu-Light", size: 15))
-        .edgesIgnoringSafeArea(.all)
+        }.font(gFont(.ubuntuLight, 15))
     }
 }
 
@@ -58,11 +56,11 @@ public struct SettingsView: View {
 struct SettingsView_Previews: PreviewProvider {
    static var previews: some View {
       Group {
-         ContentView()
+         SettingsView()
             .previewDevice(PreviewDevice(rawValue: "iPhone SE"))
             .previewDisplayName("iPhone SE")
 
-         ContentView()
+         SettingsView()
             .previewDevice(PreviewDevice(rawValue: "iPhone XS Max"))
             .previewDisplayName("iPhone XS Max")
       }

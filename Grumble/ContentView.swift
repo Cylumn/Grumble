@@ -39,7 +39,7 @@ public struct ContentView: View {
         self.toListHome(true)
     }
     
-    func toAddFood() {
+    public func toAddFood() {
         withAnimation(gAnim(.easeOut)) {
             self.slideIndex = PanelIndex.addFood.rawValue
         }
@@ -50,30 +50,23 @@ public struct ContentView: View {
         }
     }
     
-    public var body: some View {
-        GeometryReader{ geometry in
-        VStack(spacing: 0){
-            if self.tr.tab() == .list {
-                SlideView(index: self.$slideIndex, offsetFactor: 0.3, views: [
-                    AnyView(ListView(self)),
-                    AnyView(AddToListView(self))],
-                           padding: 0, draggable: [false, true])
-            } else if self.tr.tab() == .settings {
-                SettingsView()
-            }
-            
-            if self.tr.tab() == .list || self.tr.tab() == .settings { //always true
-                TabView(geometry, self)
-            }
+    private var tab: some View {
+        switch self.tr.tab() {
+            case .list:
+                return AnyView(SlideView(index: self.$slideIndex, offsetFactor: 0.3,
+                                         views: [AnyView(ListView(self)),
+                                                AnyView(AddToListView(self))],
+                                         padding: 0, draggable: [false, true]))
+            case .settings:
+                return AnyView(SettingsView())
         }
-        }.edgesIgnoringSafeArea(.bottom)
     }
-}
-
-extension UIApplication {
-    func endEditing() {
-        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-        sendAction(#selector(UIView.endEditing), to: nil, from: nil, for: nil)
+    
+    public var body: some View {
+        VStack(spacing: 0) {
+            self.tab
+            TabView(self)
+        }.edgesIgnoringSafeArea(.bottom)
     }
 }
 

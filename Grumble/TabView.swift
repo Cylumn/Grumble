@@ -8,57 +8,53 @@
 
 import SwiftUI
 
-struct TabView: View {
+public struct TabView: View {
     @ObservedObject private var tr: TabRouter = TabRouter.tr()
-    private var geometry: GeometryProxy
     private var contentView: ContentView
-    var iconHeight: CGFloat = 25
+    private var iconHeight: CGFloat
     
-    init(_ geometry: GeometryProxy, _ contentView: ContentView){
-        self.geometry = geometry
+    //Initializer
+    public init(_ contentView: ContentView) {
         self.contentView = contentView
+        self.iconHeight = 25
     }
     
-    var body: some View {
-        HStack{
-            if self.tr.tab() == .list {
-                Image(systemName: "bag.fill").resizable().aspectRatio(contentMode: .fit).frame(width: geometry.size.width/2, height: self.iconHeight).contentShape(Rectangle())
-                    .onTapGesture{
-                        self.toList()
-                    }
-            } else {
-                Image(systemName: "bag").resizable().aspectRatio(contentMode: .fit).frame(width: geometry.size.width/2, height: self.iconHeight).contentShape(Rectangle())
+    //Function Methods
+    private func toList() {
+        self.tr.changeTab(.list)
+        self.contentView.toListHome(false)
+    }
+    
+    private func toSettings() {
+        self.tr.changeTab(.settings)
+    }
+    
+    public var body: some View {
+        HStack(spacing: nil) {
+            Image(systemName: self.tr.tab() == .list ? "bag.fill" : "bag")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: sWidth() * 0.5, height: self.iconHeight)
+                .contentShape(Rectangle())
                 .onTapGesture{
                     self.toList()
                 }
-            }
             
-            if self.tr.tab() == .settings {
-                Image(systemName: "gear").resizable().aspectRatio(contentMode: .fit).frame(width: geometry.size.width/2, height: self.iconHeight).contentShape(Rectangle())
-                    .font(Font.title.weight(.black))
-                    .onTapGesture{
-                        self.toSettings()
-                    }
-            } else {
-                Image(systemName: "gear").resizable().aspectRatio(contentMode: .fit).frame(width: geometry.size.width/2, height: self.iconHeight).contentShape(Rectangle())
-                .font(Font.title.weight(.medium))
+            Image(systemName: "gear")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: sWidth() * 0.5, height: self.iconHeight)
+                .contentShape(Rectangle())
+                .font(Font.title.weight(self.tr.tab() == .settings ? .black : .medium))
                 .onTapGesture{
                     self.toSettings()
                 }
-            }
-        }.foregroundColor(Color.black)
-            .frame(width: geometry.size.width, height: geometry.size.height * 0.085)
-            .background(Color.white.shadow(radius: 3))
-            .edgesIgnoringSafeArea(.all)
-    }
-    
-    func toList(){
-        self.tr.changeTab(.list)
-        contentView.toListHome(false)
-    }
-    
-    func toSettings(){
-        self.tr.changeTab(.settings)
+        }.frame(width: sWidth(), height: sHeight() * 0.085)
+        .background(Color.white)
+        .foregroundColor(Color.black)
+        .clipped()
+        .shadow(color: Color.black.opacity(0.2), radius: 3)
+        .edgesIgnoringSafeArea(.all)
     }
 }
 

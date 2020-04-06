@@ -9,6 +9,8 @@
 import Foundation
 import SwiftUI
 
+private var bgGradient: LinearGradient? = nil
+
 public enum GColor: String {
     //Blues
     case blue0 = "Columbia"
@@ -35,4 +37,11 @@ public func gColor(_ color: GColor) -> UIColor {
 
 public func gColor(_ color: GColor) -> Color {
     return Color(gColor(color))
+}
+
+public func gGradient() -> LinearGradient {
+    if bgGradient == nil {
+        bgGradient = LinearGradient(gradient: Gradient(colors: [gColor(.blue0), gColor(.blue4)]), startPoint: .top, endPoint: .bottom)
+    }
+    return bgGradient!
 }

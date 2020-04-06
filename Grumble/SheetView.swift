@@ -8,6 +8,10 @@
 
 import SwiftUI
 
+private let dragSpeedConsidered: CGFloat = 1.3
+private let hideKeyboardFraction: CGFloat = 0.5
+private let hideFraction: CGFloat = 0.6
+
 public enum SheetPosition {
     case up
     case down
@@ -18,22 +22,66 @@ public struct SheetView<Content>: View where Content: View {
     private var movingOffset: Binding<CGFloat>
     @State private var lastDragPosition: DragGesture.Value? = nil
     
-    private var position: SheetPosition
-    private var gapFromTop: CGFloat
+    private var maxHeight: CGFloat
     private var backgroundExtension: CGFloat
     private var onDragEnd: ((SheetPosition) -> ())
     private var content: () -> Content
     
+    @State private var position: SheetPosition = SheetPosition.down
+    
     //Initializer
-    public init(currentHeight: Binding<CGFloat>, movingOffset: Binding<CGFloat>, startPosition: SheetPosition = SheetPosition.down, gapFromTop: CGFloat = 50, onDragEnd: @escaping (SheetPosition) -> () = {_ in}, _ content: @escaping () -> Content) {
+    public init(currentHeight: Binding<CGFloat>, movingOffset: Binding<CGFloat>, maxHeight: CGFloat = sHeight() * 0.95, onDragEnd: @escaping (SheetPosition) -> () = {_ in}, _ content: @escaping () -> Content) {
         self.currentHeight = currentHeight
         self.movingOffset = movingOffset
         
-        self.position = startPosition
-        self.gapFromTop = gapFromTop
+        self.maxHeight = maxHeight
         self.backgroundExtension = 0.2
         self.onDragEnd = onDragEnd
         self.content = content
+        
+        self.position = currentHeight.wrappedValue > maxHeight * hideFraction ? .down : .up
+    }
+    
+    private var gesture: some Gesture {
+        DragGesture()
+        .onChanged { drag in
+            self.movingOffset.wrappedValue = max(drag.translation.height + self.currentHeight.wrappedValue, self.maxHeight - sHeight())
+            
+            if self.position == .up && self.movingOffset.wrappedValue > self.maxHeight * hideKeyboardFraction {
+                self.onDragEnd(.down)
+                self.position = .down
+            } else if self.position == .down && self.movingOffset.wrappedValue < self.maxHeight * hideKeyboardFraction {
+                self.onDragEnd(.up)
+                self.position = .up
+            }
+            self.lastDragPosition = drag
+        }.onEnded { drag in
+            var adjustedOffset = self.movingOffset.wrappedValue
+            if let ldp = self.lastDragPosition {
+                let timeDiff = drag.time.timeIntervalSince(ldp.time)
+                let speed = (drag.translation.height - ldp.translation.height) / CGFloat(timeDiff)
+                adjustedOffset = self.movingOffset.wrappedValue + speed * dragSpeedConsidered
+            }
+            
+            if adjustedOffset > self.maxHeight * hideFraction {
+                withAnimation(gAnim(.spring)) {
+                    self.movingOffset.wrappedValue = self.maxHeight
+                }
+                if self.position == .up {
+                    self.onDragEnd(.down)
+                    self.position = .down
+                }
+            } else {
+                withAnimation(gAnim(.springSlow)) {
+                    self.movingOffset.wrappedValue = 0.0
+                }
+                if self.position == .down {
+                    self.onDragEnd(.up)
+                    self.position = .up
+                }
+            }
+            self.currentHeight.wrappedValue = self.movingOffset.wrappedValue
+        }
     }
     
     public var body: some View {
@@ -44,42 +92,11 @@ public struct SheetView<Content>: View where Content: View {
                                 .cornerRadius(40)
                         }.frame(height: sHeight())
                         .offset(y: sHeight() * self.backgroundExtension / 2))
-            .frame(minHeight: 0.0, maxHeight: .infinity, alignment: .bottom)
-            .offset(y: sHeight() - self.gapFromTop + self.movingOffset.wrappedValue)
-                .gesture(
-                DragGesture()
-                .onChanged({ drag in
-                    if drag.translation.height + self.currentHeight.wrappedValue > self.gapFromTop - sHeight() {
-                        self.movingOffset.wrappedValue = drag.translation.height + self.currentHeight.wrappedValue
-                    } else {
-                        self.movingOffset.wrappedValue = self.gapFromTop - sHeight()
-                    }
-                    
-                    self.lastDragPosition = drag
-                }).onEnded({ drag in
-                    var adjustedOffset = self.movingOffset.wrappedValue
-                    if let ldp = self.lastDragPosition {
-                        let timeDiff = drag.time.timeIntervalSince(ldp.time)
-                        let speed = (drag.translation.height - ldp.translation.height) / CGFloat(timeDiff)
-                        adjustedOffset = self.movingOffset.wrappedValue + speed * 1.3
-                    }
-                    
-                    if adjustedOffset > self.gapFromTop * 0.6 {
-                        withAnimation(.spring(dampingFraction: 0.7)) {
-                            self.movingOffset.wrappedValue = self.gapFromTop
-                            self.onDragEnd(.down)
-                        }
-                    } else {
-                        //go to top
-                        withAnimation(.spring(dampingFraction: 1.5)) {
-                            self.movingOffset.wrappedValue = 0.0
-                            self.onDragEnd(.up)
-                        }
-                    }
-                    self.currentHeight.wrappedValue = self.movingOffset.wrappedValue
-                })
-                ).clipped()
-                .shadow(color: Color.gray.opacity(0.2), radius: 20, x: 0.0, y: -5)
+            .frame(minHeight: 0, maxHeight: .infinity, alignment: .bottom)
+            .offset(y: sHeight() + safeAreaInset(.top) - self.maxHeight + self.movingOffset.wrappedValue)
+            .gesture(self.gesture)
+            .clipped()
+            .shadow(color: Color.gray.opacity(0.2), radius: 20, x: 0.0, y: -5)
     }
 }
 

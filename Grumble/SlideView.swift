@@ -8,6 +8,8 @@
 
 import SwiftUI
 
+private let dragSpeedConsidered: CGFloat = 1.3
+
 public enum Direction: CGFloat {
     case leftToRight = 1
     case rightToLeft = -1
@@ -51,59 +53,70 @@ public struct SlideView: View {
         }
     }
     
+    private var gesture: some Gesture {
+        DragGesture()
+        .onChanged { drag in
+            if !self.draggable[self.index.wrappedValue] {
+                return
+            }
+            
+            switch self.index.wrappedValue {
+                case 0:
+                    if self.direction.rawValue * drag.translation.width < 0 {
+                        self.dragOffset = self.direction.rawValue * drag.translation.width
+                        self.lastDragPosition = drag
+                    }
+                case self.views.count - 1:
+                    if self.direction.rawValue * drag.translation.width > 0 {
+                        self.dragOffset = self.direction.rawValue * drag.translation.width
+                        self.lastDragPosition = drag
+                    }
+                default:
+                    self.dragOffset = self.direction.rawValue * drag.translation.width
+                    self.lastDragPosition = drag
+            }
+        }.onEnded { drag in
+            if !self.draggable[self.index.wrappedValue] {
+                return
+            }
+            
+            var adjustedOffset = self.dragOffset
+            if let ldp = self.lastDragPosition {
+                let timeDiff = drag.time.timeIntervalSince(ldp.time)
+                let speed = self.direction.rawValue * (drag.translation.width - ldp.translation.width) / CGFloat(timeDiff)
+                adjustedOffset = self.dragOffset + speed * dragSpeedConsidered
+            }
+            
+            if self.index.wrappedValue > 0 && adjustedOffset > sWidth() * 0.5 {
+                withAnimation(gAnim(.easeOut)) {
+                    self.dragOffset = 0
+                    self.index.wrappedValue -= 1
+                    UIApplication.shared.endEditing()
+                }
+            } else if self.index.wrappedValue < self.views.count - 1 && adjustedOffset < -sWidth() * 0.5 {
+                withAnimation(gAnim(.easeOut)) {
+                    self.dragOffset = 0
+                    self.index.wrappedValue += 1
+                    UIApplication.shared.endEditing()
+                }
+            } else {
+                withAnimation(gAnim(.easeOut)) {
+                    self.dragOffset = 0
+                }
+            }
+        }
+    }
+    
     public var body: some View {
-        ZStack{
-            ForEach(0..<self.views.count) { i in
+        ZStack {
+            ForEach(0 ..< self.views.count) { i in
                 self.views[i]
                     .padding([.top, .bottom], self.padding)
                     .background(Color.white)
                     .frame(width: sWidth())
-                    .contentShape(Rectangle())
                     .offset(x: self.offsetValue(i))
-                    .gesture(self.draggable[i] ?
-                        DragGesture()
-                         .onChanged { drag in
-                            if self.index.wrappedValue == 0 {
-                                if self.direction.rawValue * drag.translation.width < 0 {
-                                    self.dragOffset = self.direction.rawValue * drag.translation.width
-                                    self.lastDragPosition = drag
-                                }
-                            } else if self.index.wrappedValue == self.views.count - 1 {
-                                if self.direction.rawValue * drag.translation.width > 0 {
-                                    self.dragOffset = self.direction.rawValue * drag.translation.width
-                                    self.lastDragPosition = drag
-                                }
-                            } else {
-                                self.dragOffset = self.direction.rawValue * drag.translation.width
-                                self.lastDragPosition = drag
-                            }
-                        }.onEnded { drag in
-                            var adjustedOffset = self.dragOffset
-                            if let ldp = self.lastDragPosition {
-                                let timeDiff = drag.time.timeIntervalSince(ldp.time)
-                                let speed = self.direction.rawValue * (drag.translation.width - ldp.translation.width) / CGFloat(timeDiff)
-                                adjustedOffset = self.dragOffset + speed * 1.3
-                            }
-                            
-                            if self.index.wrappedValue > 0 && adjustedOffset > sWidth() * 0.5 {
-                                withAnimation(.easeOut(duration: 0.3)) {
-                                    self.dragOffset = 0
-                                    self.index.wrappedValue -= 1
-                                    UIApplication.shared.endEditing()
-                                }
-                            } else if self.index.wrappedValue < self.views.count - 1 && adjustedOffset < -sWidth() * 0.5 {
-                                withAnimation(.easeOut(duration: 0.3)) {
-                                    self.dragOffset = 0
-                                    self.index.wrappedValue += 1
-                                    UIApplication.shared.endEditing()
-                                }
-                            } else {
-                                withAnimation(.easeOut(duration: 0.3)) {
-                                    self.dragOffset = 0
-                                }
-                            }
-                        } : DragGesture().onChanged(){_ in}.onEnded(){_ in})
             }
-        }
+        }.contentShape(Rectangle())
+        .gesture(self.gesture)
     }
 }

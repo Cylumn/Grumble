@@ -34,6 +34,14 @@ public enum GFont: String {
     case tekoMedium = "Teko-Medium"
 }
 
+public func gFont(_ name: GFont, _ size: CGFloat) -> Font {
+    return Font.custom(name.rawValue, size: size)
+}
+
+public func gFont(_ name: GFont, _ size: CGFloat) -> UIFont {
+    return UIFont(name: name.rawValue, size: size) ?? UIFont.systemFont(ofSize: size)
+}
+
 public func gFont(_ name: GFont, _ axis: Axis, _ fraction: CGFloat) -> Font {
     var length: CGFloat
     switch axis {
