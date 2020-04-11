@@ -10,22 +10,64 @@ import Foundation
 import SwiftUI
 import Firebase
 
-public struct Restaurant: Decodable {
-    var address: String?
-    var food: String
-    var price: Double?
+public let tagTitles: [String] = ["food", "burger", "salad", "soup"]
+public let tagColors: [Color] = [gColor(.blue2),
+                                        gColor(.dandelion),
+                                        gColor(.neon),
+                                        gColor(.magenta)]
+public let tagSprites: [String] = ["", "hamburger", "salad", "soup"]
+public var tagIDMap: [String: Int] {
+    var map = [:] as [String: Int]
+    for index in 0 ..< tagTitles.count {
+        map[tagTitles[index]] = index
+    }
+    return map
+}
+
+//deprecate in the future
+public enum GrubTags: Int {
+    case food = 0
+    case burger = 1
+    case salad = 2
+    case soup = 3
+}
+
+public struct Grub: Decodable {
+    public var food: String
+    public var price: Double?
+    public var restaurant: String?
+    public var address: String?
+    public var tags: [String: Int]
+    public var date: String
     
-    init(_ foodItem: NSDictionary?){
-        self.address = foodItem?.value(forKey: "address") as? String
-        self.food = foodItem?.value(forKey: "food") as? String ?? "undefined"
+    public init(_ foodItem: NSDictionary?){
+        self.food = foodItem?.value(forKey: "food") as! String
         self.price = foodItem?.value(forKey: "price") as? Double
+        self.restaurant = foodItem?.value(forKey: "restaurant") as? String
+        self.address = foodItem?.value(forKey: "address") as? String
+        self.tags = foodItem?.value(forKey: "tags") as! [String: Int]
+        self.date = foodItem?.value(forKey: "date") as! String
+    }
+    
+    @available(*, deprecated) //remove in future
+    public static func testGrub() -> Grub {
+        var grubTest: [String: Any] = [:]
+        grubTest["food"] = "Ramen"
+        grubTest["price"] = 10.0
+        grubTest["restaurant"] = "Ippudo"
+        grubTest["address"] = "Saratoga Avenue"
+        let tags = ["food": 0, "soup": 3, "smallestTag" : 3]
+        grubTest["tags"] = tags
+        grubTest["date"] = getDate()
+        
+        return Grub(grubTest as NSDictionary)
     }
 }
 
 public class UserCookie: ObservableObject {
     private static var instance: UserCookie?
     @Published private var hasCurrentUser: Bool = false
-    @Published private var fList: [String: Restaurant] = [:]
+    @Published private var fList: [String: Grub] = [:]
     
     //Getter Methods
     public static func uc() -> UserCookie {
@@ -39,7 +81,7 @@ public class UserCookie: ObservableObject {
         return self.hasCurrentUser
     }
     
-    public func foodList() -> [String: Restaurant] {
+    public func foodList() -> [String: Grub] {
         return self.fList
     }
     
@@ -48,11 +90,11 @@ public class UserCookie: ObservableObject {
         self.hasCurrentUser = loggedIn
     }
     
-    public func setFoodList(_ foodList: [String: Restaurant]) {
+    public func setFoodList(_ foodList: [String: Grub]) {
         self.fList = foodList
     }
     
-    public func appendFoodList(_ key: String, _ value: Restaurant) {
+    public func appendFoodList(_ key: String, _ value: Grub) {
         self.fList[key] = value
     }
     

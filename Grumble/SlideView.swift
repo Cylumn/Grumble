@@ -19,44 +19,61 @@ public struct SlideView: View {
     private var index: Binding<Int>
     private var direction: Direction
     private var offsetFactor: CGFloat
+    private var bgColor: Color
+    private var viewWidth: CGFloat
     private var views: [AnyView]
     private var padding: CGFloat
+    private var height: CGFloat?
     
     @State private var dragOffset: CGFloat = 0
-    private var draggable: [Bool]
+    private var unDraggable: Set<Int>?
     @State private var lastDragPosition: DragGesture.Value? = nil
     
     //Initializer
-    public init(index: Binding<Int>, direction: Direction = Direction.leftToRight, offsetFactor: CGFloat = 1, views: [AnyView], padding: CGFloat = 10, draggable: [Bool]) {
+    public init(index: Binding<Int>, direction: Direction = Direction.leftToRight, offsetFactor: CGFloat = 1, bgColor: Color = Color.white, viewWidth: CGFloat = sWidth(), views: [AnyView], padding: CGFloat = 10, height: CGFloat? = nil, unDraggable: Set<Int>? = nil) {
         self.index = index
         self.direction = direction
         self.offsetFactor = offsetFactor
+        self.bgColor = bgColor
+        self.viewWidth = viewWidth
         self.views = views
         self.padding = padding
+        self.height = height
         
-        self.draggable = draggable
+        self.unDraggable = unDraggable
     }
     
     //Getter Methods
     private func offsetValue(_ index: Int) -> CGFloat {
         switch index {
             case _ where index < self.index.wrappedValue - 1:
-                return self.direction.rawValue * self.offsetFactor * sWidth()
+                return self.direction.rawValue * self.offsetFactor * -self.viewWidth
             case self.index.wrappedValue - 1:
-                return self.direction.rawValue * self.offsetFactor * (self.dragOffset - sWidth())
+                return self.direction.rawValue * self.offsetFactor * (self.dragOffset - self.viewWidth)
             case self.index.wrappedValue:
                 return self.direction.rawValue * self.offsetFactor * self.dragOffset
             case self.index.wrappedValue + 1:
-                return self.direction.rawValue * (self.dragOffset + sWidth())
+                return self.direction.rawValue * (self.dragOffset + self.viewWidth)
             default:
-                return self.direction.rawValue * sWidth()
+                return self.direction.rawValue * self.viewWidth
+        }
+    }
+    
+    private func offsetValueCumulative(_ index: Int) -> CGFloat {
+        switch index {
+            case _ where index < self.index.wrappedValue - 1:
+                return self.direction.rawValue * max(CGFloat(self.index.wrappedValue - index) * self.offsetFactor * -self.viewWidth, -sWidth())
+            case _ where index > self.index.wrappedValue + 1:
+                return self.direction.rawValue * min(CGFloat(index - self.index.wrappedValue) * self.viewWidth, sWidth())
+            default:
+                return self.offsetValue(index)
         }
     }
     
     private var gesture: some Gesture {
         DragGesture()
         .onChanged { drag in
-            if !self.draggable[self.index.wrappedValue] {
+            if self.unDraggable?.contains(self.index.wrappedValue) ?? false || self.views.count == 1 {
                 return
             }
             
@@ -76,7 +93,7 @@ public struct SlideView: View {
                     self.lastDragPosition = drag
             }
         }.onEnded { drag in
-            if !self.draggable[self.index.wrappedValue] {
+            if self.unDraggable?.contains(self.index.wrappedValue) ?? false || self.views.count == 1 {
                 return
             }
             
@@ -108,15 +125,20 @@ public struct SlideView: View {
     }
     
     public var body: some View {
-        ZStack {
-            ForEach(0 ..< self.views.count) { i in
-                self.views[i]
-                    .padding([.top, .bottom], self.padding)
-                    .background(Color.white)
-                    .frame(width: sWidth())
-                    .offset(x: self.offsetValue(i))
+        ZStack(alignment: .bottom) {
+            ForEach(0 ..< self.views.count, id: \.self) { i in
+                ZStack {
+                    if self.offsetValueCumulative(i) > 2 * -sWidth() && self.offsetValueCumulative(i) < 2 * sWidth() {
+                        self.views[i]
+                            .padding([.top, .bottom], self.padding)
+                            .background(self.bgColor)
+                            .frame(width: self.viewWidth)
+                            .offset(x: self.viewWidth >= sWidth() ? self.offsetValue(i) : self.offsetValueCumulative(i))
+                    }
+                }
             }
-        }.contentShape(Rectangle())
+        }.frame(width: sWidth(), height: self.height)
+        .contentShape(Rectangle())
         .gesture(self.gesture)
     }
 }

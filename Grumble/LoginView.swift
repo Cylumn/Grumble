@@ -189,11 +189,11 @@ public struct LoginView: View, GFieldDelegate {
                     }
                 }
                 
-                Spacer().frame(height: self.ko.height(formID) + sHeight() * (self.ko.visible(formID) ? 0.01 : 0.04))
+                Spacer().frame(height: self.ko.height(formID, tabbedView: false) + sHeight() * (self.ko.visible(formID) ? 0.01 : 0.04))
             }.frame(width: sWidth() * 0.85)
             .foregroundColor(Color.white)
             
-            SignupSheetView(currentHeight: self.$currentHeight, movingOffset: self.$movingOffset, onDragEnd: { pos in
+            SignupSheetView(currentHeight: self.$currentHeight, movingOffset: self.$movingOffset, onDragStateChanged: { pos in
                 switch pos {
                     case .up:
                         self.ko.removeField(.login)

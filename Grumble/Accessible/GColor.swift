@@ -19,6 +19,12 @@ public enum GColor: String {
     case blue3 = "Teal"
     case blue4 = "Turquoise"
     
+    //Rainbow Colors
+    case dandelion = "Dandelion"
+    case neon = "Neon"
+    case magenta = "Magenta"
+    case coral = "Coral"
+    
     //TurquoiseFoam? WTF is this
     case lightTurquoise = "TurquoiseFoam"
     

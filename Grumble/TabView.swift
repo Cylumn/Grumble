@@ -30,31 +30,29 @@ public struct TabView: View {
     }
     
     public var body: some View {
-        HStack(spacing: nil) {
-            Image(systemName: self.tr.tab() == .list ? "bag.fill" : "bag")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: sWidth() * 0.5, height: self.iconHeight)
-                .contentShape(Rectangle())
-                .onTapGesture{
-                    self.toList()
-                }
+        HStack(spacing: 0) {
+            ZStack {
+                Image(systemName: "bag")
+            }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                .foregroundColor(self.tr.tab() == .list ? gColor(.blue2) : Color.black)
+            .contentShape(Rectangle())
+            .onTapGesture{
+                self.toList()
+            }
             
-            Image(systemName: "gear")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: sWidth() * 0.5, height: self.iconHeight)
-                .contentShape(Rectangle())
-                .font(Font.title.weight(self.tr.tab() == .settings ? .black : .medium))
-                .onTapGesture{
-                    self.toSettings()
-                }
-        }.frame(width: sWidth(), height: sHeight() * 0.085)
+            ZStack {
+                Image(systemName: "gear")
+            }.frame(maxWidth: .infinity, maxHeight: .infinity)
+            .foregroundColor(self.tr.tab() == .settings ? gColor(.blue2) : Color.black)
+            .contentShape(Rectangle())
+            .onTapGesture{
+                self.toSettings()
+            }
+        }.frame(width: sWidth(), height: tabHeight)
         .background(Color.white)
-        .foregroundColor(Color.black)
+        .font(.system(size: sWidth() * 0.07))
         .clipped()
-        .shadow(color: Color.black.opacity(0.2), radius: 3)
-        .edgesIgnoringSafeArea(.all)
+        .shadow(color: Color.black.opacity(0.15), radius: 10)
     }
 }
 

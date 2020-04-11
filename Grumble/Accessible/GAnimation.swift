@@ -12,23 +12,27 @@ import SwiftUI
 private let dampingFraction: Double = 0.8
 private let dampingFractionSlow: Double = 1.5
 private let duration: Double = 0.3
+private let durationSlow: Double = 1
 
 public enum GAnimation {
     case spring
     case springSlow
     case easeOut
+    case easeOutSlow
     case easeInOut
 }
 
 public func gAnim(_ animation: GAnimation) -> Animation {
     switch animation {
-        case .spring:
-            return .spring(dampingFraction: dampingFraction)
-        case .springSlow:
-            return .spring(dampingFraction: dampingFractionSlow)
-        case .easeOut:
-            return .easeOut(duration: duration)
-        default:
-            return .easeInOut
+    case .spring:
+        return .spring(dampingFraction: dampingFraction)
+    case .springSlow:
+        return .spring(dampingFraction: dampingFractionSlow)
+    case .easeOut:
+        return .easeOut(duration: duration)
+    case .easeOutSlow:
+        return .easeOut(duration: durationSlow)
+    default:
+        return .easeInOut
     }
 }

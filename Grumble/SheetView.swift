@@ -24,18 +24,20 @@ public struct SheetView<Content>: View where Content: View {
     
     private var maxHeight: CGFloat
     private var backgroundExtension: CGFloat
-    private var onDragEnd: ((SheetPosition) -> ())
+    private var onDragStateChanged: ((SheetPosition) -> ())
+    private var onDragEnd:((SheetPosition) -> ())
     private var content: () -> Content
     
     @State private var position: SheetPosition = SheetPosition.down
     
     //Initializer
-    public init(currentHeight: Binding<CGFloat>, movingOffset: Binding<CGFloat>, maxHeight: CGFloat = sHeight() * 0.95, onDragEnd: @escaping (SheetPosition) -> () = {_ in}, _ content: @escaping () -> Content) {
+    public init(currentHeight: Binding<CGFloat>, movingOffset: Binding<CGFloat>, maxHeight: CGFloat = sHeight() * 0.95, onDragStateChanged: @escaping (SheetPosition) -> () = {_ in}, onDragEnd: @escaping (SheetPosition) -> () = {_ in}, _ content: @escaping () -> Content) {
         self.currentHeight = currentHeight
         self.movingOffset = movingOffset
         
         self.maxHeight = maxHeight
         self.backgroundExtension = 0.2
+        self.onDragStateChanged = onDragStateChanged
         self.onDragEnd = onDragEnd
         self.content = content
         
@@ -48,10 +50,10 @@ public struct SheetView<Content>: View where Content: View {
             self.movingOffset.wrappedValue = max(drag.translation.height + self.currentHeight.wrappedValue, self.maxHeight - sHeight())
             
             if self.position == .up && self.movingOffset.wrappedValue > self.maxHeight * hideKeyboardFraction {
-                self.onDragEnd(.down)
+                self.onDragStateChanged(.down)
                 self.position = .down
             } else if self.position == .down && self.movingOffset.wrappedValue < self.maxHeight * hideKeyboardFraction {
-                self.onDragEnd(.up)
+                self.onDragStateChanged(.up)
                 self.position = .up
             }
             self.lastDragPosition = drag
@@ -68,17 +70,19 @@ public struct SheetView<Content>: View where Content: View {
                     self.movingOffset.wrappedValue = self.maxHeight
                 }
                 if self.position == .up {
-                    self.onDragEnd(.down)
+                    self.onDragStateChanged(.down)
                     self.position = .down
                 }
+                self.onDragEnd(.down)
             } else {
                 withAnimation(gAnim(.springSlow)) {
                     self.movingOffset.wrappedValue = 0.0
                 }
                 if self.position == .down {
-                    self.onDragEnd(.up)
+                    self.onDragStateChanged(.up)
                     self.position = .up
                 }
+                self.onDragEnd(.up)
             }
             self.currentHeight.wrappedValue = self.movingOffset.wrappedValue
         }
@@ -92,7 +96,7 @@ public struct SheetView<Content>: View where Content: View {
                                 .cornerRadius(40)
                         }.frame(height: sHeight())
                         .offset(y: sHeight() * self.backgroundExtension / 2))
-            .frame(minHeight: 0, maxHeight: .infinity, alignment: .bottom)
+            .frame(minHeight: 0, maxHeight: sHeight(), alignment: .bottom)
             .offset(y: sHeight() + safeAreaInset(.top) - self.maxHeight + self.movingOffset.wrappedValue)
             .gesture(self.gesture)
             .clipped()

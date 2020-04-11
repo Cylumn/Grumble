@@ -58,6 +58,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
         GIDSignIn.sharedInstance().clientID = "729013591612-1idpq36eenpo1at67i9dujmkrbuc5j68.apps.googleusercontent.com"
         GIDSignIn.sharedInstance().delegate = self
         UserCookie.uc().setLoggedIn(Auth.auth().currentUser != nil)
+        
         return true
     }
 

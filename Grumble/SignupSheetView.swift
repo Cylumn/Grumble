@@ -14,24 +14,23 @@ private let formID: GFormID = GFormID.signup
 public struct SignupSheetView: View {
     private var currentHeight: Binding<CGFloat>
     private var movingOffset: Binding<CGFloat>
-    private var onDragEnd: (SheetPosition) -> ()
+    private var onDragStateChanged: (SheetPosition) -> ()
     
     @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko()
     @State private var slideIndex: Int = 0
     private var login: (String, String) -> Void
     
     //Initializer
-    public init(currentHeight: Binding<CGFloat>, movingOffset: Binding<CGFloat>, onDragEnd: @escaping (SheetPosition) -> (), login: @escaping (String, String) -> Void) {
+    public init(currentHeight: Binding<CGFloat>, movingOffset: Binding<CGFloat>, onDragStateChanged: @escaping (SheetPosition) -> (), login: @escaping (String, String) -> Void) {
         self.currentHeight = currentHeight
         self.movingOffset = movingOffset
-        self.onDragEnd = onDragEnd
+        self.onDragStateChanged = onDragStateChanged
         
         self.login = login
 
         GFormText.gft(formID).setNames(["Email", "Password", "Confirm Password", "Full Name", "Username"])
         GFormText.gft(formID).setSymbols(["envelope.fill", "lock.fill", "lock.shield", "person", "person.crop.circle"])
     }
-
     
     //Signup Enums
     private enum PanelIndex: Int {
@@ -262,7 +261,7 @@ public struct SignupSheetView: View {
     }
     
     public var body: some View {
-        SheetView(currentHeight: self.currentHeight, movingOffset: self.movingOffset, onDragEnd: self.onDragEnd) {
+        SheetView(currentHeight: self.currentHeight, movingOffset: self.movingOffset, onDragStateChanged: self.onDragStateChanged) {
             VStack(spacing: 15) {
                 Rectangle()
                     .frame(width: 80, height: 7)
@@ -297,7 +296,7 @@ public struct SignupSheetView: View {
                 SlideView(index: self.$slideIndex, offsetFactor: 0.3, views: [
                     AnyView(SignupPanelView(startIndex: 0, length: 3, nextPanel: self.nextPanel)),
                     AnyView(SignupPanelView(startIndex: 3, length: 2, nextPanel: self.nextPanel))],
-                    draggable: [false, false])
+                          unDraggable: [PanelIndex.first.rawValue, PanelIndex.final.rawValue])
                     .frame(height: self.ko.visible(formID) ? 290 : 450)
                 
                 Spacer()

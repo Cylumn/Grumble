@@ -59,6 +59,14 @@ public func removeSpecialChars(_ string: String, allow: String = "") -> String {
     return text
 }
 
+public func capFirst(_ text: String) -> String {
+    var string = text
+    let firstChar = string.first!.uppercased()
+    string.removeFirst()
+    string.insert(contentsOf: firstChar, at: string.startIndex)
+    return string
+}
+
 public func smartCase(_ text: String, appendInput: String, afterChar: Character = " ") -> String {
     if appendInput.isEmpty {
         return appendInput
@@ -68,9 +76,7 @@ public func smartCase(_ text: String, appendInput: String, afterChar: Character 
     
     if text.last == nil || text.last == afterChar {
         if string.count > 1 {
-            let firstChar = string.first!.uppercased()
-            string.removeFirst()
-            string.insert(contentsOf: firstChar, at: string.startIndex)
+            string = capFirst(string)
         } else {
             string = string.uppercased()
         }
@@ -107,4 +113,9 @@ public func parsePrice(_ string: String) -> String {
     text = "$" + text
     text.insert(contentsOf: ".", at: text.index(text.endIndex, offsetBy: -2))
     return text
+}
+
+public func randomString(length: Int) -> String {
+  let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+  return String((0 ..< length).map{ _ in letters.randomElement()! })
 }

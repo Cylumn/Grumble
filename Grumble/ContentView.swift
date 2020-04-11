@@ -8,6 +8,8 @@
 
 import SwiftUI
 
+public let tabHeight: CGFloat = sHeight() * 0.085
+
 public struct ContentView: View {
     @ObservedObject private var uc: UserCookie = UserCookie.uc()
     @ObservedObject private var tr: TabRouter = TabRouter.tr()
@@ -33,6 +35,7 @@ public struct ContentView: View {
             self.slideIndex = PanelIndex.listHome.rawValue
         }
         UIApplication.shared.endEditing()
+        KeyboardObserver.ko().clearFields()
     }
     
     public func toListHome() {
@@ -44,28 +47,31 @@ public struct ContentView: View {
             self.slideIndex = PanelIndex.addFood.rawValue
         }
         UIApplication.shared.endEditing()
-        
-        Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
+        KeyboardObserver.ko().clearFields()
+        KeyboardObserver.ko().appendField(.addFood)
+        Timer.scheduledTimer(withTimeInterval: 0.33, repeats: false) { timer in
             GFormRouter.gfr().callFirstResponder(.addFood)
         }
     }
     
     private var tab: some View {
         switch self.tr.tab() {
-            case .list:
-                return AnyView(SlideView(index: self.$slideIndex, offsetFactor: 0.3,
+        case .list:
+            return AnyView(SlideView(index: self.$slideIndex, offsetFactor: 0.3,
                                          views: [AnyView(ListView(self)),
-                                                AnyView(AddToListView(self))],
-                                         padding: 0, draggable: [false, true]))
-            case .settings:
-                return AnyView(SettingsView())
+                                                AnyView(AddFood(self))],
+                                         padding: 0, unDraggable: [PanelIndex.listHome.rawValue]))
+        case .settings:
+            return AnyView(SettingsView())
         }
     }
     
     public var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .bottom) {
             self.tab
-            TabView(self)
+            if !self.tr.hidden() {
+                TabView(self)
+            }
         }.edgesIgnoringSafeArea(.bottom)
     }
 }

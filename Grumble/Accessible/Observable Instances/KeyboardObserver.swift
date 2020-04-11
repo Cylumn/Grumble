@@ -49,9 +49,13 @@ public class KeyboardObserver: ObservableObject {
         return false
     }
     
-    public func height(_ field: GFormID) -> CGFloat {
+    public func height(_ field: GFormID, tabbedView: Bool = true) -> CGFloat {
         if self.observedFields.contains(field) {
-            return self.keyboardHeight
+            if !self.keyboardVisible {
+                return 0
+            }
+            
+            return self.keyboardHeight - (tabbedView ? tabHeight : 0)
         }
         return 0
     }

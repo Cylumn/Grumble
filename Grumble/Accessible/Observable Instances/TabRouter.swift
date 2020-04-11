@@ -16,6 +16,7 @@ public enum Tab {
 public class TabRouter: ObservableObject {
     private static var instance: TabRouter?
     @Published private var currentTab: Tab = .list
+    @Published private var hideTab = false
 
     //Getter Methods
     public static func tr() -> TabRouter {
@@ -29,8 +30,16 @@ public class TabRouter: ObservableObject {
         return self.currentTab
     }
     
+    public func hidden() -> Bool {
+        return self.hideTab
+    }
+    
     //Setter Methods
     public func changeTab(_ tab: Tab) {
         self.currentTab = tab
+    }
+    
+    public func hide(_ shouldHide: Bool) {
+        self.hideTab = shouldHide
     }
 }

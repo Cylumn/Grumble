@@ -10,7 +10,7 @@ import SwiftUI
 import Firebase
 
 private struct DataList: Decodable {
-    var foodList: [String: Restaurant]?
+    var foodList: [String: Grub]?
 }
 
 //Getter Functions
@@ -56,7 +56,7 @@ private func loadPropertyList<T>(_ url: URL?, _ decodable: T.Type) -> T? where T
 //Data Functions
 public func loadLocalData() {
     if let data = loadPropertyList(URL(string: dataPath()), DataList.self) {
-        UserCookie.uc().setFoodList(data.foodList ?? [:] as [String: Restaurant])
+        UserCookie.uc().setFoodList(data.foodList ?? [:] as [String: Grub])
     }
 }
 
@@ -105,7 +105,7 @@ public func removeCloudFood(_ key: String) {
 //Cloud Observers
 private func onCloudFoodAdded(_ snapshot: DataSnapshot) {
     if let foodItem = snapshot.value as? NSDictionary {
-        UserCookie.uc().appendFoodList(snapshot.key, Restaurant(foodItem))
+        UserCookie.uc().appendFoodList(snapshot.key, Grub(foodItem))
         appendLocalFood(snapshot.key, foodItem)
     }
 }
@@ -135,7 +135,7 @@ public func onLogout() {
         
         try Auth.auth().signOut()
         UserCookie.uc().setLoggedIn(false)
-        UserCookie.uc().setFoodList([:] as [String: Restaurant])
+        UserCookie.uc().setFoodList([:] as [String: Grub])
         clearLocalData()
         
         KeyboardObserver.ko().clearFields()

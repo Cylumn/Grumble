@@ -36,13 +36,13 @@ public struct UserButton: View {
                 Text(self.text)
                     .padding(self.padding)
                     .frame(width: sWidth() * 0.85)
-                    .background(self.disabled ? self.bgEmpty : self.bgFull)
                     .font(gFont(.ubuntuMedium, .width, 2.5))
-                    .cornerRadius(8)
                     .animation(.easeInOut)
             }).disabled(self.disabled)
+            .background(self.disabled ? self.bgEmpty : self.bgFull)
             .foregroundColor(self.disabled ? self.fgEmpty : self.fgFull)
             .overlay(RoundedRectangle(cornerRadius: 8).stroke(self.disabled ? self.fgEmpty : self.fgFull, lineWidth: 2))
+            .cornerRadius(8)
         }
     }
 }

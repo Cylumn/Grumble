@@ -14,22 +14,25 @@ public enum GFormID: Int {
     case login = 1
     case filterList = 2
     case addFood = 3
+    case searchTag = 4
     
-    case size = 4
+    case size = 5
 }
 
 public func size(_ formID: GFormID) -> Int {
     switch formID {
-        case .signup:
-            return 5
-        case .login:
-            return 2
-        case .filterList:
-            return 1
-        case .addFood:
-            return 4
-        default:
-            return 0
+    case .signup:
+        return 5
+    case .login:
+        return 2
+    case .filterList:
+        return 1
+    case .addFood:
+        return 4
+    case .searchTag:
+        return 1
+    default:
+        return 0
     }
 }
 
