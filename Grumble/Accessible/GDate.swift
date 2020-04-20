@@ -8,6 +8,7 @@
 
 import Foundation
 
+private let dateFormatter: DateFormatter = DateFormatter()
 private let format: String = "yyyy-MM-dd HH:mm:ss"
 
 public func dateComponent() -> DateComponents {
@@ -20,4 +21,9 @@ public func dateComponent() -> DateComponents {
 public func getDate() -> String {
     let components = dateComponent()
     return String(components.year!) + "-" + String(components.month!) + "-" + String(components.day!) + " " + String(components.hour!) + ":" + String(components.minute!) + ":" + String(components.second!)
+}
+
+public func getDate(_ text: String) -> Date {
+    dateFormatter.dateFormat = format
+    return dateFormatter.date(from: text)!
 }

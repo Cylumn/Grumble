@@ -13,6 +13,11 @@ private struct DataList: Decodable {
     var foodList: [String: Grub]?
 }
 
+public enum LoadingStatus {
+    case loading
+    case loaded
+}
+
 //Getter Functions
 private func dataPath() -> String {
     let docPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
@@ -57,6 +62,7 @@ private func loadPropertyList<T>(_ url: URL?, _ decodable: T.Type) -> T? where T
 public func loadLocalData() {
     if let data = loadPropertyList(URL(string: dataPath()), DataList.self) {
         UserCookie.uc().setFoodList(data.foodList ?? [:] as [String: Grub])
+        UserCookie.uc().sortFoodListByDate()
     }
 }
 
@@ -103,16 +109,29 @@ public func removeCloudFood(_ key: String) {
 }
 
 //Cloud Observers
-private func onCloudFoodAdded(_ snapshot: DataSnapshot) {
+public func onCloudFoodAdded(_ snapshot: DataSnapshot) {
     if let foodItem = snapshot.value as? NSDictionary {
         UserCookie.uc().appendFoodList(snapshot.key, Grub(foodItem))
+        UserCookie.uc().sortFoodListByDate()
         appendLocalFood(snapshot.key, foodItem)
     }
+    UserCookie.uc().loadingStatus = .loaded
 }
 
-private func onCloudFoodRemoved(_ snapshot: DataSnapshot) {
+public func onCloudFoodRemoved(_ snapshot: DataSnapshot) {
     UserCookie.uc().removeFoodList(snapshot.key)
+    UserCookie.uc().sortFoodListByDate()
     removeLocalFood(snapshot.key)
+    UserCookie.uc().loadingStatus = .loaded
+}
+
+public func onCloudFoodChanged(_ snapshot: DataSnapshot) {
+    if let foodItem = snapshot.value as? NSDictionary {
+        UserCookie.uc().appendFoodList(snapshot.key, Grub(foodItem))
+        UserCookie.uc().sortFoodListByDate()
+        appendLocalFood(snapshot.key, foodItem)
+    }
+    UserCookie.uc().loadingStatus = .loaded
 }
 
 //User Login/Logout
@@ -124,6 +143,17 @@ public func onLogin() {
         let ref = Database.database().reference()
         ref.child("users").child(uid).child("foodList").observe(DataEventType.childAdded, with: onCloudFoodAdded)
         ref.child("users").child(uid).child("foodList").observe(DataEventType.childRemoved, with: onCloudFoodRemoved)
+        ref.child("users").child(uid).child("foodList").observe(DataEventType.childChanged, with: onCloudFoodChanged)
+        
+        loadCloudData() { data in
+            guard let foodList = data?["foodList"] as? NSDictionary else {
+                UserCookie.uc().loadingStatus = .loaded
+                return
+            }
+            if foodList.count == 0 {
+                UserCookie.uc().loadingStatus = .loaded
+            }
+        }
     }
 }
 

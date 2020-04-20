@@ -99,8 +99,7 @@ public struct SheetView<Content>: View where Content: View {
             .frame(minHeight: 0, maxHeight: sHeight(), alignment: .bottom)
             .offset(y: sHeight() + safeAreaInset(.top) - self.maxHeight + self.movingOffset.wrappedValue)
             .gesture(self.gesture)
-            .clipped()
-            .shadow(color: Color.gray.opacity(0.2), radius: 20, x: 0.0, y: -5)
+            //.shadow(color: Color.gray.opacity(0.2), radius: 20, x: 0.0, y: -5)
     }
 }
 

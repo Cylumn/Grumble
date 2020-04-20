@@ -9,71 +9,71 @@
 import SwiftUI
 
 public struct GrubItem: View {
-    private var fid: String
-    private var grub: Grub
-    private var selectedGrub: Binding<(String, Grub)?>
+    fileprivate var fid: String
+    fileprivate var grub: Grub
+    private var selectedFID: Binding<String?>
     private var showSheet: Binding<Bool>
-    @State private var onTap: Bool = false
     
     //Initializer
-    public init(fid: String, _ grub: Grub, _ selectedGrub: Binding<(String, Grub)?>, _ showSheet: Binding<Bool>) {
+    public init(fid: String, _ grub: Grub, _ selectedFID: Binding<String?>, _ showSheet: Binding<Bool>) {
         self.fid = fid
         self.grub = grub
-        self.selectedGrub = selectedGrub
+        self.selectedFID = selectedFID
         self.showSheet = showSheet
+    }
+    
+    //Function Method
+    fileprivate func onClick() {
+        self.selectedFID.wrappedValue = self.fid
+        withAnimation(gAnim(.easeOut)) {
+            self.showSheet.wrappedValue = true
+        }
+        TabRouter.tr().hide(true)
+        UIApplication.shared.endEditing()
     }
     
     public var body: some View {
         VStack(alignment: .leading, spacing: 5) {
-            
-            ZStack(alignment: .bottom) {
-                Rectangle().fill(tagColors[self.grub.tags["smallestTag"]!])
-                
-                Image(tagSprites[self.grub.tags["smallestTag"]!])
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .foregroundColor(Color(white: 0.98))
-                .padding(20)
-                
-                LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black.opacity(0.4)]), startPoint: .top, endPoint: .bottom)
-                    .frame(height: 70)
-                
-                HStack(alignment: .bottom) {
-                    Text(self.grub.food)
-                        .padding(10)
-                        .font(gFont(.ubuntuBold, .width, 3))
-                        .foregroundColor(Color.white)
-                
-                    Spacer()
+            Button(action: {}, label: {
+                ZStack(alignment: .bottom) {
+                    Rectangle().fill(tagColors[self.grub.tags["smallestTag"]!])
                     
-                    if self.grub.price != nil {
-                        Text("$" + String(format:"%.2f", self.grub.price!))
-                            .padding(10)
-                            .font(gFont(.ubuntuBold, .width, 2.5))
-                            .foregroundColor(Color.white)
+                    Image(tagSprites[self.grub.tags["smallestTag"]!])
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                        .frame(width: 200, height: 150, alignment: self.grub.tags["smallestTag"]! == 0 ? .center : .bottom)
+                    
+                    if self.grub.tags["smallestTag"] != 0 {
+                        LinearGradient(gradient: Gradient(colors: [Color.clear, tagColors[self.grub.tags["smallestTag"]!].opacity(0.4)]), startPoint: .top, endPoint: .bottom)
+                            .frame(height: 150)
                     }
-                }
-                
-                if self.onTap {
-                    Color.white.opacity(0.7)
-                        .onAppear {
-                            Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
-                                self.onTap = false
-                            }
+                    
+                    HStack(alignment: .bottom) {
+                        Text(self.grub.food)
+                            .padding(10)
+                            .font(gFont(.ubuntuBold, .width, 3))
+                            .foregroundColor(Color.white)
+                    
+                        Spacer()
+                        
+                        if self.grub.price != nil {
+                            Text("$" + String(format:"%.2f", self.grub.price!))
+                                .padding(10)
+                                .font(gFont(.ubuntuBold, .width, 2.5))
+                                .foregroundColor(Color.white)
                         }
+                    }
+                }.frame(width: 200, height: 150)
+                .cornerRadius(10)
+                .onTapGesture {
+                    self.onClick()
+                }.onLongPressGesture(minimumDuration: 0.7) {
+                    self.onClick()
                 }
-            }.frame(width: 200, height: 150)
-            .cornerRadius(10)
-            .onTapGesture {
-                self.selectedGrub.wrappedValue = (self.fid, self.grub)
-                withAnimation(gAnim(.easeOut)) {
-                    self.showSheet.wrappedValue = true
-                    self.onTap = true
-                }
-                TabRouter.tr().hide(true)
-            }.shadow(color: tagColors[self.grub.tags["smallestTag"]!].opacity(0.2), radius: 10, y: 10)
+            }).buttonStyle(PlainButtonStyle())
+            .shadow(color: tagColors[self.grub.tags["smallestTag"]!].opacity(0.2), radius: 10, y: 10)
             
-            Text(self.grub.restaurant ?? " ")
+                Text(self.grub.restaurant ?? " ")
                 .padding([.top, .leading], 10)
                 .font(gFont(.ubuntuLight, .width, 2))
                 .foregroundColor(Color.black)
@@ -83,6 +83,126 @@ public struct GrubItem: View {
                 .font(gFont(.ubuntuLightItalic, .width, 1.5))
                 .foregroundColor(Color(white: 0.1))
         }
+    }
+}
+
+public struct GrubSearchItem: View {
+    private var focusSearch: Binding<Bool>
+    private var item: GrubItem
+    @State private var alertDelete: Bool = false
+    
+    //Initializer
+    public init(_ focusSearch: Binding<Bool>, _ item : GrubItem) {
+        self.focusSearch = focusSearch
+        self.item = item
+    }
+    
+    private func tokenText(_ text: String) -> some View {
+        Text(text)
+            .padding(3)
+            .padding([.leading, .trailing], 4)
+            .background(Color.white)
+            .font(gFont(.ubuntuLight, .width, 1.8))
+            .overlay(Capsule().stroke(Color(white: 0.8), lineWidth: 1))
+    }
+    
+    public var body: some View {
+        var tags = self.item.grub.tags
+        tags["smallestTag"] = nil
+        var shownIDs: [Int] = []
+        if GFormText.gft(.filterList).text(0).isEmpty {
+            let sorted = tags.values.sorted()
+            for index in (sorted.count < 3 ? 0 : 1) ..< min(sorted.count, 3) {
+                shownIDs.append(sorted[index])
+            }
+        } else {
+            let token = GFormText.gft(.filterList).text(0).lowercased()
+            let sorted = tags.values.sorted()
+            //add all that contains search key
+            for id in sorted {
+                if tagTitles[id].contains(token) {
+                    shownIDs.append(id)
+                    
+                    if shownIDs.count == 2 {
+                        break
+                    }
+                }
+            }
+            
+            //add remainder
+            switch shownIDs.count {
+            case 0:
+                for index in 0 ..< min(sorted.count, 3) {
+                    shownIDs.append(sorted[index])
+                }
+            case 1:
+                var index = (sorted.count < 3 ? 0 : 1)
+                while index < min(sorted.count, 3) && shownIDs.count < 2 {
+                    if sorted[index] < shownIDs[0] {
+                        shownIDs.insert(sorted[index], at: 0)
+                    } else if sorted[index] > shownIDs[0] {
+                        shownIDs.append(sorted[index])
+                    }
+                    
+                    index += 1
+                }
+            default:
+                break
+            }
+        }
+        
+        return HStack(spacing: 20) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text(self.item.grub.food)
+                    .font(gFont(.ubuntuMedium, .width, 2.3))
+                    .lineLimit(1)
+                    
+                HStack(spacing: 10) {
+                    ForEach(shownIDs, id: \.self) { index in
+                        self.tokenText(tagTitles[index])
+                    }
+                }
+            }
+            
+            Spacer()
+            
+            Button(action: {}, label: {
+                Text("View")
+                .padding(10)
+                .font(gFont(.ubuntuBold, .width, 1.5))
+                .foregroundColor(gColor(.blue4))
+                .onTapGesture {
+                    self.focusSearch.wrappedValue = true
+                    self.item.onClick()
+                }
+                .overlay(RoundedRectangle(cornerRadius: 8)
+                .stroke(gColor(.blue4), lineWidth: 2))
+            })
+            
+            Button(action: {}, label: {
+                Text("Delete")
+                .padding(10)
+                .font(gFont(.ubuntuBold, .width, 1.5))
+                .foregroundColor(gColor(.coral))
+                .onTapGesture {
+                    self.focusSearch.wrappedValue = true
+                    UIApplication.shared.endEditing()
+                    self.alertDelete.toggle()
+                }.overlay(RoundedRectangle(cornerRadius: 8)
+                    .stroke(gColor(.coral), lineWidth: 2))
+            }).alert(isPresented: self.$alertDelete) {
+                Alert(title: Text("Delete Grub?"), primaryButton: Alert.Button.default(Text("Cancel")), secondaryButton: Alert.Button.destructive(Text("Delete")) {
+                    Grub.removeFood(self.item.fid)
+                })
+            }
+            
+        }.padding(10)
+        .padding(.trailing, 20)
+        .frame(maxWidth: .infinity)
+        .background(Color.white)
+        .foregroundColor(Color(white: 0.2))
+        .cornerRadius(10)
+        .shadow(color: Color.black.opacity(0.1), radius: 3)
     }
 }
 

@@ -42,7 +42,7 @@ public func gFont(_ name: GFont, _ size: CGFloat) -> UIFont {
     return UIFont(name: name.rawValue, size: size) ?? UIFont.systemFont(ofSize: size)
 }
 
-public func gFont(_ name: GFont, _ axis: Axis, _ fraction: CGFloat) -> Font {
+public func gFont(_ name: GFont, _ axis: ScreenDimension, _ fraction: CGFloat) -> Font {
     var length: CGFloat
     switch axis {
         case .width:
@@ -53,7 +53,7 @@ public func gFont(_ name: GFont, _ axis: Axis, _ fraction: CGFloat) -> Font {
     return Font.custom(name.rawValue, size: length * fraction / fontMultiplier)
 }
 
-public func gFont(_ name: GFont, _ axis: Axis, _ fraction: CGFloat) -> UIFont {
+public func gFont(_ name: GFont, _ axis: ScreenDimension, _ fraction: CGFloat) -> UIFont {
     var length: CGFloat
     switch axis {
         case .width:

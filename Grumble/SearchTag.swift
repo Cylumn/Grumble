@@ -11,17 +11,17 @@ import SwiftUI
 private let formID: GFormID = GFormID.searchTag
 
 public struct SearchTag: View, GFieldDelegate {
+    @ObservedObject private var gft: GFormText = GFormText.gft(formID)
     @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko()
+    @State private var available: Set<Int> = Set(1 ..< tagTitles.count)
     @State private var selected: Set<Int> = []
-    private var tags: Binding<[AddFood.TagBox]>
     private var added: Set<Int>
     private var showTagSearch: Binding<Bool>
     
     //Initializer
-    public init(_ tags: Binding<[AddFood.TagBox]>, _ showTagSearch: Binding<Bool>) {
-        self.tags = tags
+    public init(_ showTagSearch: Binding<Bool>) {
         self.added = []
-        for tag in self.tags.wrappedValue {
+        for tag in TagBoxHolder.tbh().tagBoxes() {
             self.added.insert(tag.tag())
         }
         self.showTagSearch = showTagSearch
@@ -33,6 +33,8 @@ public struct SearchTag: View, GFieldDelegate {
             withAnimation(gAnim(.easeOut)) {
                 self.showTagSearch.wrappedValue = false
                 self.selected.removeAll()
+                self.available = Set(1 ..< tagTitles.count)
+                self.gft.setText(0, "")
                 
                 UIApplication.shared.endEditing()
             }
@@ -54,6 +56,18 @@ public struct SearchTag: View, GFieldDelegate {
     }
     
     public func parseInput(_ index: Int, _ textField: UITextField, _ string: String) -> String {
+        let token = textField.text! + string
+        if token.count > 0 {
+            var available: Set<Int> = []
+            for title in tagTitles {
+                if title != tagTitles[0] && title.contains(token.lowercased()) {
+                    available.insert(tagIDMap[title]!)
+                }
+            }
+            self.available = available
+        } else {
+            self.available = Set(1 ..< tagTitles.count)
+        }
         return textField.text! + string
     }
     
@@ -66,8 +80,14 @@ public struct SearchTag: View, GFieldDelegate {
                     Spacer().frame(height: 60)
                     
                     VStack(spacing: 10) {
+                        if self.gft.text(0).count > 0 {
+                            Text("Showing results for: \"" + self.gft.text(0) + "\"")
+                                .font(gFont(.ubuntuLight, .width, 2))
+                                .foregroundColor(Color(white: 0.2))
+                        }
+                        
                         ForEach(1 ..< tagTitles.count) { tag in
-                            if !self.added.contains(tag) {
+                            if self.available.contains(tag) && !self.added.contains(tag) {
                                 Button(action: {
                                     if self.selected.contains(tag) {
                                         self.selected.remove(tag)
@@ -163,9 +183,15 @@ public struct SearchTag: View, GFieldDelegate {
                 Color.clear
 
                 Button(action: {
-                    for tagID in self.selected {
-                        self.tags.wrappedValue.append(AddFood.TagBox(capFirst(tagTitles[tagID]), color: tagColors[tagID], tags: self.tags))
+                    var totalID: Set<Int> = []
+                    var newTags: [AddFood.TagBox] = []
+                    for tagBox in TagBoxHolder.tbh().tagBoxes() {
+                        totalID.insert(tagBox.tag())
                     }
+                    for tagID in totalID.union(self.selected).sorted() {
+                        newTags.append(AddFood.TagBox(capFirst(tagTitles[tagID]), id: tagID))
+                    }
+                    TagBoxHolder.tbh().setTagBoxes(newTags)
                     self.endSearch()
                 }, label:{
                     Text("Add Tags")
@@ -186,6 +212,6 @@ public struct SearchTag: View, GFieldDelegate {
 
 struct SearchTag_Previews: PreviewProvider {
     static var previews: some View {
-        SearchTag(Binding.constant([]), Binding.constant(true))
+        SearchTag(Binding.constant(true))
     }
 }

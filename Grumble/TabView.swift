@@ -21,12 +21,16 @@ public struct TabView: View {
     
     //Function Methods
     private func toList() {
-        self.tr.changeTab(.list)
-        self.contentView.toListHome(false)
+        if self.tr.tab() != .list {
+            self.tr.changeTab(.list)
+            self.contentView.toListHome(false)
+        }
     }
     
     private func toSettings() {
-        self.tr.changeTab(.settings)
+        if self.tr.tab() != .settings {
+            self.tr.changeTab(.settings)
+        }
     }
     
     public var body: some View {

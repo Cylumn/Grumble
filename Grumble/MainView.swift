@@ -12,7 +12,7 @@ public struct MainView: View {
     @ObservedObject private var uc: UserCookie = UserCookie.uc()
     
     public var body: some View {
-        ZStack{
+        ZStack {
             if self.uc.loggedIn() {
                 ContentView()
             } else {

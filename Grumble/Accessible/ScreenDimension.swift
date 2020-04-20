@@ -1,5 +1,5 @@
 //
-//  Screen.swift
+//  ScreenDimension.swift
 //  Grumble
 //
 //  Created by Allen Chang on 4/3/20.
@@ -9,9 +9,14 @@
 import Foundation
 import SwiftUI
 
-public enum Axis {
+public enum ScreenDimension {
     case width
     case height
+}
+
+public enum GAxis {
+    case horizontal
+    case vertical
 }
 
 public func sWidth() -> CGFloat {

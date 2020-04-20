@@ -14,13 +14,40 @@ private let fieldHeight: CGFloat = sHeight() * 0.05 + 20
 private let formHeight: CGFloat = fieldHeight * CGFloat(size(formID) - 1)
 private let tagTitleHeight: CGFloat = sHeight() * 0.08
 
+public class TagBoxHolder: ObservableObject {
+    private static var instance: TagBoxHolder? = nil
+    @Published private var tags: [AddFood.TagBox] = []
+    
+    //Getter Methods
+    public static func tbh() -> TagBoxHolder {
+        if TagBoxHolder.instance == nil {
+            TagBoxHolder.instance = TagBoxHolder()
+        }
+        return TagBoxHolder.instance!
+    }
+    
+    public func tagBoxes() -> [AddFood.TagBox] {
+        return self.tags
+    }
+    
+    //Setter Methods
+    public func setTagBoxes(_ newTags: [AddFood.TagBox]) {
+        self.tags = newTags
+    }
+    
+    public func appendTagBox(_ newTag: AddFood.TagBox) {
+        self.tags.append(newTag)
+    }
+}
+
 public struct AddFood: View, GFieldDelegate {
     @ObservedObject private var uc: UserCookie = UserCookie.uc()
     @ObservedObject private var tr: TabRouter = TabRouter.tr()
     private var contentView: ContentView
+    public static var currentFID: String? = nil
     
     @ObservedObject private var gft: GFormText = GFormText.gft(formID)
-    @State private var tags: [TagBox] = [TagBox("Food", color: tagColors[0], tags: Binding.constant([]))]
+    @ObservedObject private var tbh: TagBoxHolder = TagBoxHolder.tbh()
     @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko()
     @State private var showTagSearch: Bool = false
     
@@ -33,19 +60,38 @@ public struct AddFood: View, GFieldDelegate {
         self.gft.setError(FieldIndex.price.rawValue, "(Optional)")
         self.gft.setError(FieldIndex.restaurant.rawValue, "(Optional)")
         self.gft.setError(FieldIndex.address.rawValue, "(Optional)")
+        self.tbh.setTagBoxes([TagBox("Food", id: 0)])
     }
     
     //Field Enums
-    private enum FieldIndex: Int {
+    public enum FieldIndex: Int {
         case food = 0
         case price = 1
         case restaurant = 2
         case address = 3
     }
     
+    //Edit Enums
+    public enum AddFoodMode {
+        case add
+        case edit
+    }
+    
     //Getter Methods
     private func canSubmit() -> Bool {
         return !self.gft.text(FieldIndex.food.rawValue).isEmpty
+    }
+    
+    //Setter Methods
+    public static func clearFields() {
+        GFormText.gft(formID).setText(FieldIndex.food.rawValue, "")
+        GFormText.gft(formID).setText(FieldIndex.price.rawValue, "")
+        GFormText.gft(formID).setText(FieldIndex.restaurant.rawValue, "")
+        GFormText.gft(formID).setText(FieldIndex.address.rawValue, "")
+        var tagBoxes = TagBoxHolder.tbh().tagBoxes()
+        tagBoxes.removeSubrange(1 ..< tagBoxes.count)
+        TagBoxHolder.tbh().setTagBoxes(tagBoxes)
+        AddFood.currentFID = nil
     }
     
     //Proceed Methods
@@ -57,7 +103,7 @@ public struct AddFood: View, GFieldDelegate {
         foodItem["address"] = !self.gft.text(FieldIndex.address.rawValue).isEmpty ? self.gft.text(FieldIndex.address.rawValue) : nil
         var tagIDs: Set<Int> = []
         var smallestTag: Int? = nil
-        for tagBox in self.tags {
+        for tagBox in self.tbh.tagBoxes() {
             let tag = tagBox.tag()
             tagIDs.insert(tag)
             if tag != 0 {
@@ -74,22 +120,30 @@ public struct AddFood: View, GFieldDelegate {
         }
         tagDictionary["smallestTag"] = smallestTag ?? 0
         foodItem["tags"] = tagDictionary
-        foodItem["date"] = getDate()
-        
-        let date = dateComponent()
-        let prefix = String(trim(foodItem["food"] as! String).lowercased().prefix(3))
-        let fid = prefix + randomString(length: 4) + String(date.hour!) + "_" + String(date.minute!) + "_" + String(date.second!)
-        let foodDictionary = foodItem as NSDictionary
-        self.uc.appendFoodList(fid, Grub(foodDictionary))
-        appendLocalFood(fid, foodDictionary)
-        appendCloudFood(fid, foodDictionary)
+        switch AddFood.currentFID {
+        case nil:
+            foodItem["date"] = getDate()
+            let foodDictionary = foodItem as NSDictionary
+            let date = dateComponent()
+            
+            let prefix = String(trim(foodItem["food"] as! String).lowercased().prefix(3))
+            let fid = prefix + randomString(length: 4) + String(date.hour!) + "_" + String(date.minute!) + "_" + String(date.second!)
+            self.uc.appendFoodList(fid, Grub(foodDictionary))
+            self.uc.sortFoodListByDate()
+            appendLocalFood(fid, foodDictionary)
+            appendCloudFood(fid, foodDictionary)
+        default:
+            foodItem["date"] = UserCookie.uc().foodList()[AddFood.currentFID!]!.date
+            let foodDictionary = foodItem as NSDictionary
+            
+            self.uc.appendFoodList(AddFood.currentFID!, Grub(foodDictionary))
+            self.uc.sortFoodListByDate()
+            appendLocalFood(AddFood.currentFID!, foodDictionary)
+            appendCloudFood(AddFood.currentFID!, foodDictionary)
+        }
         contentView.toListHome()
         
-        self.gft.setText(FieldIndex.food.rawValue, "")
-        self.gft.setText(FieldIndex.price.rawValue, "")
-        self.gft.setText(FieldIndex.restaurant.rawValue, "")
-        self.gft.setText(FieldIndex.address.rawValue, "")
-        self.tags.removeSubrange(1 ..< self.tags.count)
+        AddFood.clearFields()
     }
     
     //Parsing Methods
@@ -163,29 +217,36 @@ public struct AddFood: View, GFieldDelegate {
     public struct TagBox: View {
         fileprivate static var width: CGFloat = sWidth() * sWidth() * 0.001
         fileprivate static var height: CGFloat = width * 1.0
-        private static var newTagColor: Color = Color(white: 0.9)
         private var name: String
-        private var color: Color?
-        private var tags: Binding<[TagBox]>
+        private var id: Int
         
         //Initializer
-        public init(_ name: String, color: Color?, tags: Binding<[TagBox]>) {
+        public init(_ name: String, id: Int) {
             self.name = name
-            self.color = color
-            self.tags = tags
+            self.id = id
         }
         
         //Getters
         public func tag() -> Int {
-            return tagIDMap[self.name.lowercased()]!
+            return self.id
         }
         
         public var body: some View {
             ZStack(alignment: .center) {
-                Rectangle()
-                    .fill(self.color ?? TagBox.newTagColor)
-                    .cornerRadius(20)
-                    .shadow(color: (self.color ?? TagBox.newTagColor).opacity(0.5), radius: 8, y: 10)
+                ZStack {
+                    Rectangle()
+                        .fill(tagColors[self.id])
+                    
+                    Image(tagSprites[self.id])
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    
+                    if self.id != 0 {
+                        LinearGradient(gradient: Gradient(colors: [Color.clear, tagColors[self.id].opacity(0.4)]), startPoint: .top, endPoint: .bottom)
+                    }
+                }.frame(width: TagBox.width, height: TagBox.height)
+                .cornerRadius(20)
+                .shadow(color: tagColors[self.id].opacity(0.5), radius: 8, y: 10)
                 
                 ZStack(alignment: .bottom) {
                     Color.clear
@@ -201,7 +262,9 @@ public struct AddFood: View, GFieldDelegate {
                         Color.clear
                         
                         Button(action: {
-                            self.tags.wrappedValue.removeAll(where: {$0.name == self.name})
+                            var boxes = TagBoxHolder.tbh().tagBoxes()
+                            boxes.removeAll(where: {$0.name == self.name})
+                            TagBoxHolder.tbh().setTagBoxes(boxes)
                         }, label: {
                             Image(systemName: "multiply")
                                 .padding(4)
@@ -310,8 +373,8 @@ public struct AddFood: View, GFieldDelegate {
                     .foregroundColor(Color.black)
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: sHeight() * 0.02) {
-                        ForEach(0 ..< self.tags.count, id: \.self) { index in
-                            self.tags[index]
+                        ForEach(0 ..< self.tbh.tagBoxes().count, id: \.self) { index in
+                            self.tbh.tagBoxes()[index]
                                 .transition(.opacity)
                                 .animation(gAnim(.spring))
                         }
@@ -338,13 +401,18 @@ public struct AddFood: View, GFieldDelegate {
                 }.padding(20)
                 .frame(width: sWidth())
                 .shadow(color: Color.black.opacity(0.2), radius: 12, y: 15)
-                .offset(y: -self.ko.height(formID))
-            }.frame(height: sHeight() - safeAreaInset(.top) - tabHeight)
+                .offset(y: -self.ko.height(formID, tabbedView: false))
+            }.frame(height: sHeight() - safeAreaInset(.top))
             
             ZStack(alignment: .center) {
-                Color(white: self.showTagSearch ? 0.98 : 0.9)
+                Color(white: 0.98)
+                
+                SearchTag(self.$showTagSearch)
+                .clipped()
                 
                 if !self.showTagSearch {
+                    Color(white: 0.9)
+                    
                     Button(action: {
                         withAnimation(gAnim(.easeOut)) {
                             self.showTagSearch.toggle()
@@ -361,11 +429,6 @@ public struct AddFood: View, GFieldDelegate {
                             .foregroundColor(Color(white: 0.2))
                             .font(.system(size: 15, weight: .black))
                     })
-                } else {
-                    ZStack(alignment: .top) {
-                        SearchTag(self.$tags, self.$showTagSearch)
-                            .clipped()
-                    }.frame(width: sWidth(), height: sHeight() - tabHeight)
                 }
             }.frame(width: self.showTagSearch ? sWidth() : sWidth() * 0.1, height: self.showTagSearch ? sHeight() - tabHeight : sWidth() * 0.08)
             .cornerRadius(self.showTagSearch ? 0 : 30)

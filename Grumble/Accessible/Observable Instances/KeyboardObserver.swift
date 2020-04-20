@@ -19,14 +19,14 @@ public extension UIApplication {
 public class KeyboardObserver: ObservableObject {
     private static var instance: KeyboardObserver?
     private var notificationCenter: NotificationCenter
-    private var observedFields: Set<GFormID>
+    public var observedFields: Set<GFormID>
     @Published private var keyboardVisible: Bool
     @Published private var keyboardHeight: CGFloat
     
     //Initializer
     private init(center: NotificationCenter = .default) {
         self.notificationCenter = center
-        self.observedFields = []
+        self.observedFields = [.filterList]
         self.keyboardVisible = false
         self.keyboardHeight = 0
         

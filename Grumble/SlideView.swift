@@ -29,8 +29,10 @@ public struct SlideView: View {
     private var unDraggable: Set<Int>?
     @State private var lastDragPosition: DragGesture.Value? = nil
     
+    private var onSlideChange: (Int) -> Void
+    
     //Initializer
-    public init(index: Binding<Int>, direction: Direction = Direction.leftToRight, offsetFactor: CGFloat = 1, bgColor: Color = Color.white, viewWidth: CGFloat = sWidth(), views: [AnyView], padding: CGFloat = 10, height: CGFloat? = nil, unDraggable: Set<Int>? = nil) {
+    public init(index: Binding<Int>, direction: Direction = Direction.leftToRight, offsetFactor: CGFloat = 1, bgColor: Color = Color.white, viewWidth: CGFloat = sWidth(), views: [AnyView], padding: CGFloat = 10, height: CGFloat? = nil, unDraggable: Set<Int>? = nil, onSlideChange: @escaping (Int) -> Void = {_ in}) {
         self.index = index
         self.direction = direction
         self.offsetFactor = offsetFactor
@@ -41,6 +43,8 @@ public struct SlideView: View {
         self.height = height
         
         self.unDraggable = unDraggable
+        
+        self.onSlideChange = onSlideChange
     }
     
     //Getter Methods
@@ -51,7 +55,7 @@ public struct SlideView: View {
             case self.index.wrappedValue - 1:
                 return self.direction.rawValue * self.offsetFactor * (self.dragOffset - self.viewWidth)
             case self.index.wrappedValue:
-                return self.direction.rawValue * self.offsetFactor * self.dragOffset
+                return self.direction.rawValue * self.dragOffset
             case self.index.wrappedValue + 1:
                 return self.direction.rawValue * (self.dragOffset + self.viewWidth)
             default:
@@ -109,12 +113,14 @@ public struct SlideView: View {
                     self.dragOffset = 0
                     self.index.wrappedValue -= 1
                     UIApplication.shared.endEditing()
+                    self.onSlideChange(self.index.wrappedValue)
                 }
             } else if self.index.wrappedValue < self.views.count - 1 && adjustedOffset < -sWidth() * 0.5 {
                 withAnimation(gAnim(.easeOut)) {
                     self.dragOffset = 0
                     self.index.wrappedValue += 1
                     UIApplication.shared.endEditing()
+                    self.onSlideChange(self.index.wrappedValue)
                 }
             } else {
                 withAnimation(gAnim(.easeOut)) {

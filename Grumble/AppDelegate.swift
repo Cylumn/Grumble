@@ -59,6 +59,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
         GIDSignIn.sharedInstance().delegate = self
         UserCookie.uc().setLoggedIn(Auth.auth().currentUser != nil)
         
+        if let uid = Auth.auth().currentUser?.uid {
+            let ref = Database.database().reference()
+            ref.child("users").child(uid).child("foodList").removeAllObservers()
+            
+            ref.child("users").child(uid).child("foodList").observe(DataEventType.childAdded, with: onCloudFoodAdded)
+            ref.child("users").child(uid).child("foodList").observe(DataEventType.childRemoved, with: onCloudFoodRemoved)
+            ref.child("users").child(uid).child("foodList").observe(DataEventType.childChanged, with: onCloudFoodChanged)
+            
+            loadCloudData() { data in
+                guard let foodList = data?["foodList"] as? NSDictionary else {
+                    UserCookie.uc().loadingStatus = .loaded
+                    return
+                }
+                if foodList.count == 0 {
+                    UserCookie.uc().loadingStatus = .loaded
+                }
+            }
+        }
+        
         return true
     }
 
