@@ -220,11 +220,9 @@ public struct GrumbleSheet: View {
     
     private func tagIcon(_ tag: Int, index: Int) -> some View {
         switch tag {
-        case GrubTags.burger.rawValue:
+        case GrubTags.burger.rawValue, GrubTags.salad.rawValue:
             let size = sWidth() * 0.1 + 80 * self.dragData()
-            return AnyView(
-                GBurger(CGSize(width: size, height: size), idleData: self.ga.idleData, tossData: self.dragHorizontalData(index))
-            )
+            return gTagView(tag, CGSize(width: size, height: size), idleData: self.ga.idleData, tossData: self.dragHorizontalData(index))
         default:
             return AnyView(Image(tagBGs[tag])
             .resizable()
