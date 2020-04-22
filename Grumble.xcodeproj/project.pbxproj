@@ -28,6 +28,9 @@
 		D541F5E6244A4B8F00E98EF1 /* GrumbleSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5E5244A4B8F00E98EF1 /* GrumbleSheet.swift */; };
 		D541F5E9244A522200E98EF1 /* GhorblinSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5E8244A522200E98EF1 /* GhorblinSheet.swift */; };
 		D541F5EB244CE73200E98EF1 /* GhorblinAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5EA244CE73200E98EF1 /* GhorblinAnimations.swift */; };
+		D541F5EE244F51B200E98EF1 /* GBurger-OLD.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5ED244F51B200E98EF1 /* GBurger-OLD.swift */; };
+		D541F5F0244FCE2F00E98EF1 /* GBurger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5EF244FCE2F00E98EF1 /* GBurger.swift */; };
+		D541F5F2245013B400E98EF1 /* GTagShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5F1245013B400E98EF1 /* GTagShape.swift */; };
 		D55EEBA024271FBB0079922E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D55EEB9F24271FBB0079922E /* SettingsView.swift */; };
 		D55EEBA2242839310079922E /* AddFood.swift in Sources */ = {isa = PBXBuildFile; fileRef = D55EEBA1242839310079922E /* AddFood.swift */; };
 		D55EEBA4242867710079922E /* TabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D55EEBA3242867710079922E /* TabView.swift */; };
@@ -43,8 +46,6 @@
 		D5AA593E2426C24F000BEC5C /* IOManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA593D2426C24F000BEC5C /* IOManager.swift */; };
 		D5AA594B24271366000BEC5C /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA594A24271366000BEC5C /* ListView.swift */; };
 		D5AA594D24271391000BEC5C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA594C24271391000BEC5C /* ContentView.swift */; };
-		D5ACF1F6243BAD5F00A414F9 /* GrumblerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5ACF1F5243BAD5F00A414F9 /* GrumblerSheet.swift */; };
-		D5ACF1F8243C0EA100A414F9 /* GrubPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5ACF1F7243C0EA100A414F9 /* GrubPanel.swift */; };
 		D5AD27612425B06100462F1C /* Caveat-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD27572425B06100462F1C /* Caveat-Regular.ttf */; };
 		D5AD27632425B06100462F1C /* Caveat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD27592425B06100462F1C /* Caveat-Bold.ttf */; };
 		D5AD27732425B0D400462F1C /* Ubuntu-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD27682425B07B00462F1C /* Ubuntu-Bold.ttf */; };
@@ -111,6 +112,9 @@
 		D541F5E5244A4B8F00E98EF1 /* GrumbleSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrumbleSheet.swift; sourceTree = "<group>"; };
 		D541F5E8244A522200E98EF1 /* GhorblinSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhorblinSheet.swift; sourceTree = "<group>"; };
 		D541F5EA244CE73200E98EF1 /* GhorblinAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhorblinAnimations.swift; sourceTree = "<group>"; };
+		D541F5ED244F51B200E98EF1 /* GBurger-OLD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GBurger-OLD.swift"; sourceTree = "<group>"; };
+		D541F5EF244FCE2F00E98EF1 /* GBurger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GBurger.swift; sourceTree = "<group>"; };
+		D541F5F1245013B400E98EF1 /* GTagShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GTagShape.swift; sourceTree = "<group>"; };
 		D55EEB9F24271FBB0079922E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D55EEBA1242839310079922E /* AddFood.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFood.swift; sourceTree = "<group>"; };
 		D55EEBA3242867710079922E /* TabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabView.swift; sourceTree = "<group>"; };
@@ -126,8 +130,6 @@
 		D5AA593D2426C24F000BEC5C /* IOManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOManager.swift; sourceTree = "<group>"; };
 		D5AA594A24271366000BEC5C /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
 		D5AA594C24271391000BEC5C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		D5ACF1F5243BAD5F00A414F9 /* GrumblerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrumblerSheet.swift; sourceTree = "<group>"; };
-		D5ACF1F7243C0EA100A414F9 /* GrubPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrubPanel.swift; sourceTree = "<group>"; };
 		D5AD27572425B06100462F1C /* Caveat-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Caveat-Regular.ttf"; sourceTree = "<group>"; };
 		D5AD27592425B06100462F1C /* Caveat-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Caveat-Bold.ttf"; sourceTree = "<group>"; };
 		D5AD27682425B07B00462F1C /* Ubuntu-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-Bold.ttf"; sourceTree = "<group>"; };
@@ -240,8 +242,6 @@
 				D541F5E5244A4B8F00E98EF1 /* GrumbleSheet.swift */,
 				D55EEBA1242839310079922E /* AddFood.swift */,
 				D5B94B16243E8FD3001E384A /* SearchTag.swift */,
-				D5ACF1F7243C0EA100A414F9 /* GrubPanel.swift */,
-				D5ACF1F5243BAD5F00A414F9 /* GrumblerSheet.swift */,
 			);
 			name = List;
 			sourceTree = "<group>";
@@ -283,9 +283,20 @@
 		D541F5E7244A4BDC00E98EF1 /* GShapes */ = {
 			isa = PBXGroup;
 			children = (
+				D541F5EC244F519200E98EF1 /* TagShapeViews */,
 				D541F5E8244A522200E98EF1 /* GhorblinSheet.swift */,
 			);
 			path = GShapes;
+			sourceTree = "<group>";
+		};
+		D541F5EC244F519200E98EF1 /* TagShapeViews */ = {
+			isa = PBXGroup;
+			children = (
+				D541F5F1245013B400E98EF1 /* GTagShape.swift */,
+				D541F5ED244F51B200E98EF1 /* GBurger-OLD.swift */,
+				D541F5EF244FCE2F00E98EF1 /* GBurger.swift */,
+			);
+			path = TagShapeViews;
 			sourceTree = "<group>";
 		};
 		D58C599E242C079200137546 /* Teko */ = {
@@ -655,6 +666,8 @@
 				D50292382437D6E1008A5BFC /* GAnimation.swift in Sources */,
 				D5AA594B24271366000BEC5C /* ListView.swift in Sources */,
 				D502922F2437A9FE008A5BFC /* TabRouter.swift in Sources */,
+				D541F5F2245013B400E98EF1 /* GTagShape.swift in Sources */,
+				D541F5F0244FCE2F00E98EF1 /* GBurger.swift in Sources */,
 				D5F0895024253AC4000D375D /* SceneDelegate.swift in Sources */,
 				D51FECD2243171A100BF129C /* SignupSheetView.swift in Sources */,
 				D50292352437AECF008A5BFC /* GColor.swift in Sources */,
@@ -671,9 +684,9 @@
 				D541F5E9244A522200E98EF1 /* GhorblinSheet.swift in Sources */,
 				D541F5E6244A4B8F00E98EF1 /* GrumbleSheet.swift in Sources */,
 				D5F0895224253AC4000D375D /* LoginView.swift in Sources */,
+				D541F5EE244F51B200E98EF1 /* GBurger-OLD.swift in Sources */,
 				D5B94B17243E8FD3001E384A /* SearchTag.swift in Sources */,
 				D51FECD82434189300BF129C /* SlideView.swift in Sources */,
-				D5ACF1F8243C0EA100A414F9 /* GrubPanel.swift in Sources */,
 				D55EEBA2242839310079922E /* AddFood.swift in Sources */,
 				D50292312437ACF5008A5BFC /* GFont.swift in Sources */,
 				D540148824393502008F8CCF /* FieldParser.swift in Sources */,
@@ -681,7 +694,6 @@
 				D541F5EB244CE73200E98EF1 /* GhorblinAnimations.swift in Sources */,
 				D5C4D0BA243FE8120033EFB0 /* GDate.swift in Sources */,
 				D55EEBA024271FBB0079922E /* SettingsView.swift in Sources */,
-				D5ACF1F6243BAD5F00A414F9 /* GrumblerSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

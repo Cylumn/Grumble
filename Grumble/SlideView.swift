@@ -27,7 +27,6 @@ public struct SlideView: View {
     
     @State private var dragOffset: CGFloat = 0
     private var unDraggable: Set<Int>?
-    @State private var lastDragPosition: DragGesture.Value? = nil
     
     private var onSlideChange: (Int) -> Void
     
@@ -83,47 +82,33 @@ public struct SlideView: View {
             
             switch self.index.wrappedValue {
                 case 0:
-                    if self.direction.rawValue * drag.translation.width < 0 {
-                        self.dragOffset = self.direction.rawValue * drag.translation.width
-                        self.lastDragPosition = drag
-                    }
+                    self.dragOffset = min(self.direction.rawValue * drag.translation.width, 0)
                 case self.views.count - 1:
-                    if self.direction.rawValue * drag.translation.width > 0 {
-                        self.dragOffset = self.direction.rawValue * drag.translation.width
-                        self.lastDragPosition = drag
-                    }
+                    self.dragOffset = max(self.direction.rawValue * drag.translation.width, 0)
                 default:
                     self.dragOffset = self.direction.rawValue * drag.translation.width
-                    self.lastDragPosition = drag
             }
         }.onEnded { drag in
             if self.unDraggable?.contains(self.index.wrappedValue) ?? false || self.views.count == 1 {
                 return
             }
             
-            var adjustedOffset = self.dragOffset
-            if let ldp = self.lastDragPosition {
-                let timeDiff = drag.time.timeIntervalSince(ldp.time)
-                let speed = self.direction.rawValue * (drag.translation.width - ldp.translation.width) / CGFloat(timeDiff)
-                adjustedOffset = self.dragOffset + speed * dragSpeedConsidered
-            }
-            
-            if self.index.wrappedValue > 0 && adjustedOffset > sWidth() * 0.5 {
-                withAnimation(gAnim(.easeOut)) {
+            if self.index.wrappedValue > 0 && drag.predictedEndTranslation.width > sWidth() * 0.5 {
+                withAnimation(gAnim(.spring)) {
                     self.dragOffset = 0
                     self.index.wrappedValue -= 1
-                    UIApplication.shared.endEditing()
                     self.onSlideChange(self.index.wrappedValue)
                 }
-            } else if self.index.wrappedValue < self.views.count - 1 && adjustedOffset < -sWidth() * 0.5 {
-                withAnimation(gAnim(.easeOut)) {
+                UIApplication.shared.endEditing()
+            } else if self.index.wrappedValue < self.views.count - 1 && drag.predictedEndTranslation.width < -sWidth() * 0.5 {
+                withAnimation(gAnim(.spring)) {
                     self.dragOffset = 0
                     self.index.wrappedValue += 1
-                    UIApplication.shared.endEditing()
                     self.onSlideChange(self.index.wrappedValue)
                 }
+                UIApplication.shared.endEditing()
             } else {
-                withAnimation(gAnim(.easeOut)) {
+                withAnimation(gAnim(.spring)) {
                     self.dragOffset = 0
                 }
             }

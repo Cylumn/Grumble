@@ -34,9 +34,10 @@ public struct GrubSheet: View {
     @State private var impactOccurred: Bool = false
     @State private var alertDelete: Bool = false
     private var contentView: ContentView
+    private var onHide: Binding<() -> Void>
     
     //Initializer
-    public init(_ selectedFID: Binding<String?>, _ show: Binding<Bool>, _ contentView: ContentView) {
+    public init(_ selectedFID: Binding<String?>, _ show: Binding<Bool>, _ contentView: ContentView, onHide: Binding<() -> Void>) {
         self.selectedFID = selectedFID
         switch selectedFID.wrappedValue {
         case nil:
@@ -46,6 +47,7 @@ public struct GrubSheet: View {
         }
         self.show = show
         self.contentView = contentView
+        self.onHide = onHide
     }
     
     //for testing purposes only
@@ -55,6 +57,7 @@ public struct GrubSheet: View {
         self.grub = grub
         self.show = Binding.constant(true)
         self.contentView = ContentView()
+        self.onHide = Binding.constant({})
     }
     
     //Function Methods
@@ -63,7 +66,7 @@ public struct GrubSheet: View {
             self.superOffset = 0
             self.show.wrappedValue = false
         }
-        TabRouter.tr().hide(false)
+        self.onHide.wrappedValue()
     }
     
     private func grubContentHeight() -> CGFloat {

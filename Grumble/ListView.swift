@@ -26,13 +26,11 @@ public struct ListView: View, GFieldDelegate {
     
     @State private var selectedFID: String? = nil
     @State private var showGrubSheet: Bool = false
+    @State private var onGrubSheetHide: () -> Void = {}
     
     @State private var showGrumbleSheet: Bool = false
     @State private var ghorblinType: GrumbleSheet.GhorblinType = .classic
-    
-    @State private var currentHeight: CGFloat = sHeight()
-    @State private var movingOffset: CGFloat = sHeight()
-    @State private var grubs: [AnyView] = GrubPanel.generateGrubs(foodList: UserCookie.uc().foodList())
+    @State private var ghorblinList: [String] = UserCookie.uc().foodList().keys.shuffled()
     
     //Initializer
     public init(_ contentView: ContentView){
@@ -47,14 +45,11 @@ public struct ListView: View, GFieldDelegate {
         }
         
         self.ghorblinType = ghorblinType
+        self.ghorblinList = self.uc.foodList().keys.shuffled()
         GhorblinAnimations.ga().startIdleAnimation()
         Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
             GhorblinAnimations.ga().setDrip(1)
         }
-    }
-    
-    private func shuffleGrubs() {
-        self.grubs = GrubPanel.generateGrubs(foodList: self.uc.foodList())
     }
     
     private func grubContainsToken(_ grub: Grub) -> Bool {
@@ -105,7 +100,7 @@ public struct ListView: View, GFieldDelegate {
             }.frame(maxWidth: .infinity, maxHeight: grumbleButtonHeight)
             .foregroundColor(Color.white)
             .cornerRadius(8)
-            .shadow(color: color.opacity(0.2), radius: 10, y: 10)
+            .shadow(color: color.opacity(0.3), radius: 5)
         }))
     }
     
@@ -196,8 +191,19 @@ public struct ListView: View, GFieldDelegate {
                         }
                     }
                     
-                    if self.searchFocused || self.ko.visible(formID) {
-                        ZStack(alignment: .top) {
+                    ZStack(alignment: .top) {
+                        if !self.searchFocused && !self.ko.visible(formID) {
+                            VStack(alignment: .leading, spacing: 20) {
+                                self.grumbleButtons
+                                
+                                Text("My List")
+                                    .font(gFont(.ubuntuBold, .width, 3))
+                                    .frame(height: myListTitleHeight)
+                                    .foregroundColor(Color(white: 0.2))
+                            }.animation(nil)
+                        }
+                        
+                        if self.searchFocused || self.ko.visible(formID) {
                             Color.clear
                                 .frame(minHeight: sHeight())
                                 .contentShape(Rectangle())
@@ -218,21 +224,12 @@ public struct ListView: View, GFieldDelegate {
                                     self.grubContainsToken(self.uc.foodListByDate()[$0].1)
                                 }, id: \.self) {
                                     index in
-                                    GrubSearchItem(self.$searchFocused, GrubItem(fid: self.uc.foodListByDate()[index].0, self.uc.foodListByDate()[index].1, self.$selectedFID, self.$showGrubSheet))
+                                    GrubSearchItem(self.$searchFocused, GrubItem(fid: self.uc.foodListByDate()[index].0, self.uc.foodListByDate()[index].1, self.$selectedFID, self.$showGrubSheet, onGrubSheetHide: self.$onGrubSheetHide))
                                 }
                                 
                                 Spacer().frame(maxWidth: .infinity, minHeight: self.ko.height(formID) + sHeight() * 0.1)
                             }
                         }
-                    }
-                    
-                    if !self.searchFocused && !self.ko.visible(formID){
-                        self.grumbleButtons
-                    
-                        Text("My List")
-                            .font(gFont(.ubuntuBold, .width, 3))
-                            .frame(height: myListTitleHeight)
-                            .foregroundColor(Color(white: 0.2))
                     }
                 }.padding([.top, .leading, .trailing], 20)
                 
@@ -241,7 +238,7 @@ public struct ListView: View, GFieldDelegate {
                         HStack(spacing: 20) {
                             if !self.uc.foodList().isEmpty {
                                 ForEach((0 ..< self.uc.foodListByDate().count).reversed(), id: \.self) { index in
-                                    GrubItem(fid: self.uc.foodListByDate()[index].0, self.uc.foodListByDate()[index].1, self.$selectedFID, self.$showGrubSheet)
+                                    GrubItem(fid: self.uc.foodListByDate()[index].0, self.uc.foodListByDate()[index].1, self.$selectedFID, self.$showGrubSheet, onGrubSheetHide: self.$onGrubSheetHide)
                                 }
                             } else {
                                 Text(self.uc.loadingStatus == .loading ? "Loading..." : "List is Empty!")
@@ -266,15 +263,12 @@ public struct ListView: View, GFieldDelegate {
                     .frame(width: sWidth(), height: safeAreaInset(.top))
             }.edgesIgnoringSafeArea(.all)
             
-            Color.black.opacity(min(Double(self.showGrubSheet ? maxOverlayOpacity : 0) + Double((sHeight() - self.movingOffset) / sHeight() * maxOverlayOpacity), Double(maxOverlayOpacity)))
-            
-            GrubSheet(self.$selectedFID, self.$showGrubSheet, self.contentView)
+            Color.black.opacity(self.showGrubSheet ? Double(maxOverlayOpacity) : 0)
                 
-            GrumbleSheet(self.$showGrumbleSheet, Grub.testGrub(), self.ghorblinType)
+            GrumbleSheet(self.ghorblinType, show: self.$showGrumbleSheet, self.ghorblinList, selectedFID: self.$selectedFID, showSheet: self.$showGrubSheet, onGrubSheetHide: self.$onGrubSheetHide)
                 .offset(y: self.showGrumbleSheet ? 0 : sHeight() * 1.2)
-            /*if !self.searchFocused && !self.ko.visible(formID) {
-                GrumblerSheet(currentHeight: self.$currentHeight, movingOffset: self.$movingOffset, onDragEnd: {_ in}, grubs: self.$grubs)
-            }*/
+            
+            GrubSheet(self.$selectedFID, self.$showGrubSheet, self.contentView, onHide: self.$onGrubSheetHide)
         }
     }
 }

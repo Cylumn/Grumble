@@ -13,13 +13,15 @@ public struct GrubItem: View {
     fileprivate var grub: Grub
     private var selectedFID: Binding<String?>
     private var showSheet: Binding<Bool>
+    private var onGrubSheetHide: Binding<() -> Void>
     
     //Initializer
-    public init(fid: String, _ grub: Grub, _ selectedFID: Binding<String?>, _ showSheet: Binding<Bool>) {
+    public init(fid: String, _ grub: Grub, _ selectedFID: Binding<String?>, _ showSheet: Binding<Bool>, onGrubSheetHide: Binding<() -> Void>) {
         self.fid = fid
         self.grub = grub
         self.selectedFID = selectedFID
         self.showSheet = showSheet
+        self.onGrubSheetHide = onGrubSheetHide
     }
     
     //Function Method
@@ -30,6 +32,8 @@ public struct GrubItem: View {
         }
         TabRouter.tr().hide(true)
         UIApplication.shared.endEditing()
+        
+        self.onGrubSheetHide.wrappedValue = { TabRouter.tr().hide(false) }
     }
     
     public var body: some View {
@@ -208,6 +212,6 @@ public struct GrubSearchItem: View {
 
 struct GrubItem_Previews: PreviewProvider {
     static var previews: some View {
-        return GrubItem(fid: "", Grub.testGrub(), Binding.constant(nil), Binding.constant(false))
+        return GrubItem(fid: "", Grub.testGrub(), Binding.constant(nil), Binding.constant(false), onGrubSheetHide: Binding.constant({}))
     }
 }
