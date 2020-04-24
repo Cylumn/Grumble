@@ -196,8 +196,29 @@ public struct GrumbleSheet: View {
     }
     
     private func completeGrubSheet() {
-        Grub.removeFood(self.fidList[self.fidIndex])
+        if self.fidList.count > 0 {
+            Grub.removeFood(self.fidList[self.fidIndex])
+        }
         self.hideSheet()
+    }
+    
+    private func onBonAppetit() {
+        withAnimation(Animation.easeOut(duration: 0.3)) {
+            self.chosenGrubData = 0.3
+            self.presentHideModal = PresentHideModal.inProgress
+        }
+        
+        Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
+            withAnimation(Animation.easeIn(duration: 0.9)) {
+                self.chosenGrubData = 1
+            }
+        }
+        
+        Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
+            withAnimation(gAnim(.easeOut)) {
+                self.presentHideModal = PresentHideModal.shown
+            }
+        }
     }
     
     private func onGrumble() {
@@ -270,13 +291,24 @@ public struct GrumbleSheet: View {
                     ZStack(alignment: .top) {
                         Color.clear
                         
-                        VStack(spacing: 10) {
-                            Text("Enjoy Your")
-                            
-                            Text(self.grub()?.food ?? "Empty Stomach!")
+                        VStack(alignment: .center, spacing: 10) {
+                            if self.fidList.count > 0 {
+                                Text("Enjoy Your")
+                                
+                                Text(self.grub()?.food ?? "")
+                            } else {
+                                Text("Empty Stomach!")
+                                
+                                Spacer().frame(height: 10)
+                                
+                                Text("Your ghorblin needs more virtual grub...")
+                                    .font(gFont(.ubuntuLight, .width, 2.5))
+                                    .multilineTextAlignment(.center)
+                            }
                         }.font(gFont(.ubuntuLight, .width, 3.5))
                         .foregroundColor(Color(white: 0.2))
-                        .padding(.top, 50)
+                        .padding(.top, 30)
+                        .padding(20)
                     }
                     
                     Button(action: self.completeGrubSheet, label: {
@@ -360,8 +392,20 @@ public struct GrumbleSheet: View {
                             case .lifted:
                                 self.dragDistance = -sHeight() * 0.6
                                 self.coverDragState = .completed
+                                
+                                if self.fidList.count == 0 {
+                                    self.onBonAppetit()
+                                }
                             case .completed:
                                 if self.canDragHorizontal {
+                                    if self.dragHorizontal != 0 {
+                                        if self.ga.idleData < 1 {
+                                            self.ga.idleData = 1
+                                        } else {
+                                            self.ga.idleData = 0
+                                        }
+                                    }
+                                    
                                     if self.fidIndex > 0 && drag.predictedEndTranslation.width > sWidth() * 0.5 {
                                         self.fidIndex -= 1
                                         self.dragHorizontal = 0
@@ -374,12 +418,6 @@ public struct GrumbleSheet: View {
                                         self.onGrumble()
                                     } else {
                                         self.dragHorizontal = 0
-                                    }
-                                    
-                                    if self.ga.idleData < 1 {
-                                        self.ga.idleData = 1
-                                    } else {
-                                        self.ga.idleData = 0
                                     }
                                 }
                             default:
@@ -425,22 +463,7 @@ public struct GrumbleSheet: View {
                         })
                         
                         Button(action: {
-                            withAnimation(Animation.easeOut(duration: 0.3)) {
-                                self.chosenGrubData = 0.3
-                                self.presentHideModal = PresentHideModal.inProgress
-                            }
-                            
-                            Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
-                                withAnimation(Animation.easeIn(duration: 0.9)) {
-                                    self.chosenGrubData = 1
-                                }
-                            }
-                            
-                            Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
-                                withAnimation(gAnim(.easeOut)) {
-                                    self.presentHideModal = PresentHideModal.shown
-                                }
-                            }
+                            self.onBonAppetit()
                         }, label: {
                             Text("Bon Appetit")
                                 .padding(10)
