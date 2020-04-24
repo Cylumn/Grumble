@@ -187,9 +187,12 @@ public struct GrumbleSheet: View {
         }
         TabRouter.tr().hide(false)
         self.ga.endIdleAnimation()
-        self.fidIndex = 0
         self.chosenGrubData = 0
         self.presentHideModal = .hidden
+        
+        Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
+            self.fidIndex = 0
+        }
     }
     
     private func completeGrubSheet() {
@@ -219,16 +222,8 @@ public struct GrumbleSheet: View {
     }
     
     private func tagIcon(_ tag: Int, index: Int) -> some View {
-        switch tag {
-        case GrubTags.burger.rawValue, GrubTags.salad.rawValue:
-            let size = sWidth() * 0.1 + 80 * self.dragData()
-            return gTagView(tag, CGSize(width: size, height: size), idleData: self.ga.idleData, tossData: self.dragHorizontalData(index))
-        default:
-            return AnyView(Image(tagBGs[tag])
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(width: sWidth() * 0.3 + 80 * self.dragData()))
-        }
+        let size = sWidth() * 0.1 + 80 * self.dragData()
+        return gTagView(tag, CGSize(width: size, height: size), idleData: self.ga.idleData, tossData: self.dragHorizontalData(index))
     }
     
     private var ghorblinView: some View {
@@ -379,6 +374,12 @@ public struct GrumbleSheet: View {
                                         self.onGrumble()
                                     } else {
                                         self.dragHorizontal = 0
+                                    }
+                                    
+                                    if self.ga.idleData < 1 {
+                                        self.ga.idleData = 1
+                                    } else {
+                                        self.ga.idleData = 0
                                     }
                                 }
                             default:

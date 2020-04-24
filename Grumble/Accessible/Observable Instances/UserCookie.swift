@@ -25,7 +25,10 @@ public var tagIDMap: [String: Int] {
     return map
 }
 private let gTagIcons: [(CGSize, CGFloat, CGFloat) -> AnyView] =
-    [GBurger.genericInit, GBurger.genericInit, GSalad.genericInit]
+    [GFood.genericInit,
+     GBurger.genericInit,
+     GSalad.genericInit,
+     GSoup.genericInit]
 public func gTagView(_ tag: Int, _ boundingSize: CGSize, idleData: CGFloat, tossData: CGFloat) -> AnyView {
     return (gTagIcons[tag])(boundingSize, idleData, tossData)
 }

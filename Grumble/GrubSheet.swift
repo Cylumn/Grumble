@@ -256,6 +256,7 @@ public struct GrubSheet: View {
                 .foregroundColor(gColor(.coral))
             }).alert(isPresented: self.$alertDelete) {
                 Alert(title: Text("Delete Grub?"), primaryButton: Alert.Button.default(Text("Cancel")), secondaryButton: Alert.Button.destructive(Text("Delete")) {
+                    self.show.wrappedValue = false
                     Grub.removeFood(self.selectedFID.wrappedValue!)
                 })
             }

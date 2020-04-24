@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-public struct GSalad: View, GTag {
+public struct GSalad: GTag {
     public static var imgPath: String = "salad_"
     public var bWidth: CGFloat
     public var bHeight: CGFloat
@@ -83,7 +83,7 @@ public struct GSalad: View, GTag {
     }
     
     private var bottomLettuce: some View {
-        GSalad.imgPath.imageAsset(self, path: "BottomLettuce", scale: 1 + 0.03 * self.idleData, y: 0.02 - 0.05 * self.idleData - 0.05 * self.tossData)
+        GSalad.imgPath.imageAsset(self, path: "BottomLettuce", scale: 1 + 0.03 * self.idleData, y: 0.05 - 0.05 * self.idleData - 0.05 * self.tossData)
     }
     
     private var bottomBowl: some View {
@@ -92,6 +92,8 @@ public struct GSalad: View, GTag {
     
     public var body: some View {
         ZStack(alignment: .top) {
+            Color.clear
+            
             Group {
                 self.bottomBowl
                 self.bottomLettuce

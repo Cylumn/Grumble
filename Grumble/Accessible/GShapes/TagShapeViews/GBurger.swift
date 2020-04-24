@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-public struct GBurger: View, GTag {
+public struct GBurger: GTag {
     public static var imgPath: String = "burger_"
     public var bWidth: CGFloat
     public var bHeight: CGFloat
@@ -106,6 +106,8 @@ public struct GBurger: View, GTag {
     
     public var body: some View {
         ZStack(alignment: .top) {
+            Color.clear
+            
             self.bottomBun
             self.patty
                 .offset(y: self.bHeight * 0.01 * self.tossData)
@@ -119,14 +121,14 @@ public struct GBurger: View, GTag {
                 .offset(x: self.bWidth * 0.05 * self.tossData, y: self.bHeight * -0.13 * self.tossData)
                 .rotationEffect(Angle(degrees: Double(5 * self.tossData)))
             self.lettuce
-                .offset(y: self.bHeight * -0.17 * self.tossData)
+                .offset(y: self.bHeight * -0.23 * self.tossData)
                 .rotationEffect(Angle(degrees: Double(-5 * self.tossData)))
             self.sauce(1 - self.idleData)
                 .fill(Color(red: 1, green: 0.93, blue: 0.47))
-                .offset(x: self.bWidth * 0.08, y: self.bHeight * (0.01 - 0.25 * self.tossData))
+                .offset(x: self.bWidth * 0.08, y: self.bHeight * (0.01 - 0.35 * self.tossData))
                 .rotationEffect(Angle(degrees: Double(5 * self.tossData)))
             self.topBun
-                .offset(y: self.bHeight * -0.4 * self.tossData)
+                .offset(y: self.bHeight * -0.6 * self.tossData)
                 .rotationEffect(Angle(degrees: Double(15 * self.tossData)))
         }.frame(width: self.bWidth, height: self.bHeight)
     }
