@@ -16,7 +16,7 @@ public struct SignupSheetView: View {
     private var movingOffset: Binding<CGFloat>
     private var onDragStateChanged: (SheetPosition) -> ()
     
-    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko()
+    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
     @State private var slideIndex: Int = 0
     private var login: (String, String) -> Void
     
@@ -297,7 +297,7 @@ public struct SignupSheetView: View {
                     AnyView(SignupPanelView(startIndex: 0, length: 3, nextPanel: self.nextPanel)),
                     AnyView(SignupPanelView(startIndex: 3, length: 2, nextPanel: self.nextPanel))],
                           unDraggable: [PanelIndex.first.rawValue, PanelIndex.final.rawValue])
-                    .frame(height: self.ko.visible(formID) ? 290 : 450)
+                    .frame(height: self.ko.visible() ? 290 : 450)
                 
                 Spacer()
             }.padding(.top, 15)

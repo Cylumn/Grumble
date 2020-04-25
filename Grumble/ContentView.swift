@@ -31,8 +31,9 @@ public struct ContentView: View {
             self.slideIndex = PanelIndex.listHome.rawValue
         }
         UIApplication.shared.endEditing()
-        KeyboardObserver.ko().clearFields()
-        KeyboardObserver.ko().appendField(.filterList)
+        KeyboardObserver.clearFields()
+        KeyboardObserver.appendField(.filterList)
+        ListCookie.lc().searchFocused = false
         self.tr.hide(false)
     }
     
@@ -45,8 +46,8 @@ public struct ContentView: View {
             self.slideIndex = PanelIndex.addFood.rawValue
         }
         UIApplication.shared.endEditing()
-        KeyboardObserver.ko().clearFields()
-        KeyboardObserver.ko().appendField(.addFood)
+        KeyboardObserver.clearFields()
+        KeyboardObserver.appendField(.addFood)
         Timer.scheduledTimer(withTimeInterval: 0.33, repeats: false) { timer in
             GFormRouter.gfr().callFirstResponder(.addFood)
         }
@@ -56,7 +57,7 @@ public struct ContentView: View {
         case nil:
             AddFood.clearFields()
         default:
-            AddFood.currentFID = currentFID
+            AddFoodCookie.afc().currentFID = currentFID
         }
     }
     

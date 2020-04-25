@@ -12,26 +12,23 @@ private let formID: GFormID = GFormID.searchTag
 
 public struct SearchTag: View, GFieldDelegate {
     @ObservedObject private var gft: GFormText = GFormText.gft(formID)
-    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko()
+    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
     @State private var available: Set<Int> = Set(1 ..< tagTitles.count)
     @State private var selected: Set<Int> = []
     private var added: Set<Int>
-    private var showTagSearch: Binding<Bool>
+    private var isPresented: Binding<Bool>
     
     //Initializer
-    public init(_ showTagSearch: Binding<Bool>) {
-        self.added = []
-        for tag in TagBoxHolder.tbh().tagBoxes() {
-            self.added.insert(tag.tag())
-        }
-        self.showTagSearch = showTagSearch
+    public init(_ isPresented: Binding<Bool>) {
+        self.added = AddFoodCookie.afc().tags
+        self.isPresented = isPresented
     }
     
     //Function Methods
     private func endSearch() {
-        if self.showTagSearch.wrappedValue {
+        if self.isPresented.wrappedValue {
             withAnimation(gAnim(.easeOut)) {
-                self.showTagSearch.wrappedValue = false
+                self.isPresented.wrappedValue = false
                 self.selected.removeAll()
                 self.available = Set(1 ..< tagTitles.count)
                 self.gft.setText(0, "")
@@ -39,8 +36,8 @@ public struct SearchTag: View, GFieldDelegate {
                 UIApplication.shared.endEditing()
             }
             
-            KeyboardObserver.ko().removeField(formID)
-            KeyboardObserver.ko().appendField(.addFood)
+            KeyboardObserver.removeField(formID)
+            KeyboardObserver.appendField(.addFood)
         }
     }
     
@@ -75,7 +72,7 @@ public struct SearchTag: View, GFieldDelegate {
         ZStack(alignment: .top) {
             Color.clear
             
-            if self.showTagSearch.wrappedValue {
+            if self.isPresented.wrappedValue {
                 ScrollView {
                     Spacer().frame(height: 60)
                     
@@ -86,54 +83,54 @@ public struct SearchTag: View, GFieldDelegate {
                                 .foregroundColor(Color(white: 0.2))
                         }
                         
-                        ForEach(1 ..< tagTitles.count) { tag in
-                            if self.available.contains(tag) && !self.added.contains(tag) {
-                                Button(action: {
-                                    if self.selected.contains(tag) {
-                                        self.selected.remove(tag)
-                                    } else {
-                                        self.selected.insert(tag)
-                                    }
-                                }, label: {
+                        ForEach((1 ..< tagTitles.count).filter({
+                            self.available.contains($0) && !self.added.contains($0)
+                        }), id: \.self) { tag in
+                            Button(action: {
+                                if self.selected.contains(tag) {
+                                    self.selected.remove(tag)
+                                } else {
+                                    self.selected.insert(tag)
+                                }
+                            }, label: {
+                                ZStack {
+                                    Capsule()
+                                        .fill(tagColors[tag])
+                                        .frame(height: 45)
+                                        .padding(7)
+                                    
+                                    Rectangle()
+                                        .fill(Color.white)
+                                        .frame(width: sWidth() * 0.5)
+                                        .offset(x: -sWidth() * 0.25)
+                                    
+                                    Ellipse()
+                                        .fill(Color.white)
+                                        .rotationEffect(Angle.init(degrees: -30))
+                                        .frame(width: sWidth() * 0.5)
+                                    
                                     ZStack {
-                                        Capsule()
-                                            .fill(tagColors[tag])
-                                            .frame(height: 45)
-                                            .padding(7)
-                                        
-                                        Rectangle()
-                                            .fill(Color.white)
+                                        Circle()
+                                            .fill(Color.white.opacity(0.2))
                                             .frame(width: sWidth() * 0.5)
-                                            .offset(x: -sWidth() * 0.25)
+                                    }.offset(x: sWidth() * 0.4)
+                                    
+                                    HStack(spacing: nil) {
+                                        Text(capFirst(tagTitles[tag]))
+                                            .font(gFont(.ubuntuLight, 15))
                                         
-                                        Ellipse()
-                                            .fill(Color.white)
-                                            .rotationEffect(Angle.init(degrees: -30))
-                                            .frame(width: sWidth() * 0.5)
+                                        Spacer()
                                         
-                                        ZStack {
-                                            Circle()
-                                                .fill(Color.white.opacity(0.2))
-                                                .frame(width: sWidth() * 0.5)
-                                        }.offset(x: sWidth() * 0.4)
-                                        
-                                        HStack(spacing: nil) {
-                                            Text(capFirst(tagTitles[tag]))
-                                                .font(gFont(.ubuntuLight, 15))
-                                            
-                                            Spacer()
-                                            
-                                            Image(systemName: self.selected.contains(tag) ? "plus.circle.fill" : "circle")
-                                                .foregroundColor(self.selected.contains(tag) ? gColor(.blue0) : Color.white)
-                                                .shadow(color: Color.white, radius: 5)
-                                        }.padding(30)
-                                            .foregroundColor(Color(white: 0.2))
-                                    }.padding(.trailing, 15)
-                                    .frame(height: 45)
-                                    .clipped()
-                                    .shadow(color: tagColors[tag].opacity(0.2), radius: 10, y: 10)
-                                })
-                            }
+                                        Image(systemName: self.selected.contains(tag) ? "plus.circle.fill" : "circle")
+                                            .foregroundColor(self.selected.contains(tag) ? gColor(.blue0) : Color.white)
+                                            .shadow(color: Color.white, radius: 5)
+                                    }.padding(30)
+                                        .foregroundColor(Color(white: 0.2))
+                                }.padding(.trailing, 15)
+                                .frame(height: 45)
+                                .clipped()
+                                .shadow(color: tagColors[tag].opacity(0.2), radius: 10, y: 10)
+                            })
                         }
                         
                         Spacer().frame(minHeight: sHeight() * 0.4)
@@ -183,15 +180,7 @@ public struct SearchTag: View, GFieldDelegate {
                 Color.clear
 
                 Button(action: {
-                    var totalID: Set<Int> = []
-                    var newTags: [AddFood.TagBox] = []
-                    for tagBox in TagBoxHolder.tbh().tagBoxes() {
-                        totalID.insert(tagBox.tag())
-                    }
-                    for tagID in totalID.union(self.selected).sorted() {
-                        newTags.append(AddFood.TagBox(capFirst(tagTitles[tagID]), id: tagID))
-                    }
-                    TagBoxHolder.tbh().setTagBoxes(newTags)
+                    AddFoodCookie.afc().tags = AddFoodCookie.afc().tags.union(self.selected)
                     self.endSearch()
                 }, label:{
                     Text("Add Tags")
@@ -202,7 +191,7 @@ public struct SearchTag: View, GFieldDelegate {
                 }).background(self.selected.count > 0 ? gColor(.blue0) : Color(white: 0.9))
                 .cornerRadius(100)
                 .shadow(color: Color.black.opacity(0.2), radius: 12, y: 15)
-                .offset(y: -self.ko.height(formID) - 20)
+                .offset(y: -self.ko.height() - 20)
                 .disabled(self.selected.count == 0)
                 .animation(gAnim(.easeOut))
             }.padding(20)

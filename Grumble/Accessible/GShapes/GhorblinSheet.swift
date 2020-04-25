@@ -289,6 +289,6 @@ public struct GhorblinSheetOverlay: Shape {
 
 struct GhorblinSheet_Previews: PreviewProvider {
     static var previews: some View {
-        GrumbleSheet(.classic, show: Binding.constant(true), Array(UserCookie.uc().foodList().keys), selectedFID: Binding.constant(""), showSheet: Binding.constant(false), onGrubSheetHide: Binding.constant({}))
+        GrumbleSheet(.grumble, show: Binding.constant(true), Array(UserCookie.uc().foodList().keys))
     }
 }

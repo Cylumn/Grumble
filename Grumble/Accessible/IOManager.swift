@@ -168,8 +168,8 @@ public func onLogout() {
         UserCookie.uc().setFoodList([:] as [String: Grub])
         clearLocalData()
         
-        KeyboardObserver.ko().clearFields()
-        KeyboardObserver.ko().appendField(.login)
+        KeyboardObserver.clearFields()
+        KeyboardObserver.appendField(.login)
     } catch {
         print("error:\(error)")
     }

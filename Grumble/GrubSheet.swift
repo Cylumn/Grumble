@@ -22,51 +22,38 @@ private let tagBuilderPadding: CGFloat = 10
 private let deleteHeight: CGFloat = 40
 
 public struct GrubSheet: View {
-    @ObservedObject private var uc: UserCookie = UserCookie.uc()
-    private var selectedFID: Binding<String?>
+    @ObservedObject private var lc: ListCookie = ListCookie.lc()
+    private var selectedFID: String?
     private var grub: Grub?
-    private var show: Binding<Bool>
-    @State private var superOffset: CGFloat = 0
+    
     @State private var imageFraction: CGFloat = baseImageFraction
     @State private var currentImageFraction: CGFloat = baseImageFraction
     @State private var offsetGrubContent: CGFloat = 0
     @State private var currentOffsetGrubContent: CGFloat = 0
+    
     @State private var impactOccurred: Bool = false
-    @State private var alertDelete: Bool = false
+    @State private var presentDeleteAlert: Bool = false
     private var contentView: ContentView
-    private var onHide: Binding<() -> Void>
     
     //Initializer
-    public init(_ selectedFID: Binding<String?>, _ show: Binding<Bool>, _ contentView: ContentView, onHide: Binding<() -> Void>) {
-        self.selectedFID = selectedFID
-        switch selectedFID.wrappedValue {
+    public init(_ contentView: ContentView) {
+        self.selectedFID = ListCookie.lc().selectedFID
+        switch self.selectedFID {
         case nil:
             self.grub = nil
         default:
-            self.grub = UserCookie.uc().foodList()[selectedFID.wrappedValue!]
+            self.grub = UserCookie.uc().foodList()[self.selectedFID!]
         }
-        self.show = show
+        
         self.contentView = contentView
-        self.onHide = onHide
-    }
-    
-    //for testing purposes only
-    @available(*, deprecated)
-    fileprivate init(_ grub: Grub) {
-        self.selectedFID = Binding.constant("")
-        self.grub = grub
-        self.show = Binding.constant(true)
-        self.contentView = ContentView()
-        self.onHide = Binding.constant({})
     }
     
     //Function Methods
     private func hideSheet() {
         withAnimation(gAnim(.easeInOut)) {
-            self.superOffset = 0
-            self.show.wrappedValue = false
+            self.lc.presentGrubSheet = false
         }
-        self.onHide.wrappedValue()
+        self.lc.onGrubSheetHide()
     }
     
     private func grubContentHeight() -> CGFloat {
@@ -118,13 +105,9 @@ public struct GrubSheet: View {
             GFormText.gft(.addFood).setText(AddFood.FieldIndex.price.rawValue, self.grub!.price == nil ? "" : "$" + String(format:"%.2f", self.grub!.price!))
             GFormText.gft(.addFood).setText(AddFood.FieldIndex.restaurant.rawValue, self.grub!.restaurant ?? "")
             GFormText.gft(.addFood).setText(AddFood.FieldIndex.address.rawValue, self.grub!.address ?? "")
-            var tagBoxes: [AddFood.TagBox] = []
-            for tag in tags.values.sorted() {
-                tagBoxes.append(AddFood.TagBox(capFirst(tagTitles[tag]), id: tag))
-            }
-            TagBoxHolder.tbh().setTagBoxes(tagBoxes)
+            AddFoodCookie.afc().tags = Set(tags.values)
             
-            self.contentView.toAddFood(self.selectedFID.wrappedValue!)
+            self.contentView.toAddFood(self.selectedFID!)
         }, label: {
             Text("Edit Grub")
                 .frame(maxWidth: .infinity)
@@ -246,7 +229,7 @@ public struct GrubSheet: View {
             
             self.tagBuilder
             
-            Button(action: { self.alertDelete.toggle() }, label: {
+            Button(action: { self.presentDeleteAlert.toggle() }, label: {
                 Text("Delete")
                 .padding(10)
                 .frame(height: deleteHeight)
@@ -254,10 +237,10 @@ public struct GrubSheet: View {
                 .cornerRadius(8)
                 .font(gFont(.ubuntuBold, .width, 2))
                 .foregroundColor(gColor(.coral))
-            }).alert(isPresented: self.$alertDelete) {
+            }).alert(isPresented: self.$presentDeleteAlert) {
                 Alert(title: Text("Delete Grub?"), primaryButton: Alert.Button.default(Text("Cancel")), secondaryButton: Alert.Button.destructive(Text("Delete")) {
-                    self.show.wrappedValue = false
-                    Grub.removeFood(self.selectedFID.wrappedValue!)
+                    self.lc.presentGrubSheet = false
+                    Grub.removeFood(self.selectedFID!)
                 })
             }
         }.padding([.leading, .trailing], 20)
@@ -266,16 +249,14 @@ public struct GrubSheet: View {
     }
     
     private var sheet: some View {
-        var tags = self.grub!.tags
-        let smallestTag = tags["smallestTag"]!
-        tags["smallestTag"] = nil
+        let smallestTag = self.grub!.tags["smallestTag"]!
         
         return ZStack(alignment: .topTrailing) {
             ZStack {
                 Image(tagBGs[smallestTag])
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: sWidth() + safeImagePadding * 2, height: sHeight() * self.imageFraction + safeAreaInset(.top) + safeImagePadding * 2)
+                    .frame(width: sWidth(), height: sHeight() * self.imageFraction + safeAreaInset(.top) + safeImagePadding * 2)
                     .offset(y: -safeAreaInset(.top))
             }.frame(width: sWidth())
             
@@ -346,20 +327,20 @@ public struct GrubSheet: View {
         }.onEnded { drag in
             self.currentImageFraction = self.imageFraction
             self.currentOffsetGrubContent = self.offsetGrubContent
-        }).offset(y: self.show.wrappedValue ? self.superOffset : sHeight() * 1.2)
+        }).offset(y: self.lc.presentGrubSheet ? 0 : sHeight() * 1.2)
     }
     
     public var body: some View {
         if self.grub != nil {
             return AnyView(self.sheet)
         } else {
-            return AnyView(Color.clear)
+            return AnyView(EmptyView())
         }
     }
 }
 
 struct GrubSheet_Previews: PreviewProvider {
     static var previews: some View {
-        GrubSheet(Grub.testGrub())
+        GrubSheet(ContentView())
     }
 }

@@ -10,26 +10,38 @@ import SwiftUI
 
 private let formID: GFormID = GFormID.filterList
 private let titleHeight: CGFloat = 40
-private let searchHeight: CGFloat = sWidth() * 0.1
+public let searchHeight: CGFloat = sWidth() * 0.1
 private let grumbleButtonHeight: CGFloat = 40
 private let myListTitleHeight: CGFloat = 30
 
-public let maxOverlayOpacity: CGFloat = 0.5
+private let maxOverlayOpacity: Double = 0.5
 
-public struct ListView: View, GFieldDelegate {
+public class ListCookie: ObservableObject {
+    private static var instance: ListCookie? = nil
+    @Published public var selectedFID: String? = nil
+    
+    @Published public var searchFocused: Bool = false
+    
+    @Published public var presentGrubSheet: Bool = false
+    public var onGrubSheetHide: () -> Void = {}
+    
+    public static func lc() -> ListCookie {
+        if ListCookie.instance == nil {
+            ListCookie.instance = ListCookie()
+        }
+        return ListCookie.instance!
+    }
+}
+
+public struct ListView: View {
     @ObservedObject private var uc: UserCookie = UserCookie.uc()
+    @ObservedObject private var lc: ListCookie = ListCookie.lc()
     private var contentView: ContentView
     
-    @State private var searchFocused: Bool = false
-    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko()
-    @ObservedObject private var gft: GFormText = GFormText.gft(formID)
+    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
     
-    @State private var selectedFID: String? = nil
-    @State private var showGrubSheet: Bool = false
-    @State private var onGrubSheetHide: () -> Void = {}
-    
-    @State private var showGrumbleSheet: Bool = false
-    @State private var ghorblinType: GrumbleSheet.GhorblinType = .classic
+    @State private var presentGrumbleSheet: Bool = false
+    @State private var ghorblinType: GrumbleSheet.GhorblinType = .grumble
     @State private var ghorblinList: [String] = UserCookie.uc().foodList().keys.shuffled()
     
     //Initializer
@@ -37,10 +49,15 @@ public struct ListView: View, GFieldDelegate {
         self.contentView = contentView
     }
     
+    //Getter Methods
+    private func searchListExpanded() -> Bool {
+        return self.lc.searchFocused || self.ko.visible()
+    }
+    
     //Function Methods
     private func showGrumbleSheet(_ ghorblinType: GrumbleSheet.GhorblinType) {
         withAnimation(gAnim(.easeOut)) {
-            self.showGrumbleSheet = true
+            self.presentGrumbleSheet = true
             TabRouter.tr().hide(true)
         }
         
@@ -50,42 +67,6 @@ public struct ListView: View, GFieldDelegate {
         Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
             GhorblinAnimations.ga().setDrip(1)
         }
-    }
-    
-    private func grubContainsToken(_ grub: Grub) -> Bool {
-        let text = self.gft.text(0).lowercased()
-        let food = grub.food.lowercased()
-        if text.isEmpty || food.contains(text) {
-            return true
-        }
-        
-        var tags = grub.tags
-        tags["smallestTag"] = nil
-        for tag in tags {
-            if tag.key.contains(text) {
-                return true
-            }
-        }
-        
-        return false
-    }
-    
-    //GFieldDelegate Method Implementations
-    public func style(_ index: Int, _ textField: GTextField) {
-        textField.attributedPlaceholder = NSAttributedString(string: "Filter List", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black.withAlphaComponent(0.5)])
-        textField.setInsets(top: 5, left: 45, bottom: 5, right: 10)
-        textField.textColor = UIColor.black
-        textField.returnKeyType = .default
-    }
-    
-    public func proceedField() -> Bool {
-        self.searchFocused = false
-        self.gft.setText(0, "")
-        return true
-    }
-    
-    public func parseInput(_ index: Int, _ textField: UITextField, _ string: String) -> String {
-        return textField.text! + string
     }
     
     //View Methods
@@ -125,34 +106,24 @@ public struct ListView: View, GFieldDelegate {
         }
     }
     
-    private var searchBar: some View {
-        ZStack(alignment: .leading) {
-            Image(systemName: "magnifyingglass")
-            .padding(15)
-            .foregroundColor(Color(white: 0.3))
-            
-            GField(formID, 0, self)
-        }
-    }
-    
     private var grumbleButtons: some View {
         HStack(spacing: 10) {
             VStack(spacing: 10) {
-                self.grumbleButton("Classic Grumble", gColor(.blue4)) {
-                    self.showGrumbleSheet(.classic)
+                self.grumbleButton("Grumble", gColor(.blue4)) {
+                    self.showGrumbleSheet(.grumble)
                 }
                 
-                self.grumbleButton("Similar Grub", gColor(.dandelion)) {
-                    self.showGrumbleSheet(.similar)
+                self.grumbleButton("Orthodox [WIP]", gColor(.dandelion)) {
+                    self.showGrumbleSheet(.orthodox)
                 }
             }
             
             VStack(spacing: 10) {
-                self.grumbleButton("Daring Alternative", gColor(.coral)) {
+                self.grumbleButton("Defiant [WIP]", gColor(.coral)) {
                     self.showGrumbleSheet(.defiant)
                 }
                 
-                self.grumbleButton("Grumbologist", gColor(.magenta)) {
+                self.grumbleButton("Grumbologist [WIP]", gColor(.magenta)) {
                     self.showGrumbleSheet(.grubologist)
                 }
             }
@@ -164,81 +135,39 @@ public struct ListView: View, GFieldDelegate {
             Color(white: 0.98)
             
             ScrollView(.vertical) {
-                VStack(alignment: .leading, spacing: 20) {
-                    if !self.searchFocused && !self.ko.visible(formID) {
+                ZStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 20) {
                         self.listHeader
                             .frame(height: titleHeight)
-                    }
-                    
-                    HStack(spacing: 20) {
-                        self.searchBar
-                            .background(Color(white: 0.93))
-                            .cornerRadius(8)
+                        
+                        Spacer()
                             .frame(height: searchHeight)
                         
-                        if self.searchFocused || self.ko.visible(formID) {
-                            Button(action: {
-                                withAnimation(gAnim(.spring)) {
-                                    self.searchFocused = false
-                                    self.gft.setText(0, "")
-                                    UIApplication.shared.endEditing()
-                                }
-                            }, label: {
-                                Text("Cancel")
-                                    .font(gFont(.ubuntuLight, .width, 2))
-                                    .foregroundColor(gColor(.blue0))
-                            })
-                        }
-                    }
+                        self.grumbleButtons
+                        
+                        Text("My List")
+                            .font(gFont(.ubuntuBold, .width, 3))
+                            .frame(height: myListTitleHeight)
+                            .foregroundColor(Color(white: 0.2))
+                    }.padding([.leading, .trailing], 20)
+                    .opacity(self.searchListExpanded() ? 0 : 1)
                     
-                    ZStack(alignment: .top) {
-                        if !self.searchFocused && !self.ko.visible(formID) {
-                            VStack(alignment: .leading, spacing: 20) {
-                                self.grumbleButtons
-                                
-                                Text("My List")
-                                    .font(gFont(.ubuntuBold, .width, 3))
-                                    .frame(height: myListTitleHeight)
-                                    .foregroundColor(Color(white: 0.2))
-                            }.animation(nil)
+                    VStack(alignment: .leading, spacing: 20) {
+                        if !self.searchListExpanded() {
+                            Spacer()
+                                .frame(height: titleHeight)
                         }
                         
-                        if self.searchFocused || self.ko.visible(formID) {
-                            Color.clear
-                                .frame(minHeight: sHeight())
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    withAnimation(gAnim(.spring)) {
-                                        self.searchFocused = false
-                                        self.gft.setText(0, "")
-                                    }
-                                }
-                            
-                            VStack(alignment: .leading, spacing: 20) {
-                                Text(self.gft.text(0).isEmpty ? "Showing all results..." :
-                                    "Showing results for: \"" + self.gft.text(0) + "\"")
-                                    .font(gFont(.ubuntuLight, .width, 2))
-                                    .foregroundColor(Color(white: 0.4))
-                                
-                                ForEach((0 ..< self.uc.foodListByDate().count).reversed().filter {
-                                    self.grubContainsToken(self.uc.foodListByDate()[$0].1)
-                                }, id: \.self) {
-                                    index in
-                                    GrubSearchItem(self.$searchFocused, GrubItem(fid: self.uc.foodListByDate()[index].0, self.uc.foodListByDate()[index].1, self.$selectedFID, self.$showGrubSheet, onGrubSheetHide: self.$onGrubSheetHide))
-                                }
-                                
-                                Spacer().frame(maxWidth: .infinity, minHeight: self.ko.height(formID) + sHeight() * 0.1)
-                            }
-                        }
+                        SearchList(expanded: self.searchListExpanded)
                     }
-                }.padding([.top, .leading, .trailing], 20)
+                }.padding(.top, 20)
                 
-                if !self.searchFocused && !self.ko.visible(formID){
+                if !self.searchListExpanded() {
                     ScrollView(.horizontal) {
                         HStack(spacing: 20) {
                             if !self.uc.foodList().isEmpty {
                                 ForEach((0 ..< self.uc.foodListByDate().count).reversed(), id: \.self) { index in
-                                    GrubItem(fid: self.uc.foodListByDate()[index].0, self.uc.foodListByDate()[index].1, self.$selectedFID, self.$showGrubSheet, onGrubSheetHide: self.$onGrubSheetHide)
+                                    GrubItem(fid: self.uc.foodListByDate()[index].0, self.uc.foodListByDate()[index].1)
                                 }
                             } else {
                                 Text(self.uc.loadingStatus == .loading ? "Loading..." : "List is Empty!")
@@ -263,12 +192,12 @@ public struct ListView: View, GFieldDelegate {
                     .frame(width: sWidth(), height: safeAreaInset(.top))
             }.edgesIgnoringSafeArea(.all)
             
-            Color.black.opacity(self.showGrubSheet ? Double(maxOverlayOpacity) : 0)
-                
-            GrumbleSheet(self.ghorblinType, show: self.$showGrumbleSheet, self.ghorblinList, selectedFID: self.$selectedFID, showSheet: self.$showGrubSheet, onGrubSheetHide: self.$onGrubSheetHide)
-                .offset(y: self.showGrumbleSheet ? 0 : sHeight() * 1.2)
+            Color.black.opacity(self.lc.presentGrubSheet ? maxOverlayOpacity : 0)
             
-            GrubSheet(self.$selectedFID, self.$showGrubSheet, self.contentView, onHide: self.$onGrubSheetHide)
+            GrumbleSheet(self.ghorblinType, show: self.$presentGrumbleSheet, self.ghorblinList)
+                .offset(y: self.presentGrumbleSheet ? 0 : sHeight() * 1.2)
+            
+            GrubSheet(self.contentView)
         }
     }
 }

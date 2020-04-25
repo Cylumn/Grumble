@@ -27,18 +27,18 @@ public struct GFood: GTag {
     }
     
     private var logo: some View {
-        GFood.imgPath.imageAsset(self, path: "Logo", scale: 0.19 + 0.04 * self.idleData + 0.1 * self.tossData, x: -0.3 * self.tossData, y: 0.44 - 0.04 * self.idleData - 0.7 * self.tossData)
+        GFood.imgPath.imageAsset(self, path: "Logo", scale: 0.19 + 0.04 * self.idleData + 0.1 * self.tossData, x: -0.3 * self.tossData, y: 0.44 - 0.7 * self.tossData)
             .rotationEffect(Angle(degrees: Double(20 * self.tossData)))
     }
     
     private var tag: some View {
-        GFood.imgPath.imageAsset(self, path: "Tag", scale: 0.35 + 0.06 * self.idleData, x: 0.18 + 0.03 * self.idleData, y: 0.05 - 0.06 * self.idleData)
+        GFood.imgPath.imageAsset(self, path: "Tag", scale: 0.35 + 0.06 * self.idleData, x: 0.18 + 0.03 * self.idleData, y: 0.05 - 0.01 * self.idleData)
         .rotationEffect(Angle(degrees: Double(-40 * self.tossData)))
         .scaleEffect(x: 1, y: 1 - 0.2 * self.tossData)
     }
     
     private var bag: some View {
-        GFood.imgPath.imageAsset(self, path: "Bag", scale: 0.8 + 0.2 * self.idleData, y: 0.05 - 0.05 * self.idleData)
+        GFood.imgPath.imageAsset(self, path: "Bag", scale: 0.86 + 0.1 * self.idleData, y: 0.05)
     }
     
     public var body: some View {
@@ -51,8 +51,7 @@ public struct GFood: GTag {
                 self.tag
                 
                 self.logo
-            }.scaleEffect(1.2)
-            .offset(y: self.bHeight * -0.2)
+            }.scaleEffect(1.2, anchor: UnitPoint.bottom)
         }.frame(width: self.bWidth, height: self.bHeight)
     }
 }

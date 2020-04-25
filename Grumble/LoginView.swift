@@ -13,7 +13,7 @@ import Firebase
 private let formID: GFormID = GFormID.login
 
 public struct LoginView: View, GFieldDelegate {
-    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko()
+    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
     @ObservedObject private var gft: GFormText = GFormText.gft(formID)
     
     @State private var currentHeight: CGFloat = sHeight()
@@ -21,7 +21,7 @@ public struct LoginView: View, GFieldDelegate {
     
     //Initializer
     public init() {
-        self.ko.appendField(.login)
+        KeyboardObserver.appendField(.login)
         self.gft.setName(FieldIndex.email.rawValue, "Email")
         self.gft.setName(FieldIndex.password.rawValue, "Password")
     }
@@ -46,8 +46,8 @@ public struct LoginView: View, GFieldDelegate {
             self.$movingOffset.wrappedValue = 0
             self.$currentHeight.wrappedValue = 0
             
-            self.ko.removeField(.login)
-            self.ko.appendField(.signup, true)
+            KeyboardObserver.removeField(.login)
+            KeyboardObserver.appendField(.signup, true)
             GFormRouter.gfr().callCurrentResponder(.signup)
         }
     }
@@ -115,10 +115,10 @@ public struct LoginView: View, GFieldDelegate {
                 })
             
             VStack(spacing: sHeight() * 0.03) {
-                Spacer().frame(height: sHeight() * (self.ko.visible(formID) ? 0.07 : 0.05))
+                Spacer().frame(height: sHeight() * (self.ko.visible() ? 0.07 : 0.05))
                 
                 VStack(spacing: 0){
-                    if !self.ko.visible(formID) {
+                    if !self.ko.visible() {
                         Image("Logo")
                             .resizable()
                             .frame(width: 80, height: 80)
@@ -130,7 +130,7 @@ public struct LoginView: View, GFieldDelegate {
                 
                 Spacer()
                 
-                if !self.ko.visible(formID) {
+                if !self.ko.visible() {
                     HStack(spacing: nil) {
                         Button(action: self.attemptSignup, label: {
                             Text("Sign Up")
@@ -189,20 +189,20 @@ public struct LoginView: View, GFieldDelegate {
                     }
                 }
                 
-                Spacer().frame(height: self.ko.height(formID, tabbedView: false) + sHeight() * (self.ko.visible(formID) ? 0.01 : 0.04))
+                Spacer().frame(height: self.ko.height(tabbedView: false) + sHeight() * (self.ko.visible() ? 0.01 : 0.04))
             }.frame(width: sWidth() * 0.85)
             .foregroundColor(Color.white)
             
             SignupSheetView(currentHeight: self.$currentHeight, movingOffset: self.$movingOffset, onDragStateChanged: { pos in
                 switch pos {
                     case .up:
-                        self.ko.removeField(.login)
-                        self.ko.appendField(.signup, true)
+                        KeyboardObserver.removeField(.login)
+                        KeyboardObserver.appendField(.signup, true)
                         GFormRouter.gfr().callCurrentResponder(.signup)
                     case .down:
                         UIApplication.shared.endEditing()
-                        self.ko.removeField(.signup)
-                        self.ko.appendField(.login, false)
+                        KeyboardObserver.removeField(.signup)
+                        KeyboardObserver.appendField(.login, false)
                 }
             }, login: self.attemptLogin)
         }

@@ -29,39 +29,33 @@ public struct GrumbleSheet: View {
     @State private var chosenGrubData: CGFloat = 0
     @State private var presentHideModal: PresentHideModal = .hidden
     
-    private var selectedFID: Binding<String?>
-    private var showSheet: Binding<Bool>
-    private var onGrubSheetHide: Binding<() -> Void>
-    
-    public init( _ type: GhorblinType, show: Binding<Bool>, _ fidList: [String], selectedFID: Binding<String?>, showSheet: Binding<Bool>, onGrubSheetHide: Binding<() -> Void>) {
+    //Initializer
+    public init( _ type: GhorblinType, show: Binding<Bool>, _ fidList: [String]) {
         switch type {
-        case .classic:
-            self.ghorblinFill = [gColor(.blue0), gColor(.blue4), Color(white: 0.9)]
-        case .similar:
-            self.ghorblinFill = [gColor(.dandelion), Color(white: 0.9)]
+        case .grumble:
+            self.ghorblinFill = [gColor(.blue0), gColor(.blue4), Color(white: 0.93)]
+        case .orthodox:
+            self.ghorblinFill = [gColor(.dandelion), Color(white: 0.93)]
         case .defiant:
-            self.ghorblinFill = [gColor(.coral), Color(white: 0.9)]
+            self.ghorblinFill = [gColor(.coral), Color(white: 0.93)]
         case .grubologist:
-            self.ghorblinFill = [gColor(.magenta), Color(white: 0.9)]
+            self.ghorblinFill = [gColor(.magenta), Color(white: 0.93    )]
         }
         self.show = show
         self.fidList = fidList
         
         self.holdScaleAnchor = UnitPoint.bottom
-        
-        self.selectedFID = selectedFID
-        self.showSheet = showSheet
-        self.onGrubSheetHide = onGrubSheetHide
     }
     
     //Sheet Visuals
     public enum GhorblinType {
-        case classic
-        case similar
+        case grumble
+        case orthodox
         case defiant
         case grubologist
     }
     
+    //States
     private enum CoverDragState {
         case cancelled
         case covered
@@ -221,12 +215,36 @@ public struct GrumbleSheet: View {
         }
     }
     
-    private func onGrumble() {
+    private func onToss() {
         self.canDragHorizontal = false
         UINotificationFeedbackGenerator().notificationOccurred(.error)
         Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
             self.canDragHorizontal = true
         }
+    }
+    
+    private var background: some View {
+        ZStack(alignment: .bottom) {
+            Image("GhorblinBackground")
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+            
+            Color.black.opacity(0.2)
+            
+            LinearGradient(gradient: Gradient(colors: [Color.black.opacity(0.2), Color.clear, Color.black.opacity(0.8)]), startPoint: .top, endPoint: .bottomLeading)
+                .frame(height: sHeight())
+            
+            ZStack(alignment: .bottom) {
+                Ellipse()
+                    .fill(Color(white: 0.9))
+                    .frame(width: sWidth() * 1.5, height: sHeight() * 0.35)
+                    .clipped()
+                
+                Rectangle()
+                    .fill(Color(white: 0.9))
+                    .frame(width: sWidth(), height: sHeight() * 0.15)
+            }.frame(width: sWidth())
+        }.frame(width: sWidth())
     }
     
     private var dripFill: some ShapeStyle {
@@ -243,28 +261,24 @@ public struct GrumbleSheet: View {
     }
     
     private func tagIcon(_ tag: Int, index: Int) -> some View {
-        let size = sWidth() * 0.1 + 80 * self.dragData()
+        let size = sWidth() * (0.2 + 0.1 * self.dragData())
         return gTagView(tag, CGSize(width: size, height: size), idleData: self.ga.idleData, tossData: self.dragHorizontalData(index))
     }
     
     private var ghorblinView: some View {
         ZStack {
-            LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black.opacity(0.3)]), startPoint: .top, endPoint: .bottomLeading)
-                .frame(height: sHeight() * 0.65)
-                .offset(y: -sHeight() * 0.35)
-            
             Ellipse()
                 .fill(Color.black)
                 .frame(width: 250 + 50 * self.dragData(), height: 60 + 20 * self.dragData())
-                .shadow(color: Color.black, radius: 10 + 20 * self.dragData())
-                .opacity(Double(0.5 - 0.5 * self.dragData()))
-                .offset(y: 210)
+                .shadow(color: Color.black.opacity(0.3 - 0.3 * Double(self.dragData())), radius: 10 + 20 * self.dragData())
+                .opacity(Double(0.3 - 0.3 * self.dragData()))
+                .offset(y: 200)
             
             if self.fidList.count > 0 {
                 ForEach(self.grubRenderingRange(), id: \.self) { index in
                     self.tagIcon(self.grub(index)!.tags["smallestTag"]!, index: index)
                         .rotationEffect(self.grubRotation(index))
-                        .offset(x: self.grubOffsetX(index), y: 150 + self.grubOffsetY(index) + self.chosenGrubOffsetY())
+                        .offset(x: self.grubOffsetX(index), y: 170 + self.grubOffsetY(index) + self.chosenGrubOffsetY())
                         .scaleEffect(1 + 2 * self.chosenGrubData)
                 }
             }
@@ -278,6 +292,85 @@ public struct GrumbleSheet: View {
                     .fill(Color.white)
             }.offset(y: self.coverDistance())
         }
+    }
+    
+    private var grumbleGesture: some Gesture {
+        return LongPressGesture(minimumDuration: .infinity, maximumDistance: .infinity)
+            .updating(self.$holdState) { value, state, transaction in
+                transaction.animation = gAnim(.springSlow)
+                state = 1
+        }.simultaneously(with: DragGesture().onChanged { drag in
+            if self.coverDragState == .completed {
+                if self.canDragHorizontal && self.fidList.count > 1 {
+                    switch self.fidIndex{
+                    case 0:
+                        self.dragHorizontal = min(drag.translation.width, 0)
+                    case self.fidList.count - 1:
+                        self.dragHorizontal = max(drag.translation.width, 0)
+                    default:
+                        self.dragHorizontal = drag.translation.width
+                    }
+                }
+            } else if drag.translation.height > sHeight() * 0.1 {
+                withAnimation(gAnim(.spring)) {
+                    self.coverDragState = .cancelled
+                }
+            } else {
+                withAnimation(gAnim(.easeOut)) {
+                    self.dragDistance = min(drag.translation.height, 0)
+                
+                    if !self.impactOccurred && self.coverDistance() < self.dragDistance * 0.5 {
+                        self.impactOccurred = true
+                        let impact = UIImpactFeedbackGenerator(style: .medium)
+                        impact.impactOccurred()
+                        self.coverDragState = .lifted
+                    } else if self.coverDistance() >= self.dragDistance * 0.5 {
+                        self.impactOccurred = false
+                        self.coverDragState = .covered
+                    }
+                }
+            }
+        }.onEnded { drag in
+            withAnimation(gAnim(.easeOut)) {
+                switch self.coverDragState {
+                case .cancelled:
+                    self.coverDragState = .covered
+                case .lifted:
+                    self.dragDistance = -sHeight() * 0.6
+                    self.coverDragState = .completed
+                    
+                    if self.fidList.count == 0 {
+                        self.onBonAppetit()
+                    }
+                case .completed:
+                    if self.canDragHorizontal {
+                        if self.dragHorizontal != 0 {
+                            if self.ga.idleData < 1 {
+                                self.ga.idleData = 1
+                            } else {
+                                self.ga.idleData = 0
+                            }
+                        }
+                        
+                        if self.fidIndex > 0 && drag.predictedEndTranslation.width > sWidth() * 0.5 {
+                            self.fidIndex -= 1
+                            self.dragHorizontal = 0
+                            
+                            self.onToss()
+                        } else if self.fidIndex < self.fidList.count - 1 && drag.predictedEndTranslation.width < -sWidth() * 0.5 {
+                            self.fidIndex += 1
+                            self.dragHorizontal = 0
+                            
+                            self.onToss()
+                        } else {
+                            self.dragHorizontal = 0
+                        }
+                    }
+                default:
+                    self.dragDistance = 0
+                }
+            }
+        })
     }
     
     private var hideModal: some View {
@@ -333,98 +426,69 @@ public struct GrumbleSheet: View {
         }
     }
     
+    private var overlayUI: some View {
+        HStack(spacing: nil) {
+            VStack(spacing: 0) {
+                Spacer()
+                Text(self.grub()?.food ?? "")
+                .font(gFont(.ubuntuBold, .width, 4.5))
+            }
+            
+            Spacer()
+            
+            VStack(alignment: .trailing, spacing: 20) {
+                Spacer()
+                
+                if self.fidList.count > 0 {
+                    Button(action: {
+                        ListCookie.lc().selectedFID = self.fidList[self.fidIndex]
+                        withAnimation(gAnim(.easeOut)) {
+                            ListCookie.lc().presentGrubSheet = true
+                        }
+                        ListCookie.lc().onGrubSheetHide = {}
+                    }, label: {
+                        Text("View")
+                            .padding(10)
+                            .padding([.leading, .trailing], 10)
+                            .background(Color(white: 0.95))
+                            .foregroundColor(Color(white: 0.3))
+                            .cornerRadius(10)
+                    })
+                    
+                    Button(action: {
+                        self.onBonAppetit()
+                    }, label: {
+                        Text("Bon Appetit")
+                            .padding(10)
+                            .padding([.leading, .trailing], 10)
+                            .background(gColor(.blue2))
+                            .foregroundColor(Color(white: 0.3))
+                            .cornerRadius(10)
+                    })
+                }
+            }.font(gFont(.ubuntuLight, .width, 2.5))
+        }
+    }
+    
     public var body: some View {
         ZStack(alignment: .bottom) {
-            Color(white: 0.2)
+            self.background
+                .scaleEffect(1 + 0.1 * self.holdData() + 0.5 * self.dragData(), anchor: self.holdScaleAnchor)
+                .clipped()
                 .edgesIgnoringSafeArea(.all)
+            
+            LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black.opacity(0.5)]), startPoint: .top, endPoint: .bottom)
+                .frame(height: sHeight() * 0.3)
             
             self.ghorblinView
                 .scaleEffect(1 + 0.2 * self.holdData() + 0.7 * self.dragData(), anchor: self.holdScaleAnchor)
                 .clipped()
                 .edgesIgnoringSafeArea(.all)
             
-            LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black.opacity(0.6)]), startPoint: .top, endPoint: .bottom)
-            .frame(height: sHeight() * 0.4)
-            
             ZStack(alignment: self.presentHideModal == PresentHideModal.shown ? .center : .topTrailing) {
                 Color.clear
                     .contentShape(Rectangle())
-                    .gesture(LongPressGesture(minimumDuration: .infinity, maximumDistance: .infinity)
-                        .updating(self.$holdState) { value, state, transaction in
-                            transaction.animation = gAnim(.springSlow)
-                            state = 1
-                    }.simultaneously(with: DragGesture().onChanged { drag in
-                        if self.coverDragState == .completed {
-                            if self.canDragHorizontal {
-                                switch self.fidIndex{
-                                case 0:
-                                    self.dragHorizontal = min(drag.translation.width, 0)
-                                case self.fidList.count - 1:
-                                    self.dragHorizontal = max(drag.translation.width, 0)
-                                default:
-                                    self.dragHorizontal = drag.translation.width
-                                }
-                            }
-                        } else if drag.translation.height > sHeight() * 0.1 {
-                            withAnimation(gAnim(.spring)) {
-                                self.coverDragState = .cancelled
-                            }
-                        } else {
-                            withAnimation(gAnim(.easeOut)) {
-                                self.dragDistance = min(drag.translation.height, 0)
-                            
-                                if !self.impactOccurred && self.coverDistance() < self.dragDistance * 0.5 {
-                                    self.impactOccurred = true
-                                    let impact = UIImpactFeedbackGenerator(style: .medium)
-                                    impact.impactOccurred()
-                                    self.coverDragState = .lifted
-                                } else if self.coverDistance() >= self.dragDistance * 0.5 {
-                                    self.impactOccurred = false
-                                    self.coverDragState = .covered
-                                }
-                            }
-                        }
-                    }.onEnded { drag in
-                        withAnimation(gAnim(.easeOut)) {
-                            switch self.coverDragState {
-                            case .cancelled:
-                                self.coverDragState = .covered
-                            case .lifted:
-                                self.dragDistance = -sHeight() * 0.6
-                                self.coverDragState = .completed
-                                
-                                if self.fidList.count == 0 {
-                                    self.onBonAppetit()
-                                }
-                            case .completed:
-                                if self.canDragHorizontal {
-                                    if self.dragHorizontal != 0 {
-                                        if self.ga.idleData < 1 {
-                                            self.ga.idleData = 1
-                                        } else {
-                                            self.ga.idleData = 0
-                                        }
-                                    }
-                                    
-                                    if self.fidIndex > 0 && drag.predictedEndTranslation.width > sWidth() * 0.5 {
-                                        self.fidIndex -= 1
-                                        self.dragHorizontal = 0
-                                        
-                                        self.onGrumble()
-                                    } else if self.fidIndex < self.fidList.count - 1 && drag.predictedEndTranslation.width < -sWidth() * 0.5 {
-                                        self.fidIndex += 1
-                                        self.dragHorizontal = 0
-                                        
-                                        self.onGrumble()
-                                    } else {
-                                        self.dragHorizontal = 0
-                                    }
-                                }
-                            default:
-                                self.dragDistance = 0
-                            }
-                        }
-                    }))
+                    .gesture(self.grumbleGesture)
                 
                 if self.presentHideModal == PresentHideModal.shown {
                     Color.black.opacity(0.4)
@@ -434,57 +498,18 @@ public struct GrumbleSheet: View {
                 self.hideModal
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
             
-            HStack(spacing: nil) {
-                VStack(spacing: 0) {
-                    Spacer()
-                    Text(self.grub()?.food ?? "")
-                    .font(gFont(.ubuntuBold, .width, 4.5))
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: 20) {
-                    Spacer()
-                    
-                    if self.fidList.count > 0 {
-                        Button(action: {
-                            self.selectedFID.wrappedValue = self.fidList[self.fidIndex]
-                            withAnimation(gAnim(.easeOut)) {
-                                self.showSheet.wrappedValue = true
-                            }
-                            self.onGrubSheetHide.wrappedValue = {}
-                        }, label: {
-                            Text("View")
-                                .padding(10)
-                                .padding([.leading, .trailing], 10)
-                                .background(Color(white: 0.8))
-                                .foregroundColor(Color(white: 0.3))
-                                .cornerRadius(10)
-                        })
-                        
-                        Button(action: {
-                            self.onBonAppetit()
-                        }, label: {
-                            Text("Bon Appetit")
-                                .padding(10)
-                                .padding([.leading, .trailing], 10)
-                                .background(gColor(.blue2))
-                                .foregroundColor(Color(white: 0.3))
-                                .cornerRadius(10)
-                        })
-                    }
-                }.font(gFont(.ubuntuLight, .width, 2.5))
-            }.padding(20)
-            .padding(.bottom, 20)
-            .frame(alignment: .bottom)
-            .foregroundColor(Color.white)
-            .offset(y: self.coverDragState == .completed && self.presentHideModal == PresentHideModal.hidden ? 0 : sHeight())
-        }
+            self.overlayUI
+                .padding(20)
+                .padding(.bottom, 20)
+                .frame(alignment: .bottom)
+                .foregroundColor(Color.white)
+                .offset(y: self.coverDragState == .completed && self.presentHideModal == PresentHideModal.hidden ? 0 : sHeight())
+        }.frame(width: sWidth(), height: sHeight() - safeAreaInset(.top))
     }
 }
 
 struct GrumbleSheet_Previews: PreviewProvider {
     static var previews: some View {
-        GrumbleSheet(.classic, show: Binding.constant(true), Array(UserCookie.uc().foodList().keys), selectedFID: Binding.constant(""), showSheet: Binding.constant(false), onGrubSheetHide: Binding.constant({}))
+        GrumbleSheet(.grumble, show: Binding.constant(true), Array(UserCookie.uc().foodList().keys))
     }
 }

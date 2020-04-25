@@ -17,6 +17,7 @@
 		D50292382437D6E1008A5BFC /* GAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50292372437D6E1008A5BFC /* GAnimation.swift */; };
 		D502923A2437F7B3008A5BFC /* GForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50292392437F7B3008A5BFC /* GForm.swift */; };
 		D51509C224525B780005C0E3 /* GFood.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51509C124525B780005C0E3 /* GFood.swift */; };
+		D51509C424539C970005C0E3 /* SearchList.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51509C324539C970005C0E3 /* SearchList.swift */; };
 		D51FECC9243131FA00BF129C /* KeyboardObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51FECC8243131FA00BF129C /* KeyboardObserver.swift */; };
 		D51FECCB24316DC600BF129C /* SheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51FECCA24316DC600BF129C /* SheetView.swift */; };
 		D51FECD2243171A100BF129C /* SignupSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51FECD1243171A100BF129C /* SignupSheetView.swift */; };
@@ -99,6 +100,7 @@
 		D50292372437D6E1008A5BFC /* GAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GAnimation.swift; sourceTree = "<group>"; };
 		D50292392437F7B3008A5BFC /* GForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GForm.swift; sourceTree = "<group>"; };
 		D51509C124525B780005C0E3 /* GFood.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GFood.swift; sourceTree = "<group>"; };
+		D51509C324539C970005C0E3 /* SearchList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchList.swift; sourceTree = "<group>"; };
 		D51FECC8243131FA00BF129C /* KeyboardObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardObserver.swift; sourceTree = "<group>"; };
 		D51FECCA24316DC600BF129C /* SheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetView.swift; sourceTree = "<group>"; };
 		D51FECD1243171A100BF129C /* SignupSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupSheetView.swift; sourceTree = "<group>"; };
@@ -241,6 +243,7 @@
 			isa = PBXGroup;
 			children = (
 				D5AA594A24271366000BEC5C /* ListView.swift */,
+				D51509C324539C970005C0E3 /* SearchList.swift */,
 				D5014C212440F44700C5530B /* GrubItem.swift */,
 				D5014C232441431500C5530B /* GrubSheet.swift */,
 				D541F5E5244A4B8F00E98EF1 /* GrumbleSheet.swift */,
@@ -698,6 +701,7 @@
 				D50292312437ACF5008A5BFC /* GFont.swift in Sources */,
 				D540148824393502008F8CCF /* FieldParser.swift in Sources */,
 				D56BA4BB2450B1910065E3E4 /* GSalad.swift in Sources */,
+				D51509C424539C970005C0E3 /* SearchList.swift in Sources */,
 				D51FECCB24316DC600BF129C /* SheetView.swift in Sources */,
 				D541F5EB244CE73200E98EF1 /* GhorblinAnimations.swift in Sources */,
 				D5C4D0BA243FE8120033EFB0 /* GDate.swift in Sources */,

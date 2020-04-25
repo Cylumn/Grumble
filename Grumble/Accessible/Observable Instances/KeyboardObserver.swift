@@ -17,16 +17,17 @@ public extension UIApplication {
 }
 
 public class KeyboardObserver: ObservableObject {
-    private static var instance: KeyboardObserver?
+    private static var instance: [KeyboardObserver?]?
     private var notificationCenter: NotificationCenter
-    public var observedFields: Set<GFormID>
+    public static var observedFields: Set<GFormID> = [.filterList]
+    private var formID: GFormID
     @Published private var keyboardVisible: Bool
     @Published private var keyboardHeight: CGFloat
     
     //Initializer
-    private init(center: NotificationCenter = .default) {
+    private init(center: NotificationCenter = .default, _ formID: GFormID) {
         self.notificationCenter = center
-        self.observedFields = [.filterList]
+        self.formID = formID
         self.keyboardVisible = false
         self.keyboardHeight = 0
         
@@ -35,22 +36,25 @@ public class KeyboardObserver: ObservableObject {
     }
     
     //Getter Methods
-    public static func ko() -> KeyboardObserver {
+    public static func ko(_ formID: GFormID) -> KeyboardObserver {
         if KeyboardObserver.instance == nil {
-            KeyboardObserver.instance = KeyboardObserver()
+            KeyboardObserver.instance = Array(repeating: nil, count: GFormID.size.rawValue)
         }
-        return KeyboardObserver.instance!
+        if KeyboardObserver.instance![formID.rawValue] == nil {
+            KeyboardObserver.instance![formID.rawValue] = KeyboardObserver(formID)
+        }
+        return KeyboardObserver.instance![formID.rawValue]!
     }
     
-    public func visible(_ field: GFormID) -> Bool {
-        if self.observedFields.contains(field) {
+    public func visible() -> Bool {
+        if KeyboardObserver.observedFields.contains(self.formID) {
             return self.keyboardVisible
         }
         return false
     }
     
-    public func height(_ field: GFormID, tabbedView: Bool = true) -> CGFloat {
-        if self.observedFields.contains(field) {
+    public func height(tabbedView: Bool = true) -> CGFloat {
+        if KeyboardObserver.observedFields.contains(self.formID) {
             if !self.keyboardVisible {
                 return 0
             }
@@ -61,17 +65,17 @@ public class KeyboardObserver: ObservableObject {
     }
     
     //Setter Methods
-    public func appendField(_ field: GFormID, _ beginsVisible: Bool = false) {
-        self.observedFields.insert(field)
-        self.keyboardVisible = beginsVisible
+    public static func appendField(_ field: GFormID, _ beginsVisible: Bool = false) {
+        KeyboardObserver.observedFields.insert(field)
+        self.ko(field).keyboardVisible = beginsVisible
     }
     
-    public func removeField(_ field: GFormID) {
-        self.observedFields.remove(field)
+    public static func removeField(_ field: GFormID) {
+        KeyboardObserver.observedFields.remove(field)
     }
     
-    public func clearFields() {
-        self.observedFields.removeAll()
+    public static func clearFields() {
+        KeyboardObserver.observedFields.removeAll()
     }
     
     //Observer Methods

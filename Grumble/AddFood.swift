@@ -14,42 +14,27 @@ private let fieldHeight: CGFloat = sHeight() * 0.05 + 20
 private let formHeight: CGFloat = fieldHeight * CGFloat(size(formID) - 1)
 private let tagTitleHeight: CGFloat = sHeight() * 0.08
 
-public class TagBoxHolder: ObservableObject {
-    private static var instance: TagBoxHolder? = nil
-    @Published private var tags: [AddFood.TagBox] = []
+public class AddFoodCookie: ObservableObject {
+    private static var instance: AddFoodCookie? = nil
+    @Published public var currentFID: String? = nil
+    @Published public var tags: Set<Int> = [0]
     
-    //Getter Methods
-    public static func tbh() -> TagBoxHolder {
-        if TagBoxHolder.instance == nil {
-            TagBoxHolder.instance = TagBoxHolder()
+    public static func afc() -> AddFoodCookie {
+        if AddFoodCookie.instance == nil {
+            AddFoodCookie.instance = AddFoodCookie()
         }
-        return TagBoxHolder.instance!
-    }
-    
-    public func tagBoxes() -> [AddFood.TagBox] {
-        return self.tags
-    }
-    
-    //Setter Methods
-    public func setTagBoxes(_ newTags: [AddFood.TagBox]) {
-        self.tags = newTags
-    }
-    
-    public func appendTagBox(_ newTag: AddFood.TagBox) {
-        self.tags.append(newTag)
+        return AddFoodCookie.instance!
     }
 }
 
 public struct AddFood: View, GFieldDelegate {
-    @ObservedObject private var uc: UserCookie = UserCookie.uc()
-    @ObservedObject private var tr: TabRouter = TabRouter.tr()
+    private var uc: UserCookie = UserCookie.uc()
     private var contentView: ContentView
-    public static var currentFID: String? = nil
     
     @ObservedObject private var gft: GFormText = GFormText.gft(formID)
-    @ObservedObject private var tbh: TagBoxHolder = TagBoxHolder.tbh()
-    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko()
-    @State private var showTagSearch: Bool = false
+    @ObservedObject private var afc: AddFoodCookie = AddFoodCookie.afc()
+    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
+    @State private var presentSearchTag: Bool = false
     
     //Initializer
     public init(_ contentView: ContentView){
@@ -60,7 +45,6 @@ public struct AddFood: View, GFieldDelegate {
         self.gft.setError(FieldIndex.price.rawValue, "(Optional)")
         self.gft.setError(FieldIndex.restaurant.rawValue, "(Optional)")
         self.gft.setError(FieldIndex.address.rawValue, "(Optional)")
-        self.tbh.setTagBoxes([TagBox("Food", id: 0)])
     }
     
     //Field Enums
@@ -88,10 +72,8 @@ public struct AddFood: View, GFieldDelegate {
         GFormText.gft(formID).setText(FieldIndex.price.rawValue, "")
         GFormText.gft(formID).setText(FieldIndex.restaurant.rawValue, "")
         GFormText.gft(formID).setText(FieldIndex.address.rawValue, "")
-        var tagBoxes = TagBoxHolder.tbh().tagBoxes()
-        tagBoxes.removeSubrange(1 ..< tagBoxes.count)
-        TagBoxHolder.tbh().setTagBoxes(tagBoxes)
-        AddFood.currentFID = nil
+        AddFoodCookie.afc().tags = [0]
+        AddFoodCookie.afc().currentFID = nil
     }
     
     //Proceed Methods
@@ -101,26 +83,14 @@ public struct AddFood: View, GFieldDelegate {
         foodItem["price"] = parsePriceField(self.gft.text(FieldIndex.price.rawValue))
         foodItem["restaurant"] = !self.gft.text(FieldIndex.restaurant.rawValue).isEmpty ? self.gft.text(FieldIndex.restaurant.rawValue) : nil
         foodItem["address"] = !self.gft.text(FieldIndex.address.rawValue).isEmpty ? self.gft.text(FieldIndex.address.rawValue) : nil
-        var tagIDs: Set<Int> = []
-        var smallestTag: Int? = nil
-        for tagBox in self.tbh.tagBoxes() {
-            let tag = tagBox.tag()
-            tagIDs.insert(tag)
-            if tag != 0 {
-                if smallestTag == nil {
-                    smallestTag = tag
-                } else if tag < smallestTag! {
-                    smallestTag = tag
-                }
-            }
-        }
+
         var tagDictionary: [String: Int] = [:]
-        for tag in tagIDs.sorted() {
+        for tag in self.afc.tags.sorted() {
             tagDictionary[tagTitles[tag]] = tag
         }
-        tagDictionary["smallestTag"] = smallestTag ?? 0
+        tagDictionary["smallestTag"] = self.afc.tags.filter({ $0 != 0 }).sorted().first ?? 0
         foodItem["tags"] = tagDictionary
-        switch AddFood.currentFID {
+        switch self.afc.currentFID {
         case nil:
             foodItem["date"] = getDate()
             let foodDictionary = foodItem as NSDictionary
@@ -133,13 +103,13 @@ public struct AddFood: View, GFieldDelegate {
             appendLocalFood(fid, foodDictionary)
             appendCloudFood(fid, foodDictionary)
         default:
-            foodItem["date"] = UserCookie.uc().foodList()[AddFood.currentFID!]!.date
+            foodItem["date"] = UserCookie.uc().foodList()[self.afc.currentFID!]!.date
             let foodDictionary = foodItem as NSDictionary
             
-            self.uc.appendFoodList(AddFood.currentFID!, Grub(foodDictionary))
+            self.uc.appendFoodList(self.afc.currentFID!, Grub(foodDictionary))
             self.uc.sortFoodListByDate()
-            appendLocalFood(AddFood.currentFID!, foodDictionary)
-            appendCloudFood(AddFood.currentFID!, foodDictionary)
+            appendLocalFood(self.afc.currentFID!, foodDictionary)
+            appendCloudFood(self.afc.currentFID!, foodDictionary)
         }
         contentView.toListHome()
         
@@ -221,8 +191,8 @@ public struct AddFood: View, GFieldDelegate {
         private var id: Int
         
         //Initializer
-        public init(_ name: String, id: Int) {
-            self.name = name
+        public init(id: Int) {
+            self.name = capFirst(tagTitles[id])
             self.id = id
         }
         
@@ -262,9 +232,7 @@ public struct AddFood: View, GFieldDelegate {
                         Color.clear
                         
                         Button(action: {
-                            var boxes = TagBoxHolder.tbh().tagBoxes()
-                            boxes.removeAll(where: {$0.name == self.name})
-                            TagBoxHolder.tbh().setTagBoxes(boxes)
+                            AddFoodCookie.afc().tags.remove(self.id)
                         }, label: {
                             Image(systemName: "multiply")
                                 .padding(4)
@@ -280,7 +248,9 @@ public struct AddFood: View, GFieldDelegate {
     }
     
     public var body: some View {
-        ZStack(alignment: .topLeading) {
+        let sortedTags: [Int] = self.afc.tags.sorted()
+        
+        return ZStack(alignment: .topLeading) {
             gColor(.blue0)
                 .edgesIgnoringSafeArea(.top)
             
@@ -373,8 +343,8 @@ public struct AddFood: View, GFieldDelegate {
                     .foregroundColor(Color.black)
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: sHeight() * 0.02) {
-                        ForEach(0 ..< self.tbh.tagBoxes().count, id: \.self) { index in
-                            self.tbh.tagBoxes()[index]
+                        ForEach(0 ..< sortedTags.count, id: \.self) { index in
+                            TagBox(id: sortedTags[index])
                                 .transition(.opacity)
                                 .animation(gAnim(.spring))
                         }
@@ -401,27 +371,27 @@ public struct AddFood: View, GFieldDelegate {
                 }.padding(20)
                 .frame(width: sWidth())
                 .shadow(color: Color.black.opacity(0.2), radius: 12, y: 15)
-                .offset(y: -self.ko.height(formID, tabbedView: false))
+                .offset(y: -self.ko.height(tabbedView: false))
             }.frame(height: sHeight() - safeAreaInset(.top))
             
             ZStack(alignment: .center) {
                 Color(white: 0.98)
                 
-                SearchTag(self.$showTagSearch)
+                SearchTag(self.$presentSearchTag)
                 .clipped()
                 
-                if !self.showTagSearch {
+                if !self.presentSearchTag {
                     Color(white: 0.9)
                     
                     Button(action: {
                         withAnimation(gAnim(.easeOut)) {
-                            self.showTagSearch.toggle()
+                            self.presentSearchTag.toggle()
                             
                             UIApplication.shared.endEditing()
                             GFormRouter.gfr().callFirstResponder(.searchTag)
                             
-                            self.ko.removeField(formID)
-                            self.ko.appendField(.searchTag, true)
+                            KeyboardObserver.removeField(formID)
+                            KeyboardObserver.appendField(.searchTag, true)
                         }
                     }, label: {
                         Image(systemName: "plus")
@@ -430,11 +400,11 @@ public struct AddFood: View, GFieldDelegate {
                             .font(.system(size: 15, weight: .black))
                     })
                 }
-            }.frame(width: self.showTagSearch ? sWidth() : sWidth() * 0.1, height: self.showTagSearch ? sHeight() - tabHeight : sWidth() * 0.08)
-            .cornerRadius(self.showTagSearch ? 0 : 30)
-            .offset(x: self.showTagSearch ? 0 : sWidth() * 0.23, y: self.showTagSearch ? 0 : navBarHeight + formHeight + tagTitleHeight * 0.5 - sWidth() * 0.03)
+            }.frame(width: self.presentSearchTag ? sWidth() : sWidth() * 0.1, height: self.presentSearchTag ? sHeight() - tabHeight : sWidth() * 0.08)
+            .cornerRadius(self.presentSearchTag ? 0 : 30)
+            .offset(x: self.presentSearchTag ? 0 : sWidth() * 0.23, y: self.presentSearchTag ? 0 : navBarHeight + formHeight + tagTitleHeight * 0.5 - sWidth() * 0.03)
         }.onTapGesture {
-            if !self.showTagSearch {
+            if !self.presentSearchTag {
                 UIApplication.shared.endEditing()
             }
         }

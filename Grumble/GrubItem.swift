@@ -9,46 +9,43 @@
 import SwiftUI
 
 public struct GrubItem: View {
+    private var lc: ListCookie = ListCookie.lc()
     fileprivate var fid: String
     fileprivate var grub: Grub
-    private var selectedFID: Binding<String?>
-    private var showSheet: Binding<Bool>
-    private var onGrubSheetHide: Binding<() -> Void>
+    private var smallestTag: Int
     
     //Initializer
-    public init(fid: String, _ grub: Grub, _ selectedFID: Binding<String?>, _ showSheet: Binding<Bool>, onGrubSheetHide: Binding<() -> Void>) {
+    public init(fid: String, _ grub: Grub) {
         self.fid = fid
         self.grub = grub
-        self.selectedFID = selectedFID
-        self.showSheet = showSheet
-        self.onGrubSheetHide = onGrubSheetHide
+        self.smallestTag = self.grub.tags["smallestTag"]!
     }
     
     //Function Method
     fileprivate func onClick() {
-        self.selectedFID.wrappedValue = self.fid
+        self.lc.selectedFID = self.fid
         withAnimation(gAnim(.easeOut)) {
-            self.showSheet.wrappedValue = true
+            self.lc.presentGrubSheet = true
         }
         TabRouter.tr().hide(true)
         UIApplication.shared.endEditing()
         
-        self.onGrubSheetHide.wrappedValue = { TabRouter.tr().hide(false) }
+        self.lc.onGrubSheetHide = { TabRouter.tr().hide(false) }
     }
     
     public var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             Button(action: {}, label: {
                 ZStack(alignment: .bottom) {
-                    Rectangle().fill(tagColors[self.grub.tags["smallestTag"]!])
+                    Rectangle().fill(tagColors[self.smallestTag])
                     
-                    Image(tagSprites[self.grub.tags["smallestTag"]!])
+                    Image(tagSprites[self.smallestTag])
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                        .frame(width: 200, height: 150, alignment: self.grub.tags["smallestTag"]! == 0 ? .center : .bottom)
+                    .frame(width: 200, height: 150, alignment: self.smallestTag == 0 ? .center : .bottom)
                     
-                    if self.grub.tags["smallestTag"] != 0 {
-                        LinearGradient(gradient: Gradient(colors: [Color.clear, tagColors[self.grub.tags["smallestTag"]!].opacity(0.4)]), startPoint: .top, endPoint: .bottom)
+                    if self.smallestTag != 0 {
+                        LinearGradient(gradient: Gradient(colors: [Color.clear, tagColors[self.smallestTag].opacity(0.4)]), startPoint: .top, endPoint: .bottom)
                             .frame(height: 150)
                     }
                     
@@ -77,7 +74,7 @@ public struct GrubItem: View {
             }).buttonStyle(PlainButtonStyle())
             .shadow(color: tagColors[self.grub.tags["smallestTag"]!].opacity(0.2), radius: 10, y: 10)
             
-                Text(self.grub.restaurant ?? " ")
+            Text(self.grub.restaurant ?? " ")
                 .padding([.top, .leading], 10)
                 .font(gFont(.ubuntuLight, .width, 2))
                 .foregroundColor(Color.black)
@@ -91,13 +88,11 @@ public struct GrubItem: View {
 }
 
 public struct GrubSearchItem: View {
-    private var focusSearch: Binding<Bool>
     private var item: GrubItem
-    @State private var alertDelete: Bool = false
+    @State private var presentDeleteAlert: Bool = false
     
     //Initializer
-    public init(_ focusSearch: Binding<Bool>, _ item : GrubItem) {
-        self.focusSearch = focusSearch
+    public init(_ item : GrubItem) {
         self.item = item
     }
     
@@ -176,7 +171,7 @@ public struct GrubSearchItem: View {
                 .font(gFont(.ubuntuBold, .width, 1.5))
                 .foregroundColor(gColor(.blue4))
                 .onTapGesture {
-                    self.focusSearch.wrappedValue = true
+                    ListCookie.lc().searchFocused = true
                     self.item.onClick()
                 }
                 .overlay(RoundedRectangle(cornerRadius: 8)
@@ -189,17 +184,16 @@ public struct GrubSearchItem: View {
                 .font(gFont(.ubuntuBold, .width, 1.5))
                 .foregroundColor(gColor(.coral))
                 .onTapGesture {
-                    self.focusSearch.wrappedValue = true
+                    ListCookie.lc().searchFocused = true
                     UIApplication.shared.endEditing()
-                    self.alertDelete.toggle()
+                    self.presentDeleteAlert.toggle()
                 }.overlay(RoundedRectangle(cornerRadius: 8)
-                    .stroke(gColor(.coral), lineWidth: 2))
-            }).alert(isPresented: self.$alertDelete) {
+                .stroke(gColor(.coral), lineWidth: 2))
+            }).alert(isPresented: self.$presentDeleteAlert) {
                 Alert(title: Text("Delete Grub?"), primaryButton: Alert.Button.default(Text("Cancel")), secondaryButton: Alert.Button.destructive(Text("Delete")) {
                     Grub.removeFood(self.item.fid)
                 })
             }
-            
         }.padding(10)
         .padding(.trailing, 20)
         .frame(maxWidth: .infinity)
@@ -207,11 +201,5 @@ public struct GrubSearchItem: View {
         .foregroundColor(Color(white: 0.2))
         .cornerRadius(10)
         .shadow(color: Color.black.opacity(0.1), radius: 3)
-    }
-}
-
-struct GrubItem_Previews: PreviewProvider {
-    static var previews: some View {
-        return GrubItem(fid: "", Grub.testGrub(), Binding.constant(nil), Binding.constant(false), onGrubSheetHide: Binding.constant({}))
     }
 }
