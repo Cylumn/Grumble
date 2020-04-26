@@ -16,6 +16,8 @@ public struct GrumbleSheet: View {
     private var fidList: [String]
     @State private var fidIndex: Int = 0
     private var ghorblinFill: [Color]
+    private var type: Int
+    private static var tableColors: [Color] = [gColor(.blue2), gColor(.dandelion), gColor(.coral), gColor(.magenta)]
 
     @GestureState(initialValue: CGFloat(0), resetTransaction: Transaction(animation: gAnim(.springSlow))) private var holdState
     private var holdScaleAnchor: UnitPoint
@@ -33,12 +35,16 @@ public struct GrumbleSheet: View {
     public init( _ type: GhorblinType, show: Binding<Bool>, _ fidList: [String]) {
         switch type {
         case .grumble:
+            self.type = 0
             self.ghorblinFill = [gColor(.blue0), gColor(.blue4), Color(white: 0.93)]
         case .orthodox:
+            self.type = 1
             self.ghorblinFill = [gColor(.dandelion), Color(white: 0.93)]
         case .defiant:
+            self.type = 2
             self.ghorblinFill = [gColor(.coral), Color(white: 0.93)]
         case .grubologist:
+            self.type = 3
             self.ghorblinFill = [gColor(.magenta), Color(white: 0.93    )]
         }
         self.show = show
@@ -236,13 +242,29 @@ public struct GrumbleSheet: View {
             
             ZStack(alignment: .bottom) {
                 Ellipse()
-                    .fill(Color(white: 0.9))
+                    .fill(GrumbleSheet.tableColors[self.type])
                     .frame(width: sWidth() * 1.5, height: sHeight() * 0.35)
                     .clipped()
                 
                 Rectangle()
-                    .fill(Color(white: 0.9))
+                    .fill(GrumbleSheet.tableColors[self.type])
                     .frame(width: sWidth(), height: sHeight() * 0.15)
+                
+                Ellipse()
+                    .fill(Color.black.opacity(0.2))
+                    .frame(width: sWidth() * 0.95, height: sHeight() * 0.18)
+                    .offset(y: sHeight() * -0.09)
+                
+                Image("GhorblinPlate")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: sWidth() * 0.9)
+                    .offset(y: sHeight() * -0.1)
+                
+                Ellipse()
+                    .fill(Color.black.opacity(Double(0.2 - 0.2 * self.dragData())))
+                    .frame(width: sWidth() * (0.7 + 0.2 * self.dragData()), height: sHeight() * (0.13 + 0.1 * self.dragData()))
+                    .offset(y: sHeight() * (-0.15 + 0.05 * self.dragData()))
             }.frame(width: sWidth())
         }.frame(width: sWidth())
     }
@@ -261,35 +283,37 @@ public struct GrumbleSheet: View {
     }
     
     private func tagIcon(_ tag: Int, index: Int) -> some View {
-        let size = sWidth() * (0.2 + 0.1 * self.dragData())
+        let size = sWidth() * (0.18 + 0.1 * self.dragData())
         return gTagView(tag, CGSize(width: size, height: size), idleData: self.ga.idleData, tossData: self.dragHorizontalData(index))
     }
     
     private var ghorblinView: some View {
         ZStack {
-            Ellipse()
-                .fill(Color.black)
-                .frame(width: 250 + 50 * self.dragData(), height: 60 + 20 * self.dragData())
-                .shadow(color: Color.black.opacity(0.3 - 0.3 * Double(self.dragData())), radius: 10 + 20 * self.dragData())
-                .opacity(Double(0.3 - 0.3 * self.dragData()))
-                .offset(y: 200)
-            
             if self.fidList.count > 0 {
                 ForEach(self.grubRenderingRange(), id: \.self) { index in
-                    self.tagIcon(self.grub(index)!.tags["smallestTag"]!, index: index)
-                        .rotationEffect(self.grubRotation(index))
-                        .offset(x: self.grubOffsetX(index), y: 170 + self.grubOffsetY(index) + self.chosenGrubOffsetY())
-                        .scaleEffect(1 + 2 * self.chosenGrubData)
+                    ZStack {
+                        Ellipse()
+                            .fill(Color.black.opacity(Double(0.3 - 0.3 * self.dragHorizontalData(index))))
+                            .frame(width: sWidth() * (0.2 + 0.1 * self.dragData()), height: sHeight() * (0.03 + 0.02 * self.dragData()))
+                            .offset(x: self.grubOffsetX(index), y: 210 + 10 * self.dragData() + self.grubOffsetY(index) * 0.1 + self.chosenGrubOffsetY() + sHeight() * 0.1 * self.chosenGrubData)
+                            .scaleEffect(1 + 2 * self.chosenGrubData)
+                        
+                        self.tagIcon(self.grub(index)!.tags["smallestTag"]!, index: index)
+                            .rotationEffect(self.grubRotation(index))
+                            .offset(x: self.grubOffsetX(index), y: 185 + self.grubOffsetY(index) + self.chosenGrubOffsetY())
+                            .scaleEffect(1 + 2 * self.chosenGrubData)
+                    }
                 }
             }
             
             ZStack {
                 GhorblinSheet(drip: self.ga.drip(), idleScale: self.ga.idleData, hold: self.holdData())
                     .fill(self.dripFill)
-                    .shadow(color: Color.white.opacity(0.2), radius: 20 * self.holdData())
                 
                 GhorblinSheetOverlay(drip: self.ga.drip(), idleScale: self.ga.idleData, hold: self.holdData())
                     .fill(Color.white)
+                
+                GhorblinSheetHighlights(idle: self.ga.idleData, hold: self.holdData())
             }.offset(y: self.coverDistance())
         }
     }
@@ -333,8 +357,9 @@ public struct GrumbleSheet: View {
         }.onEnded { drag in
             withAnimation(gAnim(.easeOut)) {
                 switch self.coverDragState {
-                case .cancelled:
+                case .cancelled, .covered:
                     self.coverDragState = .covered
+                    self.dragDistance = 0
                 case .lifted:
                     self.dragDistance = -sHeight() * 0.6
                     self.coverDragState = .completed
@@ -366,8 +391,6 @@ public struct GrumbleSheet: View {
                             self.dragHorizontal = 0
                         }
                     }
-                default:
-                    self.dragDistance = 0
                 }
             }
         })
@@ -477,7 +500,7 @@ public struct GrumbleSheet: View {
                 .clipped()
                 .edgesIgnoringSafeArea(.all)
             
-            LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black.opacity(0.5)]), startPoint: .top, endPoint: .bottom)
+            LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black.opacity(0.3)]), startPoint: .top, endPoint: .bottom)
                 .frame(height: sHeight() * 0.3)
             
             self.ghorblinView

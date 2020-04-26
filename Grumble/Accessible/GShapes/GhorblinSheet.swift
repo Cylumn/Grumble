@@ -70,10 +70,10 @@ private func foodCover(path: inout Path, start: CGPoint, width: CGFloat, scaleX:
     path.addLine(to: CGPoint(x: cover.x - 75 * scaleX, y: cover.y + 100 - 2))
     path.addArc(center: CGPoint(x: cover.x - 75 * scaleX, y: cover.y + 100), radius: 2,
                 startAngle: Angle(degrees: -90), endAngle: Angle(degrees: 180), clockwise: true)
-    path.addQuadCurve(to: CGPoint(x: cover.x + width * 0.5, y: cover.y + 130),
-                      control: CGPoint(x: cover.x - 85 * scaleX, y: cover.y + 130))
+    path.addQuadCurve(to: CGPoint(x: cover.x + width * 0.5, y: cover.y + 145),
+                      control: CGPoint(x: cover.x - 85 * scaleX, y: cover.y + 143))
     path.addQuadCurve(to: CGPoint(x: cover.x + 75 * scaleX + 2 + width, y: cover.y + 100),
-                      control: CGPoint(x: cover.x + 85 * scaleX + width, y: cover.y + 130))
+                      control: CGPoint(x: cover.x + 85 * scaleX + width, y: cover.y + 143))
     path.addArc(center: CGPoint(x: cover.x + 75 * scaleX + width, y: cover.y + 100), radius: 2,
                 startAngle: Angle(degrees: 0), endAngle: Angle(degrees: -90), clockwise: true)
     path.addLine(to: CGPoint(x: cover.x + 75 * scaleX + width, y: cover.y + 100))
@@ -102,7 +102,7 @@ private func ghorblinStomach(path: inout Path, start: CGPoint, scale: CGFloat, h
     path.addArc(center: CGPoint(x: start.x - 27, y: start.y + 210 - 10 * scale), radius: 20,
                 startAngle: Angle(degrees: -90), endAngle: Angle(degrees: 180), clockwise: true)
     path.addLine(to: CGPoint(x: start.x - 47, y: start.y + 220))
-    foodCover(path: &path, start: CGPoint(x: start.x - 47, y: start.y + 220 - 5 * scale + 30 * (1 - hold)), width: width, scaleX: 1.4 - 0.1 * scale - 0.2 * hold, hold: hold)
+    foodCover(path: &path, start: CGPoint(x: start.x - 47, y: start.y + 250 - 5 * scale - 20 * hold), width: width, scaleX: 1.4 - 0.1 * scale - 0.2 * hold, hold: hold)
     path.addArc(center: CGPoint(x: start.x - 47 + width + 10, y: start.y + 210 - 5 * scale),
                 radius: 10, startAngle: Angle(degrees: 180), endAngle: Angle(degrees: -90), clockwise: false)
     path.addLine(to: CGPoint(x: start.x + 30, y: start.y + 200 - 5 * scale))
@@ -252,38 +252,93 @@ public struct GhorblinSheetOverlay: Shape {
         path.addRoundedRect(in: CGRect(x: 215 - 13 * self.data(.idle), y: 355 + 8 * self.data(.hold), width: 40 + 10 * self.data(.idle), height: 7 - 2 * self.data(.idle)), cornerSize: CGSize(width: 3, height: 10))
         path.addRoundedRect(in: CGRect(x: 176 + 2 * self.data(.idle), y: 372 - 3 * self.data(.idle), width: 10, height: 20), cornerSize: CGSize(width: 5, height: 5))
         
-        var xT: CGFloat = 18 + 1 * self.data(.idle) + 5 * self.data(.hold)
-        var yT: CGFloat = 0 - 3 * self.data(.idle) + 20 * (1 - self.data(.hold))
-        path.move(to: CGPoint(x: 70 + xT, y: 500 + yT))
-        path.addQuadCurve(to: CGPoint(x: 92 + xT, y: 451 + yT),
-                          control: CGPoint(x: 75 + xT, y: 460 + yT))
-        path.addArc(center: CGPoint(x: 95 + xT, y: 455 + yT), radius: 5,
-                    startAngle: Angle(degrees: -135), endAngle: Angle(degrees: 45), clockwise: false)
-        path.addQuadCurve(to: CGPoint(x: 80 + xT, y: 500 + yT),
-                          control: CGPoint(x: 83 + xT, y: 470 + yT))
-        path.addArc(center: CGPoint(x: 75 + xT, y: 500 + yT), radius: 5,
-                    startAngle: Angle(degrees: 0), endAngle: Angle(degrees: 180), clockwise: false)
-        path.closeSubpath()
+        let xT = 0 + 2 * self.data(.idle) - 3 * self.data(.hold)
+        let yT = 0 - 5 * self.data(.idle) - 5 * self.data(.hold)
         
-        xT = 3 - 3 * self.data(.idle) - 15 * self.data(.hold)
-        yT = -10 - 5 * self.data(.idle) + 20 * (1 - self.data(.hold)) + 10 * self.data(.hold)
-        path.move(to: CGPoint(x: 287 + xT, y: 515 + yT))
-        path.addQuadCurve(to: CGPoint(x: 208 + xT, y: 530 + yT), control: CGPoint(x: 268 + xT, y: 528 + yT))
-        path.addArc(center: CGPoint(x: 203 + xT, y: 535 + yT), radius: 5, startAngle: Angle(degrees: -90), endAngle: Angle(degrees: 90), clockwise: true)
-        path.addQuadCurve(to: CGPoint(x: 293 + xT, y: 523 + yT), control: CGPoint(x: 263 + xT, y: 540 + yT))
-        path.addArc(center: CGPoint(x: 290 + xT, y: 519 + yT), radius: 5, startAngle: Angle(degrees: 120), endAngle: Angle(degrees: -120), clockwise: true)
-        
-        xT = 18 + 2 * self.data(.idle) - 10 * self.data(.hold)
-        yT = 10 - 5 * self.data(.idle) + 30 * (1 - self.data(.hold))
-        path.move(to: CGPoint(x: 183 + xT, y: 439 + yT))
-        path.addQuadCurve(to: CGPoint(x: 215 + xT, y: 460 + yT), control: CGPoint(x: 195 + xT, y: 445 + yT))
-        path.addArc(center: CGPoint(x: 225 + xT, y: 455 + yT), radius: 10, startAngle: Angle(degrees: 135), endAngle: Angle(degrees: 0), clockwise: true)
-        path.addQuadCurve(to: CGPoint(x: 200 + xT, y: 415 + yT), control: CGPoint(x: 225 + xT, y: 420 + yT))
-        path.addArc(center: CGPoint(x: 195 + xT, y: 430 + yT), radius: 15, startAngle: Angle(degrees: -90), endAngle: Angle(degrees: 135), clockwise: true)
+        path.move(to: CGPoint(x: 193 + xT, y: 469 + yT))
+        path.addQuadCurve(to: CGPoint(x: 225 + xT, y: 490 + yT), control: CGPoint(x: 205 + xT, y: 475 + yT))
+        path.addArc(center: CGPoint(x: 235 + xT, y: 485 + yT), radius: 10, startAngle: Angle(degrees: 135), endAngle: Angle(degrees: 0), clockwise: true)
+        path.addQuadCurve(to: CGPoint(x: 210 + xT, y: 445 + yT), control: CGPoint(x: 235 + xT, y: 450 + yT))
+        path.addArc(center: CGPoint(x: 205 + xT, y: 460 + yT), radius: 15, startAngle: Angle(degrees: -90), endAngle: Angle(degrees: 135), clockwise: true)
         
         path.addRoundedRect(in: CGRect(x: 176 - 50 * self.data(.idle) - 20 * self.data(.hold), y: 522 + 20 * (1 - self.data(.hold)), width: 10, height: 20), cornerSize: CGSize(width: 5, height: 5), transform: CGAffineTransform(rotationAngle: -0.2 - 0.1 * self.data(.idle)))
         
         return path
+    }
+}
+
+public struct GhorblinSheetHighlights: View {
+    private var idle: CGFloat
+    private var hold: CGFloat
+    
+    public init(idle: CGFloat, hold: CGFloat) {
+        self.idle = idle
+        self.hold = hold
+    }
+    
+    fileprivate struct Highlights: Shape {
+        public var animatableData: AnimatablePair<CGFloat, CGFloat>
+        
+        fileprivate init(idle: CGFloat, hold: CGFloat) {
+            self.animatableData = AnimatablePair(idle, hold)
+        }
+        
+        private func idle() -> CGFloat { return animatableData.first }
+        private func hold() -> CGFloat { return animatableData.second }
+        
+        func path(in rect: CGRect) -> Path {
+            let xT = 0 + 2 * self.idle()
+            let yT = 0 - 5 * self.idle() - 5 * self.hold()
+            
+            var p = Path() { path in
+                path.move(to: CGPoint(x: 120 + xT, y: 450 + yT))
+                path.addQuadCurve(to: CGPoint(x: 80 + xT + 10 * self.idle() + 10 * self.hold(), y: 495 + yT - 10 * self.idle()),
+                                  control: CGPoint(x: 95 + xT + 5 * self.idle() + 10 * self.hold(), y: 460 + yT))
+            }
+            
+            p.addPath(Path() { path in
+                path.move(to: CGPoint(x: 180 + xT, y: 410 + yT))
+                path.addQuadCurve(to: CGPoint(x: 170 + xT, y: 415 + yT),
+                                  control: CGPoint(x: 170 + xT, y: 410 + yT))
+                
+            })
+            
+            return p
+        }
+    }
+    
+    fileprivate struct Shadows: Shape {
+        public var animatableData: AnimatablePair<CGFloat, CGFloat>
+        
+        fileprivate init(idle: CGFloat, hold: CGFloat) {
+            self.animatableData = AnimatablePair(idle, hold)
+        }
+        
+        private func idle() -> CGFloat { return animatableData.first }
+        private func hold() -> CGFloat { return animatableData.second }
+        
+        func path(in rect: CGRect) -> Path {
+            let xT = 0 + 2 * self.idle() - 15 * self.hold()
+            let yT = 0 - 5 * self.idle() - 10 * self.hold()
+            
+            return Path() { path in
+                path.move(to: CGPoint(x: 295 + xT - 5 * self.idle(), y: 540 + yT))
+                path.addQuadCurve(to: CGPoint(x: 230 + xT, y: 565 + yT),
+                                  control: CGPoint(x: 280 + xT - 10 * self.idle(), y: 560 + yT))
+            }
+        }
+    }
+    
+    public var body: some View {
+        return ZStack {
+            Highlights(idle: self.idle, hold: self.hold)
+                .stroke(style: StrokeStyle(lineWidth: 9, lineCap: .round))
+                .foregroundColor(Color.white)
+            
+            Shadows(idle: self.idle, hold: self.hold)
+                .stroke(style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                .foregroundColor(Color(white: 0.8))
+        }
     }
 }
 

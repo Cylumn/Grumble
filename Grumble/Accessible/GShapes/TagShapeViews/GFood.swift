@@ -51,7 +51,8 @@ public struct GFood: GTag {
                 self.tag
                 
                 self.logo
-            }.scaleEffect(1.2, anchor: UnitPoint.bottom)
+            }.scaleEffect(1.1, anchor: UnitPoint.bottom)
+            .offset(y: self.bHeight * -0.1)
         }.frame(width: self.bWidth, height: self.bHeight)
     }
 }

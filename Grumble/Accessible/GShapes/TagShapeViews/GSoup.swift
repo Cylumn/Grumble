@@ -137,21 +137,24 @@ public struct GSoup: GTag {
         ZStack(alignment: .top) {
             Color.clear
             
-            self.bottomBowl
-            
-            self.bottomCheese
-            
-            self.bottomBread
-            
-            self.mediumCheese
-            
-            self.topBread
-            
-            self.topCheese
-            
-            self.topBowl
-            
-            self.cheeseSplash
+            ZStack(alignment: .top) {
+                self.bottomBowl
+                
+                self.bottomCheese
+                
+                self.bottomBread
+                
+                self.mediumCheese
+                
+                self.topBread
+                
+                self.topCheese
+                
+                self.topBowl
+                
+                self.cheeseSplash
+            }.scaleEffect(x: 1.1, y: 0.9)
+            .offset(y: self.bHeight * 0.02)
         }.frame(width: self.bWidth, height: self.bHeight)
     }
 }
