@@ -8,7 +8,24 @@
 
 import SwiftUI
 
+public class GrubItemCookie: ObservableObject {
+    private static var instance: GrubItemCookie?
+    @Published public var textSize: CGFloat = 2.5
+    
+    public static func gic() -> GrubItemCookie {
+        if GrubItemCookie.instance == nil {
+            GrubItemCookie.instance = GrubItemCookie()
+        }
+        return GrubItemCookie.instance!
+    }
+    
+    public func reset() {
+        self.textSize = 2.5
+    }
+}
+
 public struct GrubItem: View {
+    @ObservedObject private var gic: GrubItemCookie = GrubItemCookie.gic()
     private var lc: ListCookie = ListCookie.lc()
     fileprivate var fid: String
     fileprivate var grub: Grub
@@ -19,6 +36,15 @@ public struct GrubItem: View {
         self.fid = fid
         self.grub = grub
         self.smallestTag = self.grub.tags["smallestTag"]!
+    }
+    
+    //Getter Methods
+    private func textSize(_ text: String) -> CGFloat {
+        let size = min(27.0 / CGFloat(text.count), self.gic.textSize)
+        if size != self.gic.textSize {
+            self.gic.textSize = size
+        }
+        return self.gic.textSize
     }
     
     //Function Method
@@ -39,20 +65,12 @@ public struct GrubItem: View {
                 ZStack(alignment: .bottom) {
                     Rectangle().fill(tagColors[self.smallestTag])
                     
-                    Image(tagSprites[self.smallestTag])
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 200, height: 150, alignment: self.smallestTag == 0 ? .center : .bottom)
-                    
-                    if self.smallestTag != 0 {
-                        LinearGradient(gradient: Gradient(colors: [Color.clear, tagColors[self.smallestTag].opacity(0.4)]), startPoint: .top, endPoint: .bottom)
-                            .frame(height: 150)
-                    }
+                    GTagIcon.icon(tag: self.smallestTag, id: .listBox, size: CGSize(width: 200, height: 150))
                     
                     HStack(alignment: .bottom) {
                         Text(self.grub.food)
                             .padding(10)
-                            .font(gFont(.ubuntuBold, .width, 3))
+                            .font(gFont(.ubuntuBold, .width, textSize(self.grub.food)))
                             .foregroundColor(Color.white)
                     
                         Spacer()
@@ -60,10 +78,10 @@ public struct GrubItem: View {
                         if self.grub.price != nil {
                             Text("$" + String(format:"%.2f", self.grub.price!))
                                 .padding(10)
-                                .font(gFont(.ubuntuBold, .width, 2.5))
+                                .font(gFont(.ubuntuBold, .width, textSize(self.grub.food)))
                                 .foregroundColor(Color.white)
                         }
-                    }
+                    }.background(LinearGradient(gradient: Gradient(colors: [tagColors[self.smallestTag].opacity(0), tagColors[self.smallestTag]]), startPoint: .top, endPoint: .bottom))
                 }.frame(width: 200, height: 150)
                 .cornerRadius(10)
                 .onTapGesture {
@@ -201,5 +219,11 @@ public struct GrubSearchItem: View {
         .foregroundColor(Color(white: 0.2))
         .cornerRadius(10)
         .shadow(color: Color.black.opacity(0.1), radius: 3)
+    }
+}
+
+struct GrubItem_Previews: PreviewProvider {
+    static var previews: some View {
+        GrubItem(fid: "", Grub.testGrub())
     }
 }

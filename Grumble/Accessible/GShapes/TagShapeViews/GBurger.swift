@@ -108,28 +108,30 @@ public struct GBurger: GTag {
         ZStack(alignment: .top) {
             Color.clear
             
-            self.bottomBun
-            self.patty
-                .offset(y: self.bHeight * 0.01 * self.tossData)
-            self.cheese
-                .offset(y: self.bHeight * (0.04 - 0.03 * self.tossData))
-            self.sauce(self.idleData)
-                .fill(Color.red)
-                .offset(x: self.bWidth * -0.03, y: self.bHeight * (0.19 - 0.08 * self.tossData))
-                .rotationEffect(Angle(degrees: Double(-2 * self.tossData)))
-            self.tomato
-                .offset(x: self.bWidth * 0.05 * self.tossData, y: self.bHeight * -0.13 * self.tossData)
-                .rotationEffect(Angle(degrees: Double(5 * self.tossData)))
-            self.lettuce
-                .offset(y: self.bHeight * -0.23 * self.tossData)
-                .rotationEffect(Angle(degrees: Double(-5 * self.tossData)))
-            self.sauce(1 - self.idleData)
-                .fill(Color(red: 1, green: 0.93, blue: 0.47))
-                .offset(x: self.bWidth * 0.08, y: self.bHeight * (0.01 - 0.35 * self.tossData))
-                .rotationEffect(Angle(degrees: Double(5 * self.tossData)))
-            self.topBun
-                .offset(y: self.bHeight * -0.6 * self.tossData)
-                .rotationEffect(Angle(degrees: Double(15 * self.tossData)))
+            ZStack(alignment: .top) {
+                self.bottomBun
+                self.patty
+                    .offset(y: self.bHeight * 0.01 * self.tossData)
+                self.cheese
+                    .offset(y: self.bHeight * (0.04 - 0.03 * self.tossData))
+                self.sauce(self.idleData)
+                    .fill(Color.red)
+                    .offset(x: self.bWidth * -0.03, y: self.bHeight * (0.19 - 0.08 * self.tossData))
+                    .rotationEffect(Angle(degrees: Double(-2 * self.tossData)))
+                self.tomato
+                    .offset(x: self.bWidth * 0.05 * self.tossData, y: self.bHeight * -0.13 * self.tossData)
+                    .rotationEffect(Angle(degrees: Double(5 * self.tossData)))
+                self.lettuce
+                    .offset(y: self.bHeight * -0.23 * self.tossData)
+                    .rotationEffect(Angle(degrees: Double(-5 * self.tossData)))
+                self.sauce(1 - self.idleData)
+                    .fill(Color(red: 1, green: 0.93, blue: 0.47))
+                    .offset(x: self.bWidth * 0.08, y: self.bHeight * (0.01 - 0.35 * self.tossData))
+                    .rotationEffect(Angle(degrees: Double(5 * self.tossData)))
+                self.topBun
+                    .offset(y: self.bHeight * -0.6 * self.tossData)
+                    .rotationEffect(Angle(degrees: Double(15 * self.tossData)))
+            }.offset(y: self.bHeight * 0.02)
         }.frame(width: self.bWidth, height: self.bHeight)
     }
 }

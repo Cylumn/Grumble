@@ -15,8 +15,6 @@ public let tagColors: [Color] = [gColor(.blue2),
                                         gColor(.dandelion),
                                         gColor(.neon),
                                         gColor(.magenta)]
-public let tagBGs: [String] = ["food", "burger", "salad", "soup"]
-public let tagSprites: [String] = ["foodIcon", "burgerIcon", "saladIcon", "soupIcon"]
 public var tagIDMap: [String: Int] {
     var map = [:] as [String: Int]
     for index in 0 ..< tagTitles.count {
@@ -132,6 +130,7 @@ public class UserCookie: ObservableObject {
     
     public func setFoodList(_ foodList: [String: Grub]) {
         self.fList = foodList
+        GrubItemCookie.gic().reset()
     }
     
     public func appendFoodList(_ key: String, _ value: Grub) {
@@ -140,6 +139,7 @@ public class UserCookie: ObservableObject {
     
     public func removeFoodList(_ key: String) {
         self.fList[key] = nil
+        GrubItemCookie.gic().reset()
     }
     
     public func sortFoodListByDate() {

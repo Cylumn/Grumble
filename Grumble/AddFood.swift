@@ -66,6 +66,22 @@ public struct AddFood: View, GFieldDelegate {
         return !self.gft.text(FieldIndex.food.rawValue).isEmpty
     }
     
+    private func presentSearchWidth() -> CGFloat {
+        return sWidth() * (self.presentSearchTag ? 1 : 0.1)
+    }
+    
+    private func presentSearchHeight() -> CGFloat {
+        let small: CGFloat = sWidth() * 0.08
+        let big: CGFloat = sHeight() - tabHeight
+        return self.presentSearchTag ? big : small
+    }
+    
+    private func presentSearchOffset() -> CGSize {
+        let width: CGFloat = self.presentSearchTag ? 0 : sWidth() * 0.23
+        let height: CGFloat = self.presentSearchTag ? 0 : navBarHeight + formHeight + tagTitleHeight * 0.5 - sWidth() * 0.03
+        return CGSize(width: width, height: height)
+    }
+    
     //Setter Methods
     public static func clearFields() {
         GFormText.gft(formID).setText(FieldIndex.food.rawValue, "")
@@ -184,7 +200,85 @@ public struct AddFood: View, GFieldDelegate {
         }
     }
     
-    public struct TagBox: View {
+    private var header: some View {
+        ZStack {
+            HStack(spacing: nil) {
+                Button(action: self.contentView.toListHome, label: {
+                    Image(systemName: "chevron.left")
+                        .foregroundColor(Color.white)
+                        .padding(.leading, 5)
+                }).frame(width: 50, height: navBarHeight)
+                
+                Spacer()
+            }
+            
+            Text("Add Grub to List")
+                .font(gFont(.ubuntuBold, 18))
+                .fontWeight(.bold)
+                .foregroundColor(Color.white)
+                .padding(12)
+        }
+    }
+    
+    private var form: some View {
+        HStack(spacing: 0) {
+            VStack(spacing: 0) {
+                ForEach(0 ..< size(formID)) { index in
+                    if !self.gft.symbol(index).isEmpty {
+                        ZStack {
+                            Image(systemName: self.gft.symbol(index))
+                                .font(.system(size: 25))
+                        }.frame(height: fieldHeight)
+                        .foregroundColor(self.gft.text(index).isEmpty ? Color.gray : gColor(.blue0))
+                    }
+                }
+            }.frame(width: 50)
+            Rectangle()
+                .fill(gColor(.blue2))
+                .frame(width: 10, height: formHeight)
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: 0) {
+                    ForEach(0 ..< FieldIndex.restaurant.rawValue) { index in
+                        ZStack(alignment: .topLeading) {
+                            Color.clear
+                            
+                            if index > 0 {
+                                Rectangle()
+                                .fill(Color(white: 0.8))
+                                .frame(width: 1, height: fieldHeight)
+                            }
+                            
+                            Text(self.gft.name(index))
+                                .padding(7)
+                                .font(gFont(.ubuntuMedium, .width, 1.5))
+                            
+                            GField(formID, index, self)
+                        }.frame(idealWidth: index == FieldIndex.price.rawValue ? sWidth() * 0.35 : .infinity, maxWidth: index == FieldIndex.price.rawValue ? sWidth() * 0.35 : .infinity)
+                        .frame(height: fieldHeight)
+                    }
+                }
+                ForEach(FieldIndex.restaurant.rawValue ..< size(formID)) { index in
+                    ZStack(alignment: .topLeading) {
+                        Color.clear
+                        
+                        Rectangle()
+                            .fill(Color(white: 0.8))
+                            .frame(height: 1)
+                        
+                        Text(self.gft.name(index))
+                            .padding(7)
+                            .font(gFont(.ubuntuMedium, .width, 1.5))
+                        
+                        GField(formID, index, self)
+                    }.frame(idealWidth: .infinity, maxWidth: .infinity)
+                    .frame(height: fieldHeight)
+                }
+            }.foregroundColor(Color(white: 0.3))
+            .frame(idealWidth: .infinity, maxWidth: .infinity)
+        }
+    }
+    
+    private struct TagBox: View {
         fileprivate static var width: CGFloat = sWidth() * sWidth() * 0.001
         fileprivate static var height: CGFloat = width * 1.0
         private var name: String
@@ -203,17 +297,11 @@ public struct AddFood: View, GFieldDelegate {
         
         public var body: some View {
             ZStack(alignment: .center) {
-                ZStack {
-                    Rectangle()
-                        .fill(tagColors[self.id])
+                ZStack(alignment: .bottom) {
+                    GTagIcon.icon(tag: self.id, id: .tagBox, size: CGSize(width: TagBox.width, height: TagBox.height))
                     
-                    Image(tagSprites[self.id])
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    
-                    if self.id != 0 {
-                        LinearGradient(gradient: Gradient(colors: [Color.clear, tagColors[self.id].opacity(0.4)]), startPoint: .top, endPoint: .bottom)
-                    }
+                    LinearGradient(gradient: Gradient(colors: [tagColors[self.id].opacity(0), tagColors[self.id]]), startPoint: .top, endPoint: .bottom)
+                        .frame(height: TagBox.height * 0.5)
                 }.frame(width: TagBox.width, height: TagBox.height)
                 .cornerRadius(20)
                 .shadow(color: tagColors[self.id].opacity(0.5), radius: 8, y: 10)
@@ -258,81 +346,13 @@ public struct AddFood: View, GFieldDelegate {
                 .edgesIgnoringSafeArea(.bottom)
             
             VStack(alignment: .leading, spacing: 0) {
-                ZStack {
-                    HStack(spacing: nil) {
-                        Button(action: self.contentView.toListHome, label: {
-                            Image(systemName: "chevron.left")
-                                .foregroundColor(Color.white)
-                                .padding(.leading, 5)
-                        }).frame(width: 50, height: navBarHeight)
-                        
-                        Spacer()
-                    }
-                    
-                    Text("Add Grub to List")
-                        .font(gFont(.ubuntuBold, 18))
-                        .fontWeight(.bold)
-                        .foregroundColor(Color.white)
-                        .padding(12)
-                }.padding(10)
-                .frame(width: sWidth(), height: navBarHeight)
-                .background(gColor(.blue0))
-                HStack(spacing: 0) {
-                    VStack(spacing: 0) {
-                        ForEach(0 ..< size(formID)) { index in
-                            if !self.gft.symbol(index).isEmpty {
-                                ZStack {
-                                    Image(systemName: self.gft.symbol(index))
-                                        .font(.system(size: 25))
-                                }.frame(height: fieldHeight)
-                                .foregroundColor(self.gft.text(index).isEmpty ? Color.gray : gColor(.blue0))
-                            }
-                        }
-                    }.frame(width: 50)
-                    Rectangle()
-                        .fill(gColor(.blue2))
-                        .frame(width: 10, height: formHeight)
-                    VStack(alignment: .leading, spacing: 0) {
-                        HStack(spacing: 0) {
-                            ForEach(0 ..< FieldIndex.restaurant.rawValue) { index in
-                                ZStack(alignment: .topLeading) {
-                                    Color.clear
-                                    
-                                    if index > 0 {
-                                        Rectangle()
-                                        .fill(Color(white: 0.8))
-                                        .frame(width: 1, height: fieldHeight)
-                                    }
-                                    
-                                    Text(self.gft.name(index))
-                                        .padding(7)
-                                        .font(gFont(.ubuntuMedium, .width, 1.5))
-                                    
-                                    GField(formID, index, self)
-                                }.frame(idealWidth: index == FieldIndex.price.rawValue ? sWidth() * 0.35 : .infinity, maxWidth: index == FieldIndex.price.rawValue ? sWidth() * 0.35 : .infinity)
-                                .frame(height: fieldHeight)
-                            }
-                        }
-                        ForEach(FieldIndex.restaurant.rawValue ..< size(formID)) { index in
-                            ZStack(alignment: .topLeading) {
-                                Color.clear
-                                
-                                Rectangle()
-                                    .fill(Color(white: 0.8))
-                                    .frame(height: 1)
-                                
-                                Text(self.gft.name(index))
-                                    .padding(7)
-                                    .font(gFont(.ubuntuMedium, .width, 1.5))
-                                
-                                GField(formID, index, self)
-                            }.frame(idealWidth: .infinity, maxWidth: .infinity)
-                            .frame(height: fieldHeight)
-                        }
-                    }.foregroundColor(Color(white: 0.3))
-                    .frame(idealWidth: .infinity, maxWidth: .infinity)
-                }.frame(width: sWidth())
-                .background(Color.white)
+                self.header
+                    .padding(10)
+                    .frame(width: sWidth(), height: navBarHeight)
+                    .background(gColor(.blue0))
+                self.form
+                    .frame(width: sWidth())
+                    .background(Color.white)
                 Rectangle()
                     .fill(Color(white: 0.5))
                     .frame(height: 1)
@@ -375,17 +395,15 @@ public struct AddFood: View, GFieldDelegate {
             }.frame(height: sHeight() - safeAreaInset(.top))
             
             ZStack(alignment: .center) {
-                Color(white: 0.98)
-                
                 SearchTag(self.$presentSearchTag)
-                .clipped()
+                    .clipped()
                 
                 if !self.presentSearchTag {
                     Color(white: 0.9)
                     
                     Button(action: {
                         withAnimation(gAnim(.easeOut)) {
-                            self.presentSearchTag.toggle()
+                            self.presentSearchTag = true
                             
                             UIApplication.shared.endEditing()
                             GFormRouter.gfr().callFirstResponder(.searchTag)
@@ -400,9 +418,9 @@ public struct AddFood: View, GFieldDelegate {
                             .font(.system(size: 15, weight: .black))
                     })
                 }
-            }.frame(width: self.presentSearchTag ? sWidth() : sWidth() * 0.1, height: self.presentSearchTag ? sHeight() - tabHeight : sWidth() * 0.08)
+            }.frame(width: self.presentSearchWidth(), height: self.presentSearchHeight())
             .cornerRadius(self.presentSearchTag ? 0 : 30)
-            .offset(x: self.presentSearchTag ? 0 : sWidth() * 0.23, y: self.presentSearchTag ? 0 : navBarHeight + formHeight + tagTitleHeight * 0.5 - sWidth() * 0.03)
+            .offset(self.presentSearchOffset())
         }.onTapGesture {
             if !self.presentSearchTag {
                 UIApplication.shared.endEditing()

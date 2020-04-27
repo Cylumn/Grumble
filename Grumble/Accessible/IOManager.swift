@@ -139,6 +139,7 @@ public func onLogin() {
     if let uid = Auth.auth().currentUser?.uid {
         UserCookie.uc().setLoggedIn(true)
         TabRouter.tr().changeTab(.list)
+        KeyboardObserver.appendField(.filterList)
         
         let ref = Database.database().reference()
         ref.child("users").child(uid).child("foodList").observe(DataEventType.childAdded, with: onCloudFoodAdded)

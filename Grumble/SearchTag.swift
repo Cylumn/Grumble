@@ -70,17 +70,18 @@ public struct SearchTag: View, GFieldDelegate {
     
     public var body: some View {
         ZStack(alignment: .top) {
-            Color.clear
+            Color(white: 0.97)
             
             if self.isPresented.wrappedValue {
                 ScrollView {
                     Spacer().frame(height: 60)
                     
-                    VStack(spacing: 10) {
+                    VStack(spacing: 15) {
                         if self.gft.text(0).count > 0 {
                             Text("Showing results for: \"" + self.gft.text(0) + "\"")
                                 .font(gFont(.ubuntuLight, .width, 2))
                                 .foregroundColor(Color(white: 0.2))
+                                .offset(y: -5)
                         }
                         
                         ForEach((1 ..< tagTitles.count).filter({
@@ -94,43 +95,24 @@ public struct SearchTag: View, GFieldDelegate {
                                 }
                             }, label: {
                                 ZStack {
-                                    Capsule()
-                                        .fill(tagColors[tag])
-                                        .frame(height: 45)
-                                        .padding(7)
-                                    
-                                    Rectangle()
-                                        .fill(Color.white)
-                                        .frame(width: sWidth() * 0.5)
-                                        .offset(x: -sWidth() * 0.25)
-                                    
-                                    Ellipse()
-                                        .fill(Color.white)
-                                        .rotationEffect(Angle.init(degrees: -30))
-                                        .frame(width: sWidth() * 0.5)
-                                    
-                                    ZStack {
-                                        Circle()
-                                            .fill(Color.white.opacity(0.2))
-                                            .frame(width: sWidth() * 0.5)
-                                    }.offset(x: sWidth() * 0.4)
+                                    Color.white
                                     
                                     HStack(spacing: nil) {
                                         Text(capFirst(tagTitles[tag]))
                                             .font(gFont(.ubuntuLight, 15))
+                                            .foregroundColor(tagColors[tag])
                                         
                                         Spacer()
                                         
-                                        Image(systemName: self.selected.contains(tag) ? "plus.circle.fill" : "circle")
-                                            .foregroundColor(self.selected.contains(tag) ? gColor(.blue0) : Color.white)
-                                            .shadow(color: Color.white, radius: 5)
-                                    }.padding(30)
-                                        .foregroundColor(Color(white: 0.2))
-                                }.padding(.trailing, 15)
-                                .frame(height: 45)
-                                .clipped()
-                                .shadow(color: tagColors[tag].opacity(0.2), radius: 10, y: 10)
-                            })
+                                        Image(systemName: self.selected.contains(tag) ? "plus.square.fill" : "square")
+                                            .foregroundColor(self.selected.contains(tag) ? gColor(.blue0) : Color.gray)
+                                    }.padding(10)
+                                    .padding([.leading, .trailing], 5)
+                                    .foregroundColor(Color(white: 0.2))
+                                }.frame(height: 45)
+                                .cornerRadius(10)
+                                .shadow(color: Color.black.opacity(0.1), radius: 5)
+                            }).padding([.leading, .trailing], 15)
                         }
                         
                         Spacer().frame(minHeight: sHeight() * 0.4)
@@ -140,41 +122,31 @@ public struct SearchTag: View, GFieldDelegate {
                 .offset(y: 20)
             }
             
-            ZStack(alignment: .top) {
-                Rectangle()
-                    .fill(Color.white)
-                    .frame(height: 30)
-                
-                Capsule()
-                    .fill(Color.white)
+            ZStack {
+                Color(white: 0.97)
                 
                 HStack(alignment: .bottom, spacing: 0) {
                     ZStack(alignment: .leading) {
-                        Capsule().fill(Color(white: 0.9))
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color(white: 0.93))
                         
                         Image(systemName: "magnifyingglass")
                             .padding(10)
                             .foregroundColor(Color(white: 0.2))
                         
                         GField(formID, 0, self)
-                    }.padding([.leading, .top, .bottom], 10)
-                    Image(systemName: "chevron.down")
-                        .frame(maxWidth: sWidth() * 0.2, maxHeight: .infinity)
-                        .font(.system(size: 15, weight: .black))
-                        .foregroundColor(gColor(.blue0))
-                        .simultaneousGesture(TapGesture().onEnded {
-                            self.endSearch()
-                        })
-                }.contentShape(Rectangle())
-                .gesture(DragGesture().onChanged { drag in
-                    if abs(drag.startLocation.y - drag.location.y) > 30 {
-                        self.endSearch()
-                    }
-                })
+                    }.padding([.top, .bottom], 10)
+                    .padding(.leading, 20)
+                    Button(action: self.endSearch, label: {
+                        Text("Cancel")
+                            .frame(maxWidth: sWidth() * 0.2, maxHeight: .infinity)
+                            .font(gFont(.ubuntuLight, .width, 2))
+                            .foregroundColor(gColor(.blue0))
+                    })
+                }
             }.frame(height: 60)
+            .padding(.top, 5)
             .cornerRadius(5)
-            .clipped()
-            .shadow(color: Color.gray.opacity(0.2), radius: 10, y: 10)
             
             ZStack(alignment: .bottomTrailing) {
                 Color.clear

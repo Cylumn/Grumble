@@ -252,17 +252,14 @@ public struct GrubSheet: View {
         let smallestTag = self.grub!.tags["smallestTag"]!
         
         return ZStack(alignment: .topTrailing) {
-            ZStack {
-                Image(tagBGs[smallestTag])
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: sWidth(), height: sHeight() * self.imageFraction + safeAreaInset(.top) + safeImagePadding * 2)
+            ZStack(alignment: .top) {
+                tagColors[smallestTag]
+                    .edgesIgnoringSafeArea(.all)
+                
+                GTagIcon.icon(tag: smallestTag, id: .grubSheet, size: CGSize(width: sWidth(), height: sHeight() * baseImageFraction + safeAreaInset(.top) + safeImagePadding * 2))
+                    .scaleEffect(x: max(self.imageFraction / baseImageFraction, 0.8), y: max(self.imageFraction / baseImageFraction, 0.8), anchor: UnitPoint.top)
                     .offset(y: -safeAreaInset(.top))
             }.frame(width: sWidth())
-            
-            if smallestTag != 0 {
-                LinearGradient(gradient: Gradient(colors: [Color.clear, tagColors[smallestTag]]), startPoint: .top, endPoint: .bottom)
-            }
             
             Color.clear
                 .contentShape(Rectangle())
@@ -341,6 +338,9 @@ public struct GrubSheet: View {
 
 struct GrubSheet_Previews: PreviewProvider {
     static var previews: some View {
-        GrubSheet(ContentView())
+        ListCookie.lc().selectedFID = "food"
+        ListCookie.lc().presentGrubSheet = true
+        UserCookie.uc().appendFoodList("food", Grub.testGrub())
+        return GrubSheet(ContentView())
     }
 }
