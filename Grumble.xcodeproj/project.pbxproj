@@ -20,8 +20,6 @@
 		D51509C424539C970005C0E3 /* SearchList.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51509C324539C970005C0E3 /* SearchList.swift */; };
 		D51FECC9243131FA00BF129C /* KeyboardObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51FECC8243131FA00BF129C /* KeyboardObserver.swift */; };
 		D51FECCB24316DC600BF129C /* SheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51FECCA24316DC600BF129C /* SheetView.swift */; };
-		D51FECD2243171A100BF129C /* SignupSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51FECD1243171A100BF129C /* SignupSheetView.swift */; };
-		D51FECD62432C43600BF129C /* UserButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51FECD52432C43600BF129C /* UserButton.swift */; };
 		D51FECD82434189300BF129C /* SlideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51FECD72434189300BF129C /* SlideView.swift */; };
 		D51FECDE24370B1500BF129C /* UserCookie.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51FECDD24370B1500BF129C /* UserCookie.swift */; };
 		D524481B24310C9700903BE3 /* GrumbleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D524481A24310C9700903BE3 /* GrumbleTests.swift */; };
@@ -61,6 +59,9 @@
 		D5AD277A2425B0D400462F1C /* Ubuntu-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD276B2425B07C00462F1C /* Ubuntu-Regular.ttf */; };
 		D5B94B17243E8FD3001E384A /* SearchTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5B94B16243E8FD3001E384A /* SearchTag.swift */; };
 		D5C4D0BA243FE8120033EFB0 /* GDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5C4D0B9243FE8120033EFB0 /* GDate.swift */; };
+		D5DFD71C24579EC100B78451 /* SecurityForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DFD71B24579EC100B78451 /* SecurityForm.swift */; };
+		D5DFD71E2458F43600B78451 /* SignupSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DFD71D2458F43600B78451 /* SignupSheet.swift */; };
+		D5DFD721245A2BAF00B78451 /* Welcome.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DFD720245A2BAE00B78451 /* Welcome.swift */; };
 		D5F0894E24253AC4000D375D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F0894D24253AC4000D375D /* AppDelegate.swift */; };
 		D5F0895024253AC4000D375D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F0894F24253AC4000D375D /* SceneDelegate.swift */; };
 		D5F0895224253AC4000D375D /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F0895124253AC4000D375D /* LoginView.swift */; };
@@ -103,8 +104,6 @@
 		D51509C324539C970005C0E3 /* SearchList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchList.swift; sourceTree = "<group>"; };
 		D51FECC8243131FA00BF129C /* KeyboardObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardObserver.swift; sourceTree = "<group>"; };
 		D51FECCA24316DC600BF129C /* SheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetView.swift; sourceTree = "<group>"; };
-		D51FECD1243171A100BF129C /* SignupSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupSheetView.swift; sourceTree = "<group>"; };
-		D51FECD52432C43600BF129C /* UserButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserButton.swift; sourceTree = "<group>"; };
 		D51FECD72434189300BF129C /* SlideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideView.swift; sourceTree = "<group>"; };
 		D51FECDD24370B1500BF129C /* UserCookie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCookie.swift; sourceTree = "<group>"; };
 		D524481824310C9700903BE3 /* GrumbleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GrumbleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -148,6 +147,9 @@
 		D5AD276F2425B07C00462F1C /* Ubuntu-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-Italic.ttf"; sourceTree = "<group>"; };
 		D5B94B16243E8FD3001E384A /* SearchTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTag.swift; sourceTree = "<group>"; };
 		D5C4D0B9243FE8120033EFB0 /* GDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GDate.swift; sourceTree = "<group>"; };
+		D5DFD71B24579EC100B78451 /* SecurityForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityForm.swift; sourceTree = "<group>"; };
+		D5DFD71D2458F43600B78451 /* SignupSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupSheet.swift; sourceTree = "<group>"; };
+		D5DFD720245A2BAE00B78451 /* Welcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Welcome.swift; sourceTree = "<group>"; };
 		D5F0894A24253AC4000D375D /* Grumble.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Grumble.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5F0894D24253AC4000D375D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D5F0894F24253AC4000D375D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -215,7 +217,6 @@
 				D51FECCA24316DC600BF129C /* SheetView.swift */,
 				D51FECD72434189300BF129C /* SlideView.swift */,
 				D573A82724386DDC00DB6067 /* GField.swift */,
-				D51FECD52432C43600BF129C /* UserButton.swift */,
 			);
 			name = Structures;
 			sourceTree = "<group>";
@@ -224,7 +225,7 @@
 			isa = PBXGroup;
 			children = (
 				D5F0895124253AC4000D375D /* LoginView.swift */,
-				D51FECD1243171A100BF129C /* SignupSheetView.swift */,
+				D5DFD71D2458F43600B78451 /* SignupSheet.swift */,
 			);
 			name = Login;
 			sourceTree = "<group>";
@@ -234,7 +235,7 @@
 			children = (
 				D5AA594C24271391000BEC5C /* ContentView.swift */,
 				D51FECCE24316FE900BF129C /* List */,
-				D55EEB9F24271FBB0079922E /* SettingsView.swift */,
+				D5DFD71A24579E6E00B78451 /* Settings */,
 			);
 			name = Content;
 			sourceTree = "<group>";
@@ -344,6 +345,7 @@
 				D5F0895824253AC6000D375D /* LaunchScreen.storyboard */,
 				D5AA59392425E996000BEC5C /* MainView.swift */,
 				D51FECCC24316FAC00BF129C /* Login */,
+				D5DFD71F245A2B9300B78451 /* Welcome */,
 				D51FECCD24316FC600BF129C /* Content */,
 				D55EEBA3242867710079922E /* TabView.swift */,
 				D502923D2438159E008A5BFC /* Structures */,
@@ -383,6 +385,23 @@
 				D5AD276A2425B07C00462F1C /* Ubuntu-MediumItalic.ttf */,
 			);
 			path = Ubuntu;
+			sourceTree = "<group>";
+		};
+		D5DFD71A24579E6E00B78451 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				D55EEB9F24271FBB0079922E /* SettingsView.swift */,
+				D5DFD71B24579EC100B78451 /* SecurityForm.swift */,
+			);
+			name = Settings;
+			sourceTree = "<group>";
+		};
+		D5DFD71F245A2B9300B78451 /* Welcome */ = {
+			isa = PBXGroup;
+			children = (
+				D5DFD720245A2BAE00B78451 /* Welcome.swift */,
+			);
+			name = Welcome;
 			sourceTree = "<group>";
 		};
 		D5F0894124253AC4000D375D = {
@@ -676,18 +695,19 @@
 				D5AA594B24271366000BEC5C /* ListView.swift in Sources */,
 				D502922F2437A9FE008A5BFC /* TabRouter.swift in Sources */,
 				D541F5F2245013B400E98EF1 /* GTagShape.swift in Sources */,
+				D5DFD71E2458F43600B78451 /* SignupSheet.swift in Sources */,
 				D541F5F0244FCE2F00E98EF1 /* GBurger.swift in Sources */,
 				D56BA4BD245132C50065E3E4 /* GSoup.swift in Sources */,
 				D5F0895024253AC4000D375D /* SceneDelegate.swift in Sources */,
-				D51FECD2243171A100BF129C /* SignupSheetView.swift in Sources */,
 				D50292352437AECF008A5BFC /* GColor.swift in Sources */,
 				D51509C224525B780005C0E3 /* GFood.swift in Sources */,
 				D502923A2437F7B3008A5BFC /* GForm.swift in Sources */,
-				D51FECD62432C43600BF129C /* UserButton.swift in Sources */,
+				D5DFD721245A2BAF00B78451 /* Welcome.swift in Sources */,
 				D5AA593E2426C24F000BEC5C /* IOManager.swift in Sources */,
 				D5014C242441431500C5530B /* GrubSheet.swift in Sources */,
 				D50292332437AE06008A5BFC /* ScreenDimension.swift in Sources */,
 				D5AA594D24271391000BEC5C /* ContentView.swift in Sources */,
+				D5DFD71C24579EC100B78451 /* SecurityForm.swift in Sources */,
 				D573A82824386DDC00DB6067 /* GField.swift in Sources */,
 				D5AA593A2425E996000BEC5C /* MainView.swift in Sources */,
 				D51FECC9243131FA00BF129C /* KeyboardObserver.swift in Sources */,

@@ -7,8 +7,14 @@
 //
 
 import SwiftUI
+import Firebase
 
 public struct SettingsView: View {
+    @State private var page: PageForm? = nil
+    
+    private enum PageForm {
+        case security
+    }
     
     //Function Methods
     private func logOutUser(){
@@ -17,7 +23,7 @@ public struct SettingsView: View {
         }
     }
     
-    public var body: some View {
+    private var settings: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: nil) {
                 Text("Settings")
@@ -34,14 +40,24 @@ public struct SettingsView: View {
                     .padding([.leading, .trailing], 20)
             }.padding(.bottom, 10)
             List{
-                Section(header: Text("General [WIP]")){
+                Section(header: Text("General [WIP]")) {
                     Text("About [WIP]")
-                    Text("Security [WIP]")
+                    if (Auth.auth().currentUser!.providerData[0].providerID == EmailAuthProviderID) {
+                        Button(action: {
+                            withAnimation(gAnim(.easeOut)) {
+                                self.page = .security
+                                TabRouter.tr().hide(true)
+                                KeyboardObserver.appendField(.security)
+                            }
+                        }, label: {
+                            Text("Security")
+                        })
+                    }
                 }
-                Section{
-                    Text("Social [WIP]")
+                Section(header: Text("Social [WIP]")) {
+                    Text("Privacy [WIP]")
                 }
-                Section{
+                Section {
                     Button(action: self.logOutUser, label: {
                         Text("Log Out")
                     }).foregroundColor(Color.white)
@@ -49,6 +65,24 @@ public struct SettingsView: View {
             }.listStyle(GroupedListStyle())
             Spacer()
         }.font(gFont(.ubuntuLight, 15))
+    }
+    
+    public var body: some View {
+        ZStack {
+            self.settings
+            
+            SecurityForm(Binding<Bool>(get: {
+                self.page == .security
+            }, set: {
+                self.page = $0 ? .security : nil
+                TabRouter.tr().hide($0)
+                
+                if !$0 {
+                    UIApplication.shared.endEditing()
+                    KeyboardObserver.clearFields()
+                }
+            })).offset(x: self.page == .security ? 0 : sWidth())
+        }
     }
 }
 

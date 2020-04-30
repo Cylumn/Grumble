@@ -231,19 +231,18 @@ public struct GrumbleSheet: View {
     
     private var background: some View {
         ZStack(alignment: .bottom) {
-            Image("GhorblinBackground")
+            Image("Cave")
                 .resizable()
-                .aspectRatio(contentMode: .fill)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             
-            Color.black.opacity(0.2)
+            Color.black.opacity(0.05)
             
             LinearGradient(gradient: Gradient(colors: [Color.black.opacity(0.2), Color.clear, Color.black.opacity(0.8)]), startPoint: .top, endPoint: .bottomLeading)
-                .frame(height: sHeight())
             
             ZStack(alignment: .bottom) {
                 Ellipse()
                     .fill(GrumbleSheet.tableColors[self.type])
-                    .frame(width: sWidth() * 1.5, height: sHeight() * 0.35)
+                    .frame(width: sWidth() * 1.5, height: sHeight() * 0.3)
                     .clipped()
                 
                 Rectangle()
@@ -253,18 +252,18 @@ public struct GrumbleSheet: View {
                 Ellipse()
                     .fill(Color.black.opacity(0.2))
                     .frame(width: sWidth() * 0.95, height: sHeight() * 0.18)
-                    .offset(y: sHeight() * -0.09)
+                    .offset(y: sHeight() * -0.06)
                 
                 Image("GhorblinPlate")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: sWidth() * 0.9)
-                    .offset(y: sHeight() * -0.1)
+                    .offset(y: sHeight() * -0.07)
                 
                 Ellipse()
                     .fill(Color.black.opacity(Double(0.2 - 0.2 * self.dragData())))
                     .frame(width: sWidth() * (0.7 + 0.2 * self.dragData()), height: sHeight() * (0.13 + 0.1 * self.dragData()))
-                    .offset(y: sHeight() * (-0.15 + 0.05 * self.dragData()))
+                    .offset(y: sHeight() * (-0.12 + 0.05 * self.dragData()))
             }.frame(width: sWidth())
         }.frame(width: sWidth())
     }
@@ -336,7 +335,7 @@ public struct GrumbleSheet: View {
                     }
                 }
             } else if drag.translation.height > sHeight() * 0.1 {
-                withAnimation(gAnim(.spring)) {
+                withAnimation(gAnim(.easeOut)) {
                     self.coverDragState = .cancelled
                 }
             } else {
@@ -527,7 +526,7 @@ public struct GrumbleSheet: View {
                 .frame(alignment: .bottom)
                 .foregroundColor(Color.white)
                 .offset(y: self.coverDragState == .completed && self.presentHideModal == PresentHideModal.hidden ? 0 : sHeight())
-        }.frame(width: sWidth(), height: sHeight() - safeAreaInset(.top))
+        }.frame(width: sWidth())
     }
 }
 

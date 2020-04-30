@@ -33,30 +33,30 @@ public struct TabView: View {
         }
     }
     
+    private func tabIcon(_ iconName: String, _ tab: Tab, _ onClick: @escaping () -> Void) -> some View {
+        ZStack {
+            Image(systemName: iconName)
+        }.frame(maxWidth: .infinity, maxHeight: .infinity)
+        .foregroundColor(self.tr.tab() == tab ? gColor(.blue2) : Color.black)
+        .contentShape(Rectangle())
+        .onTapGesture{
+            onClick()
+        }
+    }
+    
     public var body: some View {
-        HStack(spacing: 0) {
-            ZStack {
-                Image(systemName: "bag")
-            }.frame(maxWidth: .infinity, maxHeight: .infinity)
-                .foregroundColor(self.tr.tab() == .list ? gColor(.blue2) : Color.black)
-            .contentShape(Rectangle())
-            .onTapGesture{
-                self.toList()
-            }
-            
-            ZStack {
-                Image(systemName: "gear")
-            }.frame(maxWidth: .infinity, maxHeight: .infinity)
-            .foregroundColor(self.tr.tab() == .settings ? gColor(.blue2) : Color.black)
-            .contentShape(Rectangle())
-            .onTapGesture{
-                self.toSettings()
+        VStack(spacing: 0) {
+            Rectangle()
+                .fill(Color(white: 0.8))
+                .frame(width: sWidth(), height: 1)
+            HStack(spacing: 0) {
+                self.tabIcon("cube.box", .list, self.toList)
+                
+                self.tabIcon("gear", .settings, self.toSettings)
             }
         }.frame(width: sWidth(), height: tabHeight)
         .background(Color.white)
-        .font(.system(size: sWidth() * 0.07))
-        .clipped()
-        .shadow(color: Color.black.opacity(0.15), radius: 10)
+        .font(.system(size: sWidth() * 0.06))
     }
 }
 

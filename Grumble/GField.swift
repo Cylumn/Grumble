@@ -9,7 +9,7 @@
 import SwiftUI
 
 public protocol GFieldDelegate {
-    func style(_ index: Int, _ textField: GTextField)
+    func style(_ index: Int, _ textField: GTextField, _ placeholderText: @escaping (String) -> Void)
     func proceedField() -> Bool
     func parseInput(_ index: Int, _ textField: UITextField, _ string: String) -> String
 }
@@ -78,11 +78,14 @@ public struct GField: UIViewRepresentable {
         textField.keyboardAppearance = .light
         textField.textAlignment = .left
         textField.returnKeyType = .next
+        textField.enablesReturnKeyAutomatically = true
         textField.autocorrectionType = UITextAutocorrectionType.no
         textField.setContentCompressionResistancePriority(.sceneSizeStayPut, for: .horizontal)
         textField.frame.size.height = 20
         
-        self.delegate.style(self.index, textField)
+        self.delegate.style(self.index, textField, { placeholder in
+            textField.attributedPlaceholder = NSAttributedString(string: placeholder, attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray.withAlphaComponent(0.8)])
+        })
         GFormRouter.gfr().setRespondingField(self.formID, self.index, textField)
         return textField
     }

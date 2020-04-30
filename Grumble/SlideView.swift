@@ -133,3 +133,10 @@ public struct SlideView: View {
         .gesture(self.gesture)
     }
 }
+
+struct SlideView_Previews: PreviewProvider {
+    static var previews: some View {
+        SlideView(index: Binding.constant(0), views: [AnyView(Color.black)])
+            .previewDevice(PreviewDevice(rawValue: "iPhone XS Max"))
+    }
+}

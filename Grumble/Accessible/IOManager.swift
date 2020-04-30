@@ -175,3 +175,44 @@ public func onLogout() {
         print("error:\(error)")
     }
 }
+
+//Profile Changes
+public func createAccount(email: String, pass: String, displayName: String, _ finishedWithErrors: @escaping (NSError?) -> Void) {
+    Auth.auth().createUser(withEmail: email, password: pass) { user, error in
+        if let error = error as NSError? {
+            finishedWithErrors(error)
+            return
+        }
+        let user = Auth.auth().currentUser!.createProfileChangeRequest()
+        user.displayName = displayName
+        user.commitChanges() { error in
+            if let error = error as NSError? {
+                print("error:\(error)")
+                finishedWithErrors(error)
+            } else {
+                finishedWithErrors(nil)
+            }
+        }
+    }
+}
+
+public func changePassword(old: String, new: String, _ finishedWithError: @escaping (AuthErrorCode?) -> Void) {
+    let user = Auth.auth().currentUser!
+    let email: String = user.email!
+    let credential: AuthCredential = EmailAuthProvider.credential(withEmail: email, password: old)
+    user.reauthenticate(with: credential) { _, error in
+        guard error == nil else {
+            finishedWithError(AuthErrorCode.wrongPassword)
+            return
+        }
+        
+        user.updatePassword(to: new) { error in
+            guard error == nil else {
+                finishedWithError(AuthErrorCode.weakPassword)
+                return
+            }
+            
+            finishedWithError(nil)
+        }
+    }
+}

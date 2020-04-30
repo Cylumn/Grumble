@@ -12,11 +12,13 @@ import SwiftUI
 public enum GFormID: Int {
     case signup = 0
     case login = 1
-    case filterList = 2
-    case addFood = 3
-    case searchTag = 4
+    case welcome = 2
+    case filterList = 3
+    case addFood = 4
+    case searchTag = 5
+    case security = 6
     
-    case size = 5
+    case size = 7
 }
 
 public func size(_ formID: GFormID) -> Int {
@@ -25,12 +27,16 @@ public func size(_ formID: GFormID) -> Int {
         return 5
     case .login:
         return 2
+    case .welcome:
+        return 1
     case .filterList:
         return 1
     case .addFood:
         return 4
     case .searchTag:
         return 1
+    case .security:
+        return 3
     default:
         return 0
     }
@@ -90,7 +96,9 @@ public class GFormText: ObservableObject {
     }
     
     public func setSymbol(_ index: Int, _ text: String) {
-        self.textSymbol[index] = text
+        if self.symbol(index) != text {
+            self.textSymbol[index] = text
+        }
     }
     
     public func setSymbols(_ symbols: [String]) {
@@ -100,11 +108,15 @@ public class GFormText: ObservableObject {
     }
     
     public func setError(_ index: Int, _ text: String) {
-        self.textError[index] = text
+        if self.error(index) != text {
+            self.textError[index] = text
+        }
     }
     
     public func setText(_ index: Int, _ text: String) {
-        self.textFields[index] = text
+        if self.text(index) != text {
+            self.textFields[index] = text
+        }
     }
 }
 
@@ -112,7 +124,7 @@ public class GFormText: ObservableObject {
 public class GFormRouter: ObservableObject {
     private static var instance: GFormRouter?
     private var respondingFields: [[UITextField?]?] = Array(repeating: nil, count: GFormID.size.rawValue)
-    private var currentIndices: [Int] = Array(repeating: 0, count: GFormID.size.rawValue)
+    @Published private var currentIndices: [Int] = Array(repeating: 0, count: GFormID.size.rawValue)
     
     //Getter Methods
     public static func gfr() -> GFormRouter {

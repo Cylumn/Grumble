@@ -76,7 +76,7 @@ public struct LoginView: View, GFieldDelegate {
     }
     
     //GFieldDelegate Implementation Methods
-    public func style(_ index: Int, _ textField: GTextField) {
+    public func style(_ index: Int, _ textField: GTextField, _ placeholderText: @escaping (String) -> Void) {
         textField.backgroundColor = gColor(.lightTurquoise).withAlphaComponent(0.5)
         textField.setInsets(top: 10, left: 13, bottom: 10, right: 13)
         textField.attributedPlaceholder = NSAttributedString(string: self.gft.name(index), attributes: [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.8)])
@@ -135,9 +135,11 @@ public struct LoginView: View, GFieldDelegate {
                         Button(action: self.attemptSignup, label: {
                             Text("Sign Up")
                                 .padding(13)
-                                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white, lineWidth: 1))
+                                .background(Color.white)
+                                .cornerRadius(8)
+                                .foregroundColor(Color(white: 0.4))
                                 .font(gFont(.ubuntuMedium, .width, 2))
-                        }).background(gColor(.blue2))
+                        })
                         
                         Spacer()
                         
@@ -179,7 +181,16 @@ public struct LoginView: View, GFieldDelegate {
                         .cornerRadius(8)
                     
                     VStack(spacing: sHeight() * 0.02) {
-                        UserButton(action: self.attemptLogin, disabled: !self.canSubmit(), text: "Log In")
+                        Button(action: self.attemptLogin, label: {
+                            Text("Log In")
+                                .padding(15)
+                                .frame(maxWidth: .infinity)
+                                .background(self.canSubmit() ? gColor(.blue3) : gColor(.blue3).opacity(0.5))
+                                .animation(gAnim(.spring))
+                                .cornerRadius(10)
+                                .foregroundColor(self.canSubmit() ? Color.white : Color.white.opacity(0.2))
+                                .font(gFont(.ubuntuBold, .width, 2.5))
+                        }).disabled(!self.canSubmit())
                         
                         Button(action: self.forgotPassword, label: {
                             Text("Forgot Password? [wip]")
@@ -193,7 +204,7 @@ public struct LoginView: View, GFieldDelegate {
             }.frame(width: sWidth() * 0.85)
             .foregroundColor(Color.white)
             
-            SignupSheetView(currentHeight: self.$currentHeight, movingOffset: self.$movingOffset, onDragStateChanged: { pos in
+            SignupSheet(currentHeight: self.$currentHeight, movingOffset: self.$movingOffset, onDragStateChanged: { pos in
                 switch pos {
                     case .up:
                         KeyboardObserver.removeField(.login)

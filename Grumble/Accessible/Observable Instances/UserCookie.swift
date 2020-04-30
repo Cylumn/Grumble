@@ -99,6 +99,7 @@ public struct Grub: Decodable {
 public class UserCookie: ObservableObject {
     private static var instance: UserCookie?
     @Published private var hasCurrentUser: Bool = false
+    @Published private var ghorblinName: String? = nil
     @Published private var fList: [String: Grub] = [:]
     @Published private var grubsByDate: [(String, Grub)] = []
     @Published public var loadingStatus: LoadingStatus = LoadingStatus.loading
@@ -115,6 +116,10 @@ public class UserCookie: ObservableObject {
         return self.hasCurrentUser
     }
     
+    public func newUser() -> Bool {
+        return self.ghorblinName == nil
+    }
+    
     public func foodList() -> [String: Grub] {
         return self.fList
     }
@@ -126,6 +131,10 @@ public class UserCookie: ObservableObject {
     //FList Modifier Methods
     public func setLoggedIn(_ loggedIn: Bool) {
         self.hasCurrentUser = loggedIn
+    }
+    
+    public func setGhorblinName(_ name: String) {
+        self.ghorblinName = name
     }
     
     public func setFoodList(_ foodList: [String: Grub]) {

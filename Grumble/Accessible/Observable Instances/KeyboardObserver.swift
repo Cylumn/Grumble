@@ -19,7 +19,7 @@ public extension UIApplication {
 public class KeyboardObserver: ObservableObject {
     private static var instance: [KeyboardObserver?]?
     private var notificationCenter: NotificationCenter
-    public static var observedFields: Set<GFormID> = [.filterList]
+    public static var observedFields: Set<GFormID> = [.filterList, .welcome]
     private var formID: GFormID
     @Published private var keyboardVisible: Bool
     @Published private var keyboardHeight: CGFloat
@@ -66,7 +66,9 @@ public class KeyboardObserver: ObservableObject {
     
     //Setter Methods
     public static func appendField(_ field: GFormID, _ beginsVisible: Bool = false) {
-        KeyboardObserver.observedFields.insert(field)
+        if !KeyboardObserver.observedFields.contains(field) {
+            KeyboardObserver.observedFields.insert(field)
+        }
         self.ko(field).keyboardVisible = beginsVisible
     }
     
@@ -80,18 +82,22 @@ public class KeyboardObserver: ObservableObject {
     
     //Observer Methods
     @objc private func onKeyboardShow(notification: Notification) {
-        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
-            withAnimation(gAnim(.spring)){
-                self.keyboardVisible = true
-                self.keyboardHeight = keyboardSize.height
+        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue{
+            if !self.keyboardVisible {
+                withAnimation(gAnim(.spring)){
+                    self.keyboardVisible = true
+                    self.keyboardHeight = keyboardSize.height
+                }
             }
         }
     }
     
     @objc private func onKeyboardHide(notification: Notification) {
-        withAnimation(gAnim(.spring)){
-            self.keyboardVisible = false
-            self.keyboardHeight = 0
+        if self.keyboardVisible {
+            withAnimation(gAnim(.spring)){
+                self.keyboardVisible = false
+                self.keyboardHeight = 0
+            }
         }
     }
     

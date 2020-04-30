@@ -42,8 +42,8 @@ public struct SearchTag: View, GFieldDelegate {
     }
     
     //Implemented GFieldDelegate Methods
-    public func style(_ index: Int, _ textField: GTextField) {
-        textField.attributedPlaceholder = NSAttributedString(string: "Find Tag", attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray.withAlphaComponent(0.8)])
+    public func style(_ index: Int, _ textField: GTextField, _ placeholderText: @escaping (String) -> Void) {
+        placeholderText("Find Tag")
         textField.setInsets(top: 5, left: 40, bottom: 5, right: 30)
         textField.returnKeyType = .default
     }

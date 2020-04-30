@@ -154,8 +154,8 @@ public struct AddFood: View, GFieldDelegate {
     }
     
     //Implemented GFieldDelegate Methods
-    public func style(_ index: Int, _ textField: GTextField) {
-        textField.attributedPlaceholder = NSAttributedString(string: self.gft.error(index), attributes: [NSAttributedString.Key.foregroundColor: UIColor.gray.withAlphaComponent(0.8)])
+    public func style(_ index: Int, _ textField: GTextField, _ placeholderText: @escaping (String) -> Void) {
+        placeholderText(self.gft.error(index))
         textField.setInsets(top: 23, left: 10, bottom: 5, right: 10)
         textField.font = gFont(.ubuntuLight, .width, 2)
         textField.textColor = gColor(.blue2)
@@ -392,7 +392,7 @@ public struct AddFood: View, GFieldDelegate {
                 .frame(width: sWidth())
                 .shadow(color: Color.black.opacity(0.2), radius: 12, y: 15)
                 .offset(y: -self.ko.height(tabbedView: false))
-            }.frame(height: sHeight() - safeAreaInset(.top))
+            }
             
             ZStack(alignment: .center) {
                 SearchTag(self.$presentSearchTag)

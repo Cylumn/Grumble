@@ -14,7 +14,11 @@ public struct MainView: View {
     public var body: some View {
         ZStack {
             if self.uc.loggedIn() {
-                ContentView()
+                if self.uc.newUser() {
+                    Welcome()
+                } else {
+                    ContentView()
+                }
             } else {
                 LoginView().transition(.move(edge: .bottom))
             }
@@ -24,6 +28,7 @@ public struct MainView: View {
 
 struct MainView_Previews: PreviewProvider {
     static var previews: some View {
-        MainView()
+        UserCookie.uc().setLoggedIn(true)
+        return MainView()
     }
 }

@@ -41,8 +41,8 @@ public struct SearchList: View, GFieldDelegate {
     }
     
     //GFieldDelegate Method Implementations
-    public func style(_ index: Int, _ textField: GTextField) {
-        textField.attributedPlaceholder = NSAttributedString(string: "Filter List", attributes: [NSAttributedString.Key.foregroundColor: UIColor.black.withAlphaComponent(0.5)])
+    public func style(_ index: Int, _ textField: GTextField, _ placeholderText: @escaping (String) -> Void) {
+        placeholderText("Filter List")
         textField.setInsets(top: 5, left: 45, bottom: 5, right: 10)
         textField.textColor = UIColor.black
         textField.returnKeyType = .default

@@ -92,6 +92,7 @@ public struct ContentView: View {
     public var body: some View {
         ZStack(alignment: .bottom) {
             self.tab
+            
             if !self.tr.hidden() {
                 TabView(self)
             }
