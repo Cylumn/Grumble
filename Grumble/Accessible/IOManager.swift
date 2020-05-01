@@ -11,6 +11,14 @@ import Firebase
 
 private struct DataList: Decodable {
     var foodList: [String: Grub]?
+    var ghorblinName: String?
+    var linkToken: String?
+}
+
+public enum DataListKeys: String {
+    case foodList = "foodList"
+    case ghorblinName = "ghorblinName"
+    case linkToken = "linkToken"
 }
 
 public enum LoadingStatus {
@@ -63,12 +71,22 @@ public func loadLocalData() {
     if let data = loadPropertyList(URL(string: dataPath()), DataList.self) {
         UserCookie.uc().setFoodList(data.foodList ?? [:] as [String: Grub])
         UserCookie.uc().sortFoodListByDate()
+        UserCookie.uc().setGhorblinName(data.ghorblinName)
+        UserCookie.uc().setLinkToken(data.linkToken)
+    }
+}
+
+public func writeLocalData(_ key: DataListKeys, _ value: Any?) {
+    if let rootDataDictionary = NSMutableDictionary(contentsOfFile: dataPath()) {
+        rootDataDictionary.setValue(value, forKey: key.rawValue)
+        rootDataDictionary.write(toFile: dataPath(), atomically: true)
     }
 }
 
 public func clearLocalData() {
     if let rootDataDictionary = NSMutableDictionary(contentsOfFile: dataPath()) {
-        (rootDataDictionary["foodList"] as! NSMutableDictionary).removeAllObjects()
+        rootDataDictionary.removeAllObjects()
+        rootDataDictionary.setValue([:], forKey: DataListKeys.foodList.rawValue)
         rootDataDictionary.write(toFile: dataPath(), atomically: true)
     }
 }
@@ -81,30 +99,36 @@ public func loadCloudData(_ returnData: @escaping (NSDictionary?) -> Void) {
     }
 }
 
+public func writeCloudData(_ key: DataListKeys, _ value: Any?) {
+    if let uid = Auth.auth().currentUser?.uid {
+        Database.database().reference().child("users").child(uid).child(key.rawValue).setValue(value)
+    }
+}
+
 //FoodList Functions
 public func appendLocalFood(_ key: String, _ foodItem: NSDictionary) {
     if let rootDataDictionary = NSMutableDictionary(contentsOfFile: dataPath()) {
-        (rootDataDictionary["foodList"] as! NSDictionary).setValue(foodItem, forKey: key)
+        (rootDataDictionary[DataListKeys.foodList.rawValue] as! NSDictionary).setValue(foodItem, forKey: key)
         rootDataDictionary.write(toFile: dataPath(), atomically: true)
     }
 }
 
 public func appendCloudFood(_ key: String, _ foodItem: NSDictionary) {
     if let uid = Auth.auth().currentUser?.uid {
-        Database.database().reference().child("users").child(uid).child("foodList").child(key).setValue(foodItem)
+        Database.database().reference().child("users").child(uid).child(DataListKeys.foodList.rawValue).child(key).setValue(foodItem)
     }
 }
 
 public func removeLocalFood(_ key: String) {
     if let rootDataDictionary = NSMutableDictionary(contentsOfFile: dataPath()) {
-        (rootDataDictionary["foodList"] as! NSMutableDictionary).removeObject(forKey: key)
+        (rootDataDictionary[DataListKeys.foodList.rawValue] as! NSMutableDictionary).removeObject(forKey: key)
         rootDataDictionary.write(toFile: dataPath(), atomically: true)
     }
 }
 
 public func removeCloudFood(_ key: String) {
     if let uid = Auth.auth().currentUser?.uid {
-        Database.database().reference().child("users").child(uid).child("foodList").child(key).removeValue()
+        Database.database().reference().child("users").child(uid).child(DataListKeys.foodList.rawValue).child(key).removeValue()
     }
 }
 
@@ -118,10 +142,39 @@ public func onCloudFoodAdded(_ snapshot: DataSnapshot) {
     UserCookie.uc().loadingStatus = .loaded
 }
 
+public func onCloudDataAdded(_ snapshot: DataSnapshot) {
+    switch snapshot.key {
+    case DataListKeys.ghorblinName.rawValue:
+        UserCookie.uc().setGhorblinName(snapshot.value as? String)
+        writeLocalData(DataListKeys.ghorblinName, snapshot.value as? String)
+    case DataListKeys.linkToken.rawValue:
+        UserCookie.uc().setLinkToken(snapshot.value as? String)
+        writeLocalData(DataListKeys.linkToken, snapshot.value as? String)
+    default:
+        return
+    }
+    UserCookie.uc().loadingStatus = .loaded
+}
+
+
 public func onCloudFoodRemoved(_ snapshot: DataSnapshot) {
     UserCookie.uc().removeFoodList(snapshot.key)
     UserCookie.uc().sortFoodListByDate()
     removeLocalFood(snapshot.key)
+    UserCookie.uc().loadingStatus = .loaded
+}
+
+public func onCloudDataRemoved(_ snapshot: DataSnapshot) {
+    switch snapshot.key {
+    case DataListKeys.ghorblinName.rawValue:
+        UserCookie.uc().setGhorblinName(nil)
+        writeLocalData(DataListKeys.ghorblinName, nil)
+    case DataListKeys.linkToken.rawValue:
+        UserCookie.uc().setLinkToken(nil)
+        writeLocalData(DataListKeys.linkToken, nil)
+    default:
+        return
+    }
     UserCookie.uc().loadingStatus = .loaded
 }
 
@@ -134,26 +187,51 @@ public func onCloudFoodChanged(_ snapshot: DataSnapshot) {
     UserCookie.uc().loadingStatus = .loaded
 }
 
+public func onCloudDataChanged(_ snapshot: DataSnapshot) {
+    switch snapshot.key {
+    case DataListKeys.ghorblinName.rawValue:
+        UserCookie.uc().setGhorblinName(snapshot.value as? String)
+        writeLocalData(DataListKeys.ghorblinName, snapshot.value as? String)
+    case DataListKeys.linkToken.rawValue:
+        UserCookie.uc().setLinkToken(snapshot.value as? String)
+        writeLocalData(DataListKeys.linkToken, snapshot.value as? String)
+    default:
+        return
+    }
+    UserCookie.uc().loadingStatus = .loaded
+}
+
+public func setObservers(uid: String) {
+    let ref = Database.database().reference()
+    
+    ref.child("users").child(uid).removeAllObservers()
+    ref.child("users").child(uid).observe(DataEventType.childAdded, with: onCloudDataAdded)
+    ref.child("users").child(uid).observe(DataEventType.childRemoved, with: onCloudDataRemoved)
+    ref.child("users").child(uid).observe(DataEventType.childChanged, with: onCloudDataChanged)
+    
+    ref.child("users").child(DataListKeys.foodList.rawValue).removeAllObservers()
+    ref.child("users").child(uid).child(DataListKeys.foodList.rawValue).observe(DataEventType.childAdded, with: onCloudFoodAdded)
+    ref.child("users").child(uid).child(DataListKeys.foodList.rawValue).observe(DataEventType.childRemoved, with: onCloudFoodRemoved)
+    ref.child("users").child(uid).child(DataListKeys.foodList.rawValue).observe(DataEventType.childChanged, with: onCloudFoodChanged)
+}
+
 //User Login/Logout
 public func onLogin() {
     if let uid = Auth.auth().currentUser?.uid {
-        UserCookie.uc().setLoggedIn(true)
-        TabRouter.tr().changeTab(.list)
-        KeyboardObserver.appendField(.filterList)
-        
-        let ref = Database.database().reference()
-        ref.child("users").child(uid).child("foodList").observe(DataEventType.childAdded, with: onCloudFoodAdded)
-        ref.child("users").child(uid).child("foodList").observe(DataEventType.childRemoved, with: onCloudFoodRemoved)
-        ref.child("users").child(uid).child("foodList").observe(DataEventType.childChanged, with: onCloudFoodChanged)
+        setObservers(uid: uid)
         
         loadCloudData() { data in
-            guard let foodList = data?["foodList"] as? NSDictionary else {
-                UserCookie.uc().loadingStatus = .loaded
-                return
-            }
-            if foodList.count == 0 {
+            let foodList: NSDictionary? = data?[DataListKeys.foodList.rawValue] as? NSDictionary
+            if foodList == nil || foodList!.count == 0 {
                 UserCookie.uc().loadingStatus = .loaded
             }
+            
+            UserCookie.uc().setGhorblinName(data?[DataListKeys.ghorblinName.rawValue] as? String)
+            UserCookie.uc().setLinkToken(data?[DataListKeys.linkToken.rawValue] as? String)
+            
+            UserCookie.uc().setLoggedIn(Auth.auth().currentUser)
+            TabRouter.tr().changeTab(.list)
+            KeyboardObserver.reset()
         }
     }
 }
@@ -161,26 +239,30 @@ public func onLogin() {
 public func onLogout() {
     do {
         if let uid = Auth.auth().currentUser?.uid {
-            Database.database().reference().child("users").child(uid).child("foodList").removeAllObservers()
+            Database.database().reference().child("users").child(uid).removeAllObservers()
+            Database.database().reference().child("users").child(uid).child(DataListKeys.foodList.rawValue).removeAllObservers()
         }
         
         try Auth.auth().signOut()
-        UserCookie.uc().setLoggedIn(false)
+        UserCookie.uc().setLoggedIn(nil)
         UserCookie.uc().setFoodList([:] as [String: Grub])
+        UserCookie.uc().setLinkToken(nil)
+        UserCookie.uc().setGhorblinName(nil)
+        UserCookie.uc().loadingStatus = LoadingStatus.loading
         clearLocalData()
         
-        KeyboardObserver.clearFields()
-        KeyboardObserver.appendField(.login)
+        GFormText.reset()
+        KeyboardObserver.reset()
     } catch {
         print("error:\(error)")
     }
 }
 
 //Profile Changes
-public func createAccount(email: String, pass: String, displayName: String, _ finishedWithErrors: @escaping (NSError?) -> Void) {
+public func createAccount(email: String, pass: String, displayName: String, _ finishedWithError: @escaping (NSError?) -> Void) {
     Auth.auth().createUser(withEmail: email, password: pass) { user, error in
         if let error = error as NSError? {
-            finishedWithErrors(error)
+            finishedWithError(error)
             return
         }
         let user = Auth.auth().currentUser!.createProfileChangeRequest()
@@ -188,11 +270,29 @@ public func createAccount(email: String, pass: String, displayName: String, _ fi
         user.commitChanges() { error in
             if let error = error as NSError? {
                 print("error:\(error)")
-                finishedWithErrors(error)
+                finishedWithError(error)
             } else {
-                finishedWithErrors(nil)
+                UserCookie.uc().setLinkToken(nil)
+                writeLocalData(DataListKeys.linkToken, nil)
+                
+                finishedWithError(nil)
             }
         }
+    }
+}
+
+public func createLinkedAccount(pass: String, _ finishedWithError: @escaping (NSError?) -> Void = { _ in}) {
+    let user = Auth.auth().currentUser!
+    let email: String = user.email!
+    let credential: AuthCredential = EmailAuthProvider.credential(withEmail: email, password: pass)
+    user.link(with: credential) { _, error in
+        guard error == nil else {
+            print("error:\(error!)")
+            finishedWithError(error as NSError?)
+            return
+        }
+        
+        finishedWithError(nil)
     }
 }
 

@@ -35,11 +35,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
         }
         guard let authentication = user.authentication else { return }
         let credential = GoogleAuthProvider.credential(withIDToken: authentication.idToken, accessToken: authentication.accessToken)
-        Auth.auth().signIn(with: credential) { (authResult, error) in
+        Auth.auth().signIn(with: credential) { _, error in
             if let error = error {
                 print("error:\(error)")
                 return
             }
+            
+            var hasEmailProvider: Bool = false
+            for provider in Auth.auth().currentUser!.providerData {
+                if provider.providerID == EmailAuthProviderID {
+                    hasEmailProvider = true
+                    break
+                }
+            }
+            
+            if !hasEmailProvider {
+                let linkToken: String = randomString(length: 10)
+                UserCookie.uc().setLinkToken(linkToken)
+                writeLocalData(DataListKeys.linkToken, linkToken)
+                writeCloudData(DataListKeys.linkToken, linkToken)
+                createLinkedAccount(pass: linkToken)
+            }
+            
             onLogin()
         }
     }
@@ -53,22 +70,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
     //On application launch
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         //initializers
-        loadLocalData()
         FirebaseApp.configure()
         GIDSignIn.sharedInstance().clientID = "729013591612-1idpq36eenpo1at67i9dujmkrbuc5j68.apps.googleusercontent.com"
         GIDSignIn.sharedInstance().delegate = self
-        UserCookie.uc().setLoggedIn(Auth.auth().currentUser != nil)
+        UserCookie.uc().setLoggedIn(Auth.auth().currentUser)
         
         if let uid = Auth.auth().currentUser?.uid {
-            let ref = Database.database().reference()
-            ref.child("users").child(uid).child("foodList").removeAllObservers()
-            
-            ref.child("users").child(uid).child("foodList").observe(DataEventType.childAdded, with: onCloudFoodAdded)
-            ref.child("users").child(uid).child("foodList").observe(DataEventType.childRemoved, with: onCloudFoodRemoved)
-            ref.child("users").child(uid).child("foodList").observe(DataEventType.childChanged, with: onCloudFoodChanged)
+            setObservers(uid: uid)
             
             loadCloudData() { data in
-                guard let foodList = data?["foodList"] as? NSDictionary else {
+                guard let foodList = data?[DataListKeys.foodList.rawValue] as? NSDictionary else {
                     UserCookie.uc().loadingStatus = .loaded
                     return
                 }

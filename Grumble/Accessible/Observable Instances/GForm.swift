@@ -12,13 +12,14 @@ import SwiftUI
 public enum GFormID: Int {
     case signup = 0
     case login = 1
-    case welcome = 2
-    case filterList = 3
-    case addFood = 4
-    case searchTag = 5
-    case security = 6
+    case createPass = 2
+    case welcome = 3
+    case filterList = 4
+    case addFood = 5
+    case searchTag = 6
+    case security = 7
     
-    case size = 7
+    case size = 8
 }
 
 public func size(_ formID: GFormID) -> Int {
@@ -26,6 +27,8 @@ public func size(_ formID: GFormID) -> Int {
     case .signup:
         return 5
     case .login:
+        return 2
+    case .createPass:
         return 2
     case .welcome:
         return 1
@@ -66,6 +69,23 @@ public class GFormText: ObservableObject {
             GFormText.instances![formID.rawValue] = GFormText(formID)
         }
         return GFormText.instances![formID.rawValue]!
+    }
+    
+    public static func reset() {
+        guard let instances = GFormText.instances else {
+            return
+        }
+        
+        for instance in instances {
+            if instance == nil {
+                continue
+            }
+            
+            for index in 0 ..< instance!.textFields.count {
+                instance!.setText(index, "")
+                instance!.setError(index, "")
+            }
+        }
     }
     
     public func name(_ index: Int) -> String {

@@ -35,9 +35,6 @@ public struct SearchTag: View, GFieldDelegate {
                 
                 UIApplication.shared.endEditing()
             }
-            
-            KeyboardObserver.removeField(formID)
-            KeyboardObserver.appendField(.addFood)
         }
     }
     

@@ -407,9 +407,8 @@ public struct AddFood: View, GFieldDelegate {
                             
                             UIApplication.shared.endEditing()
                             GFormRouter.gfr().callFirstResponder(.searchTag)
-                            
-                            KeyboardObserver.removeField(formID)
-                            KeyboardObserver.appendField(.searchTag, true)
+            
+                            KeyboardObserver.observe(.searchTag, true)
                         }
                     }, label: {
                         Image(systemName: "plus")

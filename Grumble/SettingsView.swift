@@ -42,17 +42,14 @@ public struct SettingsView: View {
             List{
                 Section(header: Text("General [WIP]")) {
                     Text("About [WIP]")
-                    if (Auth.auth().currentUser!.providerData[0].providerID == EmailAuthProviderID) {
-                        Button(action: {
-                            withAnimation(gAnim(.easeOut)) {
-                                self.page = .security
-                                TabRouter.tr().hide(true)
-                                KeyboardObserver.appendField(.security)
-                            }
-                        }, label: {
-                            Text("Security")
-                        })
-                    }
+                    Button(action: {
+                        withAnimation(gAnim(.easeOut)) {
+                            self.page = .security
+                            TabRouter.tr().hide(true)
+                        }
+                    }, label: {
+                        Text("Security")
+                    })
                 }
                 Section(header: Text("Social [WIP]")) {
                     Text("Privacy [WIP]")
@@ -79,7 +76,6 @@ public struct SettingsView: View {
                 
                 if !$0 {
                     UIApplication.shared.endEditing()
-                    KeyboardObserver.clearFields()
                 }
             })).offset(x: self.page == .security ? 0 : sWidth())
         }

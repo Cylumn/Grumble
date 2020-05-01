@@ -13,7 +13,7 @@ private let formID: GFormID = GFormID.security
 
 public struct SecurityForm: View, GFieldDelegate {
     @ObservedObject private var gft: GFormText = GFormText.gft(formID)
-    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(.security)
+    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
     private var isPresented: Binding<Bool>
     @State private var state: FormState = .form
     @State private var lockScale: CGFloat = 0

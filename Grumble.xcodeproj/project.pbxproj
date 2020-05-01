@@ -62,6 +62,7 @@
 		D5DFD71C24579EC100B78451 /* SecurityForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DFD71B24579EC100B78451 /* SecurityForm.swift */; };
 		D5DFD71E2458F43600B78451 /* SignupSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DFD71D2458F43600B78451 /* SignupSheet.swift */; };
 		D5DFD721245A2BAF00B78451 /* Welcome.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DFD720245A2BAE00B78451 /* Welcome.swift */; };
+		D5DFD723245BA6E000B78451 /* CreateLinkedAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DFD722245BA6E000B78451 /* CreateLinkedAccount.swift */; };
 		D5F0894E24253AC4000D375D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F0894D24253AC4000D375D /* AppDelegate.swift */; };
 		D5F0895024253AC4000D375D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F0894F24253AC4000D375D /* SceneDelegate.swift */; };
 		D5F0895224253AC4000D375D /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F0895124253AC4000D375D /* LoginView.swift */; };
@@ -150,6 +151,7 @@
 		D5DFD71B24579EC100B78451 /* SecurityForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityForm.swift; sourceTree = "<group>"; };
 		D5DFD71D2458F43600B78451 /* SignupSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupSheet.swift; sourceTree = "<group>"; };
 		D5DFD720245A2BAE00B78451 /* Welcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Welcome.swift; sourceTree = "<group>"; };
+		D5DFD722245BA6E000B78451 /* CreateLinkedAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateLinkedAccount.swift; sourceTree = "<group>"; };
 		D5F0894A24253AC4000D375D /* Grumble.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Grumble.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5F0894D24253AC4000D375D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D5F0894F24253AC4000D375D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -399,6 +401,7 @@
 		D5DFD71F245A2B9300B78451 /* Welcome */ = {
 			isa = PBXGroup;
 			children = (
+				D5DFD722245BA6E000B78451 /* CreateLinkedAccount.swift */,
 				D5DFD720245A2BAE00B78451 /* Welcome.swift */,
 			);
 			name = Welcome;
@@ -697,6 +700,7 @@
 				D541F5F2245013B400E98EF1 /* GTagShape.swift in Sources */,
 				D5DFD71E2458F43600B78451 /* SignupSheet.swift in Sources */,
 				D541F5F0244FCE2F00E98EF1 /* GBurger.swift in Sources */,
+				D5DFD723245BA6E000B78451 /* CreateLinkedAccount.swift in Sources */,
 				D56BA4BD245132C50065E3E4 /* GSoup.swift in Sources */,
 				D5F0895024253AC4000D375D /* SceneDelegate.swift in Sources */,
 				D50292352437AECF008A5BFC /* GColor.swift in Sources */,

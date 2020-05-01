@@ -99,6 +99,7 @@ public struct Grub: Decodable {
 public class UserCookie: ObservableObject {
     private static var instance: UserCookie?
     @Published private var hasCurrentUser: Bool = false
+    @Published private var linkToken: String? = nil
     @Published private var ghorblinName: String? = nil
     @Published private var fList: [String: Grub] = [:]
     @Published private var grubsByDate: [(String, Grub)] = []
@@ -108,12 +109,21 @@ public class UserCookie: ObservableObject {
     public static func uc() -> UserCookie {
         if UserCookie.instance == nil {
             UserCookie.instance = UserCookie()
+            loadLocalData()
         }
         return UserCookie.instance!
     }
     
     public func loggedIn() -> Bool {
         return self.hasCurrentUser
+    }
+    
+    public func linkedAccount() -> Bool {
+        return self.linkToken == nil
+    }
+    
+    public func accountLinkToken() -> String? {
+        return self.linkToken
     }
     
     public func newUser() -> Bool {
@@ -129,12 +139,22 @@ public class UserCookie: ObservableObject {
     }
     
     //FList Modifier Methods
-    public func setLoggedIn(_ loggedIn: Bool) {
-        self.hasCurrentUser = loggedIn
+    public func setLoggedIn(_ user: User?) {
+        if user == nil {
+            self.hasCurrentUser = false
+        } else {
+            self.hasCurrentUser = true
+        }
     }
     
-    public func setGhorblinName(_ name: String) {
-        self.ghorblinName = name
+    public func setLinkToken(_ token: String?) {
+        self.linkToken = token
+    }
+    
+    public func setGhorblinName(_ name: String?) {
+        if self.ghorblinName != name {
+            self.ghorblinName = name
+        }
     }
     
     public func setFoodList(_ foodList: [String: Grub]) {

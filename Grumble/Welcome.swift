@@ -17,8 +17,10 @@ public struct Welcome: View, GFieldDelegate {
     @State private var name: String = "ghorblin.name"
     
     private var introHeader: [String]
+    private var introImage: [String]
     private var introParagraph: [String]
     
+    private var explainImage: [String]
     private var explainHeader: [String]
     private var explainParagraph: [String]
     
@@ -33,7 +35,17 @@ public struct Welcome: View, GFieldDelegate {
         "she discovered to be a fusion of primordial and technological prowess",
         "to the modern stomach, the Ghorblins captured the explorer's awe, so she introduced them to ...",
         ""]
+        self.introImage =
+        ["GhorblinIcon",
+        "GhorblinIconZoomed",
+        "GhorblinTransformation",
+        "World"]
         
+        self.explainImage =
+        ["GhorblinIcon",
+        "ExplainAI",
+        "ExplainTraining",
+        "ExplainToss"]
         self.explainHeader =
         ["[NAME]",
         "Like all artificial intelligence",
@@ -94,6 +106,8 @@ public struct Welcome: View, GFieldDelegate {
             }
         } else {
             UserCookie.uc().setGhorblinName(name)
+            writeLocalData(DataListKeys.ghorblinName, name)
+            writeCloudData(DataListKeys.ghorblinName, name)
         }
     }
     
@@ -111,16 +125,6 @@ public struct Welcome: View, GFieldDelegate {
     public func parseInput(_ index: Int, _ textField: UITextField, _ string: String) -> String {
         return cut(trim(removeSpecialChars(textField.text! + smartCase(textField.text!, appendInput: string))), maxLength: 10)
     }
-    
-    private var welcomeBG: some View {
-        ZStack {
-            gColor(.blue0)
-                .edgesIgnoringSafeArea(.top)
-            
-            Color.white
-                .edgesIgnoringSafeArea(.bottom)
-        }
-    }
 
     private func header(_ text: String) -> some View {
         Text(text)
@@ -137,10 +141,10 @@ public struct Welcome: View, GFieldDelegate {
     }
     
     private func image(_ path: String) -> some View {
-        Image("GhorblinIcon")
+        Image(path)
             .resizable()
             .aspectRatio(contentMode: .fit)
-            .frame(width: sHeight() * 0.3, height: sHeight() * 0.3)
+            .frame(height: sHeight() * 0.3)
             .cornerRadius(10)
             .padding(20)
     }
@@ -189,7 +193,7 @@ public struct Welcome: View, GFieldDelegate {
         VStack(spacing: 0) {
             self.header(self.introHeader[index])
             self.paragraph(self.introParagraph[index])
-            self.image("GhorblinIcon")
+            self.image(self.introImage[index])
             Spacer()
             self.proceedButton("Next", next)
         }
@@ -245,30 +249,28 @@ public struct Welcome: View, GFieldDelegate {
     
     private func explain(_ index: Int) -> some View {
         VStack(spacing: 10) {
-            self.image("GhorblinIcon")
+            self.image(self.explainImage[index])
             self.header(self.explainHeader[index].replacingOccurrences(of: "[NAME]", with: self.name))
             self.paragraph(self.explainParagraph[index].replacingOccurrences(of: "[NAME]", with: self.name))
+            if index == Pages.explain3.rawValue - Pages.explain1.rawValue {
+                self.header("[in development]")
+            }
             Spacer()
             self.proceedButton(Pages.explain1.rawValue + index == Pages.size.rawValue - 1 ? "Begin" : "Next", next)
         }
     }
     
     public var body: some View {
-        ZStack {
-            self.welcomeBG
-            
-            VStack(spacing: 0) {
-                ZStack {
-                    ForEach((0 ..< Pages.size.rawValue).reversed(), id: \.self) { index in
-                        self.page(index)
-                            .frame(width: sWidth() * 0.8)
-                            .background(Color.white)
-                            .opacity(index < self.index ? 0 : 1)
-                            .disabled(index != self.index)
-                    }.frame(maxHeight: sHeight() * 0.7)
-                }
-                Spacer().frame(height: self.ko.height() + 20)
-            }.padding(20)
+        VStack(spacing: 0) {
+            ZStack {
+                ForEach((0 ..< Pages.size.rawValue).reversed(), id: \.self) { index in
+                    self.page(index)
+                        .frame(width: sWidth() * 0.8)
+                        .opacity(index != self.index ? 0 : 1)
+                        .disabled(index != self.index)
+                }.frame(maxHeight: sHeight() * 0.7)
+            }
+            Spacer().frame(height: self.ko.height())
         }
     }
 }

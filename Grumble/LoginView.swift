@@ -21,7 +21,6 @@ public struct LoginView: View, GFieldDelegate {
     
     //Initializer
     public init() {
-        KeyboardObserver.appendField(.login)
         self.gft.setName(FieldIndex.email.rawValue, "Email")
         self.gft.setName(FieldIndex.password.rawValue, "Password")
     }
@@ -46,8 +45,8 @@ public struct LoginView: View, GFieldDelegate {
             self.$movingOffset.wrappedValue = 0
             self.$currentHeight.wrappedValue = 0
             
-            KeyboardObserver.removeField(.login)
-            KeyboardObserver.appendField(.signup, true)
+            KeyboardObserver.ignore(.login)
+            KeyboardObserver.observe(.signup, true)
             GFormRouter.gfr().callCurrentResponder(.signup)
         }
     }
@@ -63,6 +62,8 @@ public struct LoginView: View, GFieldDelegate {
                 }
                 return
             }
+            
+            UIApplication.shared.endEditing()
             onLogin()
         }
     }
@@ -207,13 +208,13 @@ public struct LoginView: View, GFieldDelegate {
             SignupSheet(currentHeight: self.$currentHeight, movingOffset: self.$movingOffset, onDragStateChanged: { pos in
                 switch pos {
                     case .up:
-                        KeyboardObserver.removeField(.login)
-                        KeyboardObserver.appendField(.signup, true)
+                        KeyboardObserver.ignore(.login)
+                        KeyboardObserver.observe(.signup, true)
                         GFormRouter.gfr().callCurrentResponder(.signup)
                     case .down:
                         UIApplication.shared.endEditing()
-                        KeyboardObserver.removeField(.signup)
-                        KeyboardObserver.appendField(.login, false)
+                        KeyboardObserver.ignore(.signup)
+                        KeyboardObserver.observe(.login, false)
                 }
             }, login: self.attemptLogin)
         }

@@ -37,7 +37,6 @@ public class TabRouter: ObservableObject {
     //Setter Methods
     public func changeTab(_ tab: Tab) {
         self.currentTab = tab
-        KeyboardObserver.clearFields()
     }
     
     public func hide(_ shouldHide: Bool) {

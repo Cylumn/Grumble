@@ -19,7 +19,7 @@ public extension UIApplication {
 public class KeyboardObserver: ObservableObject {
     private static var instance: [KeyboardObserver?]?
     private var notificationCenter: NotificationCenter
-    public static var observedFields: Set<GFormID> = [.filterList, .welcome]
+    public static var ignoredFields: Set<GFormID> = []
     private var formID: GFormID
     @Published private var keyboardVisible: Bool
     @Published private var keyboardHeight: CGFloat
@@ -47,14 +47,14 @@ public class KeyboardObserver: ObservableObject {
     }
     
     public func visible() -> Bool {
-        if KeyboardObserver.observedFields.contains(self.formID) {
+        if !KeyboardObserver.ignoredFields.contains(self.formID) {
             return self.keyboardVisible
         }
         return false
     }
     
     public func height(tabbedView: Bool = true) -> CGFloat {
-        if KeyboardObserver.observedFields.contains(self.formID) {
+        if !KeyboardObserver.ignoredFields.contains(self.formID) {
             if !self.keyboardVisible {
                 return 0
             }
@@ -65,19 +65,20 @@ public class KeyboardObserver: ObservableObject {
     }
     
     //Setter Methods
-    public static func appendField(_ field: GFormID, _ beginsVisible: Bool = false) {
-        if !KeyboardObserver.observedFields.contains(field) {
-            KeyboardObserver.observedFields.insert(field)
+    public static func ignore(_ field: GFormID) {
+        if !KeyboardObserver.ignoredFields.contains(field) {
+            KeyboardObserver.ignoredFields.insert(field)
         }
+    }
+    
+    public static func observe(_ field: GFormID, _ beginsVisible: Bool = false) {
+        KeyboardObserver.ignoredFields.remove(field)
+        
         self.ko(field).keyboardVisible = beginsVisible
     }
     
-    public static func removeField(_ field: GFormID) {
-        KeyboardObserver.observedFields.remove(field)
-    }
-    
-    public static func clearFields() {
-        KeyboardObserver.observedFields.removeAll()
+    public static func reset() {
+        KeyboardObserver.ignoredFields.removeAll()
     }
     
     //Observer Methods
