@@ -24,9 +24,7 @@ public struct MainView: View {
     public var body: some View {
         ZStack {
             if self.uc.loggedIn() {
-                if !self.uc.linkedAccount() || self.uc.newUser() {
-                    self.bg
-                }
+                self.bg
                 
                 if !self.uc.linkedAccount() {
                     CreateLinkedAccount()

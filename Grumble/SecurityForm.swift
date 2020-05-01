@@ -154,7 +154,7 @@ public struct SecurityForm: View, GFieldDelegate {
                     if self.ko.visible() && drag.translation.height > 0 {
                         UIApplication.shared.endEditing()
                     }
-                })).edgesIgnoringSafeArea(.all)
+                })).edgesIgnoringSafeArea(.bottom)
             
             VStack(spacing: 0) {
                 VStack(spacing: 15) {

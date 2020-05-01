@@ -130,6 +130,10 @@ public class UserCookie: ObservableObject {
         return self.ghorblinName == nil
     }
     
+    public func ghorblin() -> String? {
+        return self.ghorblinName
+    }
+    
     public func foodList() -> [String: Grub] {
         return self.fList
     }

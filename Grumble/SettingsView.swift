@@ -12,23 +12,71 @@ import Firebase
 public struct SettingsView: View {
     @State private var page: PageForm? = nil
     
+    public init() {
+        UITableView.appearance().backgroundColor = .clear
+        UITableViewCell.appearance().selectionStyle = UITableViewCell.SelectionStyle.default
+        let bg = UIView()
+        bg.backgroundColor = UIColor(white: 0.9, alpha: 0.5)
+        UITableViewCell.appearance().selectedBackgroundView = bg
+    }
+    
     private enum PageForm {
+        case about
+        case ghorblin
         case security
     }
     
     //Function Methods
-    private func logOutUser(){
+    private func logOutUser() {
         withAnimation(gAnim(.spring)) {
             onLogout()
         }
+    }
+    
+    private func sectionHeader(_ icon: String, _ label: String) -> some View {
+        HStack {
+            Image(systemName: icon)
+            Text(label)
+                .font(gFont(.ubuntuBold, .width, 2))
+            Spacer()
+        }.foregroundColor(Color(white: 0.2))
+    }
+    
+    private func buttonLabel(_ label: String, _ action: @escaping () -> Void) -> some View {
+        Button(action: {
+            withAnimation(gAnim(.easeOut)) {
+                action()
+            }
+        }, label: {
+            HStack {
+                Text(label)
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+            }
+        }).foregroundColor(gColor(.blue0))
+    }
+    
+    private func isPagePresented(page: PageForm) -> Binding<Bool> {
+        Binding<Bool>(get: {
+            self.page == page
+        }, set: {
+            self.page = $0 ? page : nil
+            TabRouter.tr().hide($0)
+            
+            if !$0 {
+                UIApplication.shared.endEditing()
+            }
+        })
     }
     
     private var settings: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: nil) {
                 Text("Settings")
-                    .font(.custom("Ubuntu-Bold", size: sWidth() / 13))
-                    .foregroundColor(gColor(.blue0))
+                    .font(gFont(.ubuntuBold, .width, 4))
+                    .foregroundColor(Color(white: 0.2))
                     .padding(20)
                 
                 Spacer()
@@ -36,48 +84,61 @@ public struct SettingsView: View {
                 Image("ColoredLogo")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(height: 50)
+                    .frame(width: 50)
                     .padding([.leading, .trailing], 20)
-            }.padding(.bottom, 10)
-            List{
-                Section(header: Text("General [WIP]")) {
-                    Text("About [WIP]")
-                    Button(action: {
-                        withAnimation(gAnim(.easeOut)) {
-                            self.page = .security
-                            TabRouter.tr().hide(true)
-                        }
-                    }, label: {
-                        Text("Security")
-                    })
-                }
-                Section(header: Text("Social [WIP]")) {
-                    Text("Privacy [WIP]")
-                }
+            }.background(Color.white)
+            
+            List {
+                Section(header:
+                self.sectionHeader("info.circle.fill", "General [WIP]")
+                    .padding(.top, 30)) {
+                    self.buttonLabel("About") {
+                        self.page = .about
+                        TabRouter.tr().hide(true)
+                    }
+                    self.buttonLabel("Your Ghorblin") {
+                        self.page = .ghorblin
+                        TabRouter.tr().hide(true)
+                    }
+                    self.buttonLabel("Security") {
+                        self.page = .security
+                        TabRouter.tr().hide(true)
+                    }
+                }.listRowBackground(Color.white)
+                
+                Section(header: self.sectionHeader("person.2.fill", "Social [WIP]")) {
+                    self.buttonLabel("Privacy [WIP]") {}
+                }.listRowBackground(Color.white)
+                
                 Section {
                     Button(action: self.logOutUser, label: {
-                        Text("Log Out")
+                        HStack {
+                            Spacer()
+                            Text("Log Out")
+                            Spacer()
+                        }
                     }).foregroundColor(Color.white)
                 }.listRowBackground(gColor(.blue4))
-            }.listStyle(GroupedListStyle())
+            }.environment(\.horizontalSizeClass, .regular)
+            .listStyle(GroupedListStyle())
+            .font(gFont(.ubuntuLight, .width, 1.8))
             Spacer()
-        }.font(gFont(.ubuntuLight, 15))
+        }.background(Color(white: 0.98))
+        .font(gFont(.ubuntuLight, 15))
     }
     
     public var body: some View {
         ZStack {
             self.settings
             
-            SecurityForm(Binding<Bool>(get: {
-                self.page == .security
-            }, set: {
-                self.page = $0 ? .security : nil
-                TabRouter.tr().hide($0)
-                
-                if !$0 {
-                    UIApplication.shared.endEditing()
-                }
-            })).offset(x: self.page == .security ? 0 : sWidth())
+            Welcome(startIndex: Welcome.Pages.introduction.rawValue, isPresented: self.isPagePresented(page: .about))
+                .offset(x: self.page == .about ? 0 : sWidth())
+            
+            Welcome(startIndex: Welcome.Pages.assignment.rawValue, endIndex: Welcome.Pages.assignment.rawValue, isPresented: self.isPagePresented(page: .about))
+                .offset(x: self.page == .ghorblin ? 0 : sWidth())
+            
+            SecurityForm(self.isPagePresented(page: .security))
+                .offset(x: self.page == .security ? 0 : sWidth())
         }
     }
 }

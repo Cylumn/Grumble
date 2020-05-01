@@ -13,8 +13,12 @@ private let formID: GFormID = GFormID.welcome
 public struct Welcome: View, GFieldDelegate {
     @ObservedObject private var gft: GFormText = GFormText.gft(formID)
     @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
-    @State private var index: Int = 0
+    @State private var pageIndex: Int = 0
     @State private var name: String = "ghorblin.name"
+    
+    private var startIndex: Int
+    private var endIndex: Int
+    private var isPresented: Binding<Bool>?
     
     private var introHeader: [String]
     private var introImage: [String]
@@ -24,7 +28,11 @@ public struct Welcome: View, GFieldDelegate {
     private var explainHeader: [String]
     private var explainParagraph: [String]
     
-    public init() {
+    public init(startIndex: Int = 0, endIndex: Int = Pages.size.rawValue - 1, isPresented: Binding<Bool>? = nil) {
+        self.startIndex = startIndex
+        self.endIndex = endIndex
+        self.isPresented = isPresented
+        
         self.introHeader =
         ["Where she came across",
         "The Ghorblin ...",
@@ -56,10 +64,12 @@ public struct Welcome: View, GFieldDelegate {
         "you will need to feed [NAME] your own food preferences before it can know you well",
         "to [NAME] by tossing it some virtual grubs",
         "you can start grumbling, swiping on [NAME]'s suggestions"]
+        
+        self.gft.setText(0, UserCookie.uc().ghorblin() ?? "")
     }
     
     //Page Enums
-    private enum Pages: Int {
+    public enum Pages: Int {
         case welcome = 0
         case introduction = 1
         case intro2 = 2
@@ -76,6 +86,10 @@ public struct Welcome: View, GFieldDelegate {
     }
     
     //Getter Methods
+    private func index() -> Int {
+        return max(self.startIndex, self.pageIndex)
+    }
+    
     private func page(_ index: Int) -> some View {
         switch index {
         case Pages.welcome.rawValue:
@@ -95,19 +109,31 @@ public struct Welcome: View, GFieldDelegate {
     
     //Function Methods
     private func next() {
-        if self.index < Pages.size.rawValue - 1 {
+        if self.index() < self.endIndex {
             withAnimation(gAnim(.easeOut)) {
-                self.index += 1
+                self.pageIndex = self.index() + 1
             }
-            if self.index == Pages.assignment.rawValue {
-                Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
-                    GFormRouter.gfr().callFirstResponder(formID)
+            if self.index() == Pages.assignment.rawValue {
+                if let name = UserCookie.uc().ghorblin() {
+                    self.name = name
+                    self.pageIndex = self.index() + 1
+                } else {
+                    Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
+                        GFormRouter.gfr().callFirstResponder(formID)
+                    }
                 }
             }
         } else {
-            UserCookie.uc().setGhorblinName(name)
-            writeLocalData(DataListKeys.ghorblinName, name)
-            writeCloudData(DataListKeys.ghorblinName, name)
+            if self.index() >= Pages.assignment.rawValue && UserCookie.uc().ghorblin() != self.name {
+                UserCookie.uc().setGhorblinName(self.name)
+                writeLocalData(DataListKeys.ghorblinName, self.name)
+                writeCloudData(DataListKeys.ghorblinName, self.name)
+            }
+            
+            withAnimation(gAnim(.easeOut)) {
+                self.isPresented?.wrappedValue = false
+            }
+            self.pageIndex = startIndex
         }
     }
     
@@ -116,6 +142,7 @@ public struct Welcome: View, GFieldDelegate {
         textField.setInsets(top: 0, left: 0, bottom: 0, right: 0)
         textField.textAlignment = .center
         textField.returnKeyType = .default
+        textField.textContentType = .oneTimeCode
     }
     
     public func proceedField() -> Bool {
@@ -225,7 +252,7 @@ public struct Welcome: View, GFieldDelegate {
                 } else {
                     Spacer()
                 }
-                self.proceedButton("Next", disabled: self.gft.text(0).count < 3) {
+                self.proceedButton(self.endIndex == Pages.assignment.rawValue ? "Confirm" : "Next", disabled: self.gft.text(0).count < 3) {
                     self.name = self.gft.text(0)
                     self.next()
                 }
@@ -266,12 +293,13 @@ public struct Welcome: View, GFieldDelegate {
                 ForEach((0 ..< Pages.size.rawValue).reversed(), id: \.self) { index in
                     self.page(index)
                         .frame(width: sWidth() * 0.8)
-                        .opacity(index != self.index ? 0 : 1)
-                        .disabled(index != self.index)
+                        .opacity(index != self.index() ? 0 : 1)
+                        .disabled(index != self.index())
                 }.frame(maxHeight: sHeight() * 0.7)
             }
             Spacer().frame(height: self.ko.height())
-        }
+        }.frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.white)
     }
 }
 
