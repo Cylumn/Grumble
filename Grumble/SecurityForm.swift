@@ -207,7 +207,6 @@ public struct SecurityForm: View, GFieldDelegate {
                 .frame(height: sHeight() * 0.45)
                 .background(Color.white)
                 .cornerRadius(20)
-                .clipped()
                 .shadow(color: Color.black.opacity(0.2), radius: 5)
                 
                 Spacer().frame(height: 20)

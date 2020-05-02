@@ -33,10 +33,10 @@ public struct GrubSheet: View {
     
     @State private var impactOccurred: Bool = false
     @State private var presentDeleteAlert: Bool = false
-    private var contentView: ContentView
+    private var toAddFood: (String?) -> Void
     
     //Initializer
-    public init(_ contentView: ContentView) {
+    public init(_ toAddFood: @escaping (String?) -> Void) {
         self.selectedFID = ListCookie.lc().selectedFID
         switch self.selectedFID {
         case nil:
@@ -45,7 +45,7 @@ public struct GrubSheet: View {
             self.grub = UserCookie.uc().foodList()[self.selectedFID!]
         }
         
-        self.contentView = contentView
+        self.toAddFood = toAddFood
     }
     
     //Function Methods
@@ -107,7 +107,7 @@ public struct GrubSheet: View {
             GFormText.gft(.addFood).setText(AddFood.FieldIndex.address.rawValue, self.grub!.address ?? "")
             AddFoodCookie.afc().tags = Set(tags.values)
             
-            self.contentView.toAddFood(self.selectedFID!)
+            self.toAddFood(self.selectedFID!)
         }, label: {
             Text("Edit Grub")
                 .frame(maxWidth: .infinity)
@@ -341,6 +341,6 @@ struct GrubSheet_Previews: PreviewProvider {
         ListCookie.lc().selectedFID = "food"
         ListCookie.lc().presentGrubSheet = true
         UserCookie.uc().appendFoodList("food", Grub.testGrub())
-        return GrubSheet(ContentView())
+        return GrubSheet({_ in})
     }
 }

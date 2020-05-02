@@ -79,7 +79,6 @@ public struct GTagIcon: View {
             
             gTagView(self.tag, self.iconSize, idleData: 0, tossData: 0)
         }.frame(width: self.size.width, height: self.size.height)
-        .clipped()
     }
 }
 

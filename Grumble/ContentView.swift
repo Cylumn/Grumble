@@ -14,11 +14,25 @@ public struct ContentView: View {
     @ObservedObject private var uc: UserCookie = UserCookie.uc()
     @ObservedObject private var tr: TabRouter = TabRouter.tr()
     @State private var slideIndex: Int = PanelIndex.listHome.rawValue
+    @State private var slideOffset: CGFloat = 0
+    
+    //private var listView: ListView
+    //private var addFood: AddFood
+    
+    public init() {
+        //self.listView = ListView(self)
+        //self.addFood = AddFood(self)
+    }
     
     //Panel Enums
     private enum PanelIndex: Int {
         case listHome = 0
         case addFood = 1
+    }
+    
+    //Getter Methods
+    private func addFoodOffset() -> CGFloat {
+        return (slideIndex == PanelIndex.listHome.rawValue ? sWidth() : 0) + slideOffset
     }
     
     //Slide changes
@@ -31,6 +45,7 @@ public struct ContentView: View {
             self.slideIndex = PanelIndex.listHome.rawValue
         }
         UIApplication.shared.endEditing()
+        KeyboardObserver.observe(.filterList, false)
         ListCookie.lc().searchFocused = false
         self.tr.hide(false)
     }
@@ -39,11 +54,12 @@ public struct ContentView: View {
         self.toListHome(true)
     }
     
-    public func toAddFood(_ currentFID: String?) {
+    public func toAddFood(_ currentFID: String? = nil) {
         withAnimation(gAnim(.easeOut)) {
             self.slideIndex = PanelIndex.addFood.rawValue
         }
         UIApplication.shared.endEditing()
+        KeyboardObserver.ignore(.filterList)
         Timer.scheduledTimer(withTimeInterval: 0.33, repeats: false) { timer in
             GFormRouter.gfr().callFirstResponder(.addFood)
         }
@@ -55,10 +71,6 @@ public struct ContentView: View {
         default:
             AddFoodCookie.afc().currentFID = currentFID
         }
-    }
-    
-    public func toAddFood() {
-        toAddFood(nil)
     }
     
     private func slideChange(_ index: Int) {
@@ -76,8 +88,8 @@ public struct ContentView: View {
         switch self.tr.tab() {
         case .list:
             return AnyView(SlideView(index: self.$slideIndex, offsetFactor: 0.3,
-                                         views: [AnyView(ListView(self)),
-                                                AnyView(AddFood(self))],
+                          views: [AnyView(ListView(self.toAddFood)),
+                                  AnyView(AddFood(self.toListHome))],
                                          padding: 0, unDraggable: [PanelIndex.listHome.rawValue],
                                          onSlideChange: self.slideChange))
         case .settings:

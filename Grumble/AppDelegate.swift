@@ -64,7 +64,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
     //on Google SignOut
     func sign(_ signIn: GIDSignIn!, didDisconnectWith user: GIDGoogleUser!,
               withError error: Error!) {
-        print("The user disconnected :(");
     }
 
     //On application launch

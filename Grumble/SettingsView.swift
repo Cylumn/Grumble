@@ -130,6 +130,7 @@ public struct SettingsView: View {
     public var body: some View {
         ZStack {
             self.settings
+                .offset(x: self.page == nil ? 0 : sWidth() * -0.3)
             
             Welcome(startIndex: Welcome.Pages.introduction.rawValue, isPresented: self.isPagePresented(page: .about))
                 .offset(x: self.page == .about ? 0 : sWidth())

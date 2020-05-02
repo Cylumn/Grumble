@@ -36,17 +36,17 @@ public class ListCookie: ObservableObject {
 public struct ListView: View {
     @ObservedObject private var uc: UserCookie = UserCookie.uc()
     @ObservedObject private var lc: ListCookie = ListCookie.lc()
-    private var contentView: ContentView
+    private var toAddFood: (String?) -> Void
     
     @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
     
     @State private var presentGrumbleSheet: Bool = false
     @State private var ghorblinType: GrumbleSheet.GhorblinType = .grumble
-    @State private var ghorblinList: [String] = UserCookie.uc().foodList().keys.shuffled()
+    @State private var ghorblinList: [String] = []
     
     //Initializer
-    public init(_ contentView: ContentView){
-        self.contentView = contentView
+    public init(_ toAddFood: @escaping (String?) -> Void) {
+        self.toAddFood = toAddFood
     }
     
     //Getter Methods
@@ -93,7 +93,7 @@ public struct ListView: View {
             
             Spacer()
             
-            Button(action: self.contentView.toAddFood, label: {
+            Button(action: { self.toAddFood(nil) }, label: {
                 ZStack {
                     Text("+ Add")
                         .padding(10)
@@ -194,10 +194,16 @@ public struct ListView: View {
             
             Color.black.opacity(self.lc.presentGrubSheet ? maxOverlayOpacity : 0)
             
-            GrumbleSheet(self.ghorblinType, show: self.$presentGrumbleSheet, self.ghorblinList)
+            GrumbleSheet(self.ghorblinType, show:
+            Binding(get: { self.presentGrumbleSheet }, set: {
+                self.presentGrumbleSheet = $0
+                if !$0 {
+                    self.ghorblinList = []
+                }
+            }), self.ghorblinList)
                 .offset(y: self.presentGrumbleSheet ? 0 : sHeight() * 1.2)
             
-            GrubSheet(self.contentView)
+            GrubSheet(self.toAddFood)
         }
     }
 }

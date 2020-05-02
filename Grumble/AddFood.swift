@@ -29,7 +29,7 @@ public class AddFoodCookie: ObservableObject {
 
 public struct AddFood: View, GFieldDelegate {
     private var uc: UserCookie = UserCookie.uc()
-    private var contentView: ContentView
+    private var toListHome: () -> Void
     
     @ObservedObject private var gft: GFormText = GFormText.gft(formID)
     @ObservedObject private var afc: AddFoodCookie = AddFoodCookie.afc()
@@ -37,8 +37,8 @@ public struct AddFood: View, GFieldDelegate {
     @State private var presentSearchTag: Bool = false
     
     //Initializer
-    public init(_ contentView: ContentView){
-        self.contentView = contentView
+    public init(_ toListHome: @escaping () -> Void){
+        self.toListHome = toListHome
         
         self.gft.setNames(["Food", "Price", "Restaurant", "Address"])
         self.gft.setSymbols(["flame.fill", "", "rosette", "mappin.and.ellipse"])
@@ -127,7 +127,7 @@ public struct AddFood: View, GFieldDelegate {
             appendLocalFood(self.afc.currentFID!, foodDictionary)
             appendCloudFood(self.afc.currentFID!, foodDictionary)
         }
-        contentView.toListHome()
+        self.toListHome()
         
         AddFood.clearFields()
     }
@@ -190,7 +190,7 @@ public struct AddFood: View, GFieldDelegate {
                     case FieldIndex.restaurant.rawValue:
                         text = cut(text, maxLength: 40)
                     case FieldIndex.food.rawValue:
-                        text = cut(text, maxLength: 25)
+                        text = cut(text, maxLength: 15)
                     case FieldIndex.address.rawValue:
                         text = cut(text, maxLength: 50)
                     default:
@@ -203,7 +203,7 @@ public struct AddFood: View, GFieldDelegate {
     private var header: some View {
         ZStack {
             HStack(spacing: nil) {
-                Button(action: self.contentView.toListHome, label: {
+                Button(action: self.toListHome, label: {
                     Image(systemName: "chevron.left")
                         .foregroundColor(Color.white)
                         .padding(.leading, 5)
@@ -432,11 +432,11 @@ public struct AddFood: View, GFieldDelegate {
 struct AddToListView_Previews: PreviewProvider {
    static var previews: some View {
       Group {
-         AddFood(ContentView())
+         AddFood({})
             .previewDevice(PreviewDevice(rawValue: "iPhone SE"))
             .previewDisplayName("iPhone SE")
 
-         AddFood(ContentView())
+         AddFood({})
             .previewDevice(PreviewDevice(rawValue: "iPhone XS Max"))
             .previewDisplayName("iPhone XS Max")
       }

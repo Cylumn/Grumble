@@ -411,6 +411,7 @@ public struct GrumbleSheet: View {
                                 Text("Enjoy Your")
                                 
                                 Text(self.grub()?.food ?? "")
+                                    .multilineTextAlignment(.center)
                             } else {
                                 Text("Empty Stomach!")
                                 

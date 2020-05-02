@@ -40,7 +40,7 @@ public struct GrubItem: View {
     
     //Getter Methods
     private func textSize(_ text: String) -> CGFloat {
-        let size = min(27.0 / CGFloat(text.count), self.gic.textSize)
+        let size = max(min(27.0 / CGFloat(text.count), self.gic.textSize), 2)
         if size != self.gic.textSize {
             self.gic.textSize = size
         }
@@ -72,6 +72,7 @@ public struct GrubItem: View {
                             .padding(10)
                             .font(gFont(.ubuntuBold, .width, textSize(self.grub.food)))
                             .foregroundColor(Color.white)
+                            .lineLimit(1)
                     
                         Spacer()
                         
@@ -96,12 +97,14 @@ public struct GrubItem: View {
                 .padding([.top, .leading], 10)
                 .font(gFont(.ubuntuLight, .width, 2))
                 .foregroundColor(Color.black)
+                .lineLimit(1)
             
             Text(self.grub.address ?? " ")
                 .padding(.leading, 10)
                 .font(gFont(.ubuntuLightItalic, .width, 1.5))
                 .foregroundColor(Color(white: 0.1))
-        }
+                .lineLimit(1)
+        }.frame(width: 200)
     }
 }
 
