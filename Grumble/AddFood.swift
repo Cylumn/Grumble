@@ -38,7 +38,10 @@ public struct AddFood: View, GFieldDelegate {
     
     //Initializer
     public init(_ toListHome: @escaping () -> Void){
-        self.toListHome = toListHome
+        self.toListHome = {
+            toListHome()
+            ListCookie.lc().onAddFoodHide()
+        }
         
         self.gft.setNames(["Food", "Restaurant", "Address", "Price"])
         self.gft.setSymbols(["flame.fill", "rosette", "mappin.and.ellipse", ""])
@@ -70,9 +73,9 @@ public struct AddFood: View, GFieldDelegate {
         return sWidth() * (self.presentSearchTag ? 1 : 0.1)
     }
     
-    private func presentSearchHeight() -> CGFloat {
+    private func presentSearchHeight() -> CGFloat? {
         let small: CGFloat = sWidth() * 0.08
-        let big: CGFloat = sHeight() - safeAreaInset(.top)
+        let big: CGFloat? = nil
         return self.presentSearchTag ? big : small
     }
     

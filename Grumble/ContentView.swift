@@ -39,7 +39,6 @@ public struct ContentView: View {
         UIApplication.shared.endEditing()
         KeyboardObserver.observe(.filterList, false)
         ListCookie.lc().searchFocused = false
-        self.tr.hide(false)
     }
     
     public func toListHome() {
@@ -61,8 +60,10 @@ public struct ContentView: View {
         switch currentFID {
         case nil:
             AddFood.clearFields()
+            ListCookie.lc().onAddFoodHide = { self.tr.hide(false) }
         default:
             AddFoodCookie.afc().currentFID = currentFID
+            ListCookie.lc().onAddFoodHide = { }
         }
     }
     
@@ -70,6 +71,7 @@ public struct ContentView: View {
         switch index {
         case PanelIndex.listHome.rawValue:
             toListHome()
+            ListCookie.lc().onAddFoodHide()
         case PanelIndex.addFood.rawValue:
             toAddFood()
         default:

@@ -204,12 +204,12 @@ public struct SecurityForm: View, GFieldDelegate {
                     }
                 }.animation(nil)
                 .padding(30)
-                .frame(height: sHeight() * 0.45)
+                .frame(height: 300)
                 .background(Color.white)
                 .cornerRadius(20)
                 .shadow(color: Color.black.opacity(0.2), radius: 5)
                 
-                Spacer().frame(height: 20)
+                Spacer().frame(height: sHeight() * 0.05)
                 
                 HStack(spacing: 0) {
                     Spacer()

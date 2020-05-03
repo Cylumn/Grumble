@@ -24,6 +24,7 @@ public class ListCookie: ObservableObject {
     
     @Published public var presentGrubSheet: Bool = false
     public var onGrubSheetHide: () -> Void = {}
+    public var onAddFoodHide: () -> Void = {}
     
     public static func lc() -> ListCookie {
         if ListCookie.instance == nil {
@@ -163,7 +164,7 @@ public struct ListView: View {
                 }.padding(.top, 20)
                 
                 if !self.searchListExpanded() {
-                    ScrollView(.horizontal) {
+                    ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 20) {
                             if !self.uc.foodList().isEmpty {
                                 ForEach((0 ..< self.uc.foodListByDate().count).reversed(), id: \.self) { index in

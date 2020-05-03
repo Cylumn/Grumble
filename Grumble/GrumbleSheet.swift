@@ -118,6 +118,10 @@ public struct GrumbleSheet: View {
     }
     
     private func grubRenderingRange() -> [Int] {
+        if self.fidList.count == 0 {
+            return []
+        }
+        
         let small: Int = max(self.fidIndex - 1, 0)
         let large: Int = min(self.fidIndex + 1, self.fidList.count - 1)
         return (small ... large).filter { self.grub($0) != nil }
@@ -148,7 +152,7 @@ public struct GrumbleSheet: View {
     }
     
     private func grubOffsetY(_ index: Int) -> CGFloat {
-        let magnitude: CGFloat = -100
+        let magnitude: CGFloat = -150
         return self.dragHorizontalData(index) * magnitude
     }
     
@@ -172,7 +176,7 @@ public struct GrumbleSheet: View {
     
     private func chosenGrubOffsetY() -> CGFloat {
         let dataFraction: CGFloat = 0.3
-        let smallHeight: CGFloat = min(self.chosenGrubData, dataFraction) * sHeight() * -0.35
+        let smallHeight: CGFloat = min(self.chosenGrubData, dataFraction) * sHeight() * -0.2
         let largeHeight: CGFloat = max(self.chosenGrubData - dataFraction, 0) * sHeight()
         return smallHeight + largeHeight
     }
@@ -252,18 +256,34 @@ public struct GrumbleSheet: View {
                 Ellipse()
                     .fill(Color.black.opacity(0.2))
                     .frame(width: sWidth() * 0.95, height: sHeight() * 0.18)
-                    .offset(y: sHeight() * -0.06)
+                    .offset(y: sHeight() * -0.02)
                 
                 Image("GhorblinPlate")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: sWidth() * 0.9)
-                    .offset(y: sHeight() * -0.07)
+                    .offset(y: sHeight() * -0.03)
                 
                 Ellipse()
                     .fill(Color.black.opacity(Double(0.2 - 0.2 * self.dragData())))
                     .frame(width: sWidth() * (0.7 + 0.2 * self.dragData()), height: sHeight() * (0.13 + 0.1 * self.dragData()))
-                    .offset(y: sHeight() * (-0.12 + 0.05 * self.dragData()))
+                    .offset(y: sHeight() * (-0.09 + 0.05 * self.dragData()))
+                
+                ForEach(self.grubRenderingRange(), id: \.self) { index in
+                    ZStack {
+                        Ellipse()
+                            .fill(Color.black.opacity(Double(0.3 - 0.3 * self.dragHorizontalData(index))))
+                            .frame(width: sWidth() * (0.2 + 0.1 * self.dragData()), height: sHeight() * (0.04 + 0.02 * self.dragData()))
+                            .offset(x: self.grubOffsetX(index),
+                                    y: sHeight() * (-0.08 + 0.01 * self.dragData()) + sHeight() * 0.3 * self.chosenGrubData)
+                            .scaleEffect(1 + 2 * self.chosenGrubData)
+                        
+                        self.tagIcon(self.grub(index)!.tags["smallestTag"]!, index: index)
+                            .rotationEffect(self.grubRotation(index))
+                            .offset(x: self.grubOffsetX(index), y: sHeight() * -0.12 + self.grubOffsetY(index) + self.chosenGrubOffsetY())
+                            .scaleEffect(1 + 2 * self.chosenGrubData)
+                    }
+                }
             }.frame(width: sWidth())
         }.frame(width: sWidth())
     }
@@ -287,24 +307,7 @@ public struct GrumbleSheet: View {
     }
     
     private var ghorblinView: some View {
-        ZStack {
-            if self.fidList.count > 0 {
-                ForEach(self.grubRenderingRange(), id: \.self) { index in
-                    ZStack {
-                        Ellipse()
-                            .fill(Color.black.opacity(Double(0.3 - 0.3 * self.dragHorizontalData(index))))
-                            .frame(width: sWidth() * (0.2 + 0.1 * self.dragData()), height: sHeight() * (0.03 + 0.02 * self.dragData()))
-                            .offset(x: self.grubOffsetX(index), y: 210 + 10 * self.dragData() + self.grubOffsetY(index) * 0.1 + self.chosenGrubOffsetY() + sHeight() * 0.1 * self.chosenGrubData)
-                            .scaleEffect(1 + 2 * self.chosenGrubData)
-                        
-                        self.tagIcon(self.grub(index)!.tags["smallestTag"]!, index: index)
-                            .rotationEffect(self.grubRotation(index))
-                            .offset(x: self.grubOffsetX(index), y: 185 + self.grubOffsetY(index) + self.chosenGrubOffsetY())
-                            .scaleEffect(1 + 2 * self.chosenGrubData)
-                    }
-                }
-            }
-            
+        ZStack(alignment: .top) {
             ZStack {
                 GhorblinSheet(drip: self.ga.drip(), idleScale: self.ga.idleData, hold: self.holdData())
                     .fill(self.dripFill)
@@ -313,8 +316,11 @@ public struct GrumbleSheet: View {
                     .fill(Color.white)
                 
                 GhorblinSheetHighlights(idle: self.ga.idleData, hold: self.holdData())
-            }.offset(y: self.coverDistance())
-        }
+            }.offset(y: self.coverDistance() + safeAreaInset(.top))
+            
+            Color.white
+                .frame(height: safeAreaInset(.top))
+        }.frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     private var grumbleGesture: some Gesture {
@@ -533,6 +539,7 @@ public struct GrumbleSheet: View {
 
 struct GrumbleSheet_Previews: PreviewProvider {
     static var previews: some View {
-        GrumbleSheet(.grumble, show: Binding.constant(true), Array(UserCookie.uc().foodList().keys))
+        UserCookie.uc().setFoodList(["": Grub.testGrub()])
+        return GrumbleSheet(.grumble, show: Binding.constant(true), Array(UserCookie.uc().foodList().keys))
     }
 }

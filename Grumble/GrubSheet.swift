@@ -11,6 +11,7 @@ import SwiftUI
 private let baseImageFraction: CGFloat = 0.35
 private let dragFraction: CGFloat = 0.5
 private let safeImagePadding: CGFloat = 10
+private let minDragFraction: CGFloat = 0
 
 private let headerHeight: CGFloat = sWidth() * 0.23
 private let grubContentPadding: CGFloat = 20
@@ -92,8 +93,7 @@ public struct GrubSheet: View {
                     Text("$" + String(format:"%.2f", self.grub!.price!))
                 }
             }
-        }.padding(.top, safeAreaInset(.top))
-        .padding(10)
+        }.padding(10)
     }
     
     private var editButton: some View {
@@ -289,7 +289,11 @@ public struct GrubSheet: View {
                     .padding(20)
                     .foregroundColor(Color.white.opacity(0.5))
                     .font(.system(size: 30))
-            })
+            }).disabled(self.imageFraction == minDragFraction)
+            
+            tagColors[smallestTag]
+                .edgesIgnoringSafeArea(.all)
+                .opacity(1 - Double(min((self.imageFraction - minDragFraction) * 10, 1)))
             
             ZStack(alignment: .topLeading) {
                 Color(white: 0.95)
@@ -306,17 +310,17 @@ public struct GrubSheet: View {
                     .frame(height: headerHeight)
                     .background(Color.white)
                     .shadow(color: Color.black.opacity(0.1), radius: 5, y: 2)
-            }.frame(height: sHeight() * (1 - self.imageFraction) + safeImagePadding, alignment: .top)
+            }.frame(alignment: .top)
             .foregroundColor(Color.black)
-            .offset(y: sHeight() * self.imageFraction + safeAreaInset(.top))
-        }.frame(width: sWidth(), height: sHeight() - safeAreaInset(.top))
+            .offset(y: sHeight() * self.imageFraction)
+        }.frame(width: sWidth())
         .gesture(DragGesture().onChanged { drag in
             withAnimation(gAnim(.easeOut)) {
                 if self.offsetGrubContent == 0 {
-                    self.imageFraction = max(min(drag.translation.height / sHeight() + self.currentOffsetGrubContent / sHeight() + self.currentImageFraction, baseImageFraction), -safeAreaInset(.top) / sHeight())
+                    self.imageFraction = max(min(drag.translation.height / sHeight() + self.currentOffsetGrubContent / sHeight() + self.currentImageFraction, baseImageFraction), minDragFraction)
                 }
                 
-                if self.imageFraction == -safeAreaInset(.top) / sHeight() {
+                if self.imageFraction == minDragFraction {
                     let attemptedOffset = min(drag.translation.height + self.currentImageFraction * sHeight() + safeAreaInset(.top) + self.currentOffsetGrubContent, 0)
                     self.offsetGrubContent = max(attemptedOffset, min(sHeight() * ( 1 - baseImageFraction) + headerHeight - self.grubContentHeight(), 0))
                 }

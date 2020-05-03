@@ -163,7 +163,7 @@ public struct SearchTag: View, GFieldDelegate {
                 }).background(self.selected.count > 0 ? gColor(.blue0) : Color(white: 0.9))
                 .cornerRadius(100)
                 .shadow(color: Color.black.opacity(0.2), radius: 12, y: 15)
-                .offset(y: -self.ko.height())
+                .offset(y: min(-self.ko.height(), -40))
                 .disabled(self.selected.count == 0)
                 .animation(gAnim(.easeOut))
             }.padding(20)
