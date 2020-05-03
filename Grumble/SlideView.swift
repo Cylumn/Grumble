@@ -88,6 +88,8 @@ public struct SlideView: View {
                 default:
                     self.dragOffset = self.direction.rawValue * drag.translation.width
             }
+            
+            UIApplication.shared.endEditing()
         }.onEnded { drag in
             if self.unDraggable?.contains(self.index.wrappedValue) ?? false || self.views.count == 1 {
                 return

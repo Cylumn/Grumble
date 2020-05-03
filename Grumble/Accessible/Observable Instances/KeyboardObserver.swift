@@ -11,8 +11,10 @@ import SwiftUI
 
 public extension UIApplication {
     func endEditing() {
-        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-        sendAction(#selector(UIView.endEditing), to: nil, from: nil, for: nil)
+        if KeyboardObserver.visible() {
+            sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            sendAction(#selector(UIView.endEditing), to: nil, from: nil, for: nil)
+        }
     }
 }
 
@@ -38,12 +40,19 @@ public class KeyboardObserver: ObservableObject {
     //Getter Methods
     public static func ko(_ formID: GFormID) -> KeyboardObserver {
         if KeyboardObserver.instance == nil {
-            KeyboardObserver.instance = Array(repeating: nil, count: GFormID.size.rawValue)
+            KeyboardObserver.instance = Array(repeating: nil, count: GFormID.size.rawValue + 1)
         }
         if KeyboardObserver.instance![formID.rawValue] == nil {
             KeyboardObserver.instance![formID.rawValue] = KeyboardObserver(formID)
         }
+        if KeyboardObserver.instance![GFormID.size.rawValue] == nil {
+            KeyboardObserver.instance![GFormID.size.rawValue] = KeyboardObserver(GFormID.size)
+        }
         return KeyboardObserver.instance![formID.rawValue]!
+    }
+    
+    public static func visible() -> Bool {
+        return KeyboardObserver.ko(GFormID.size).visible()
     }
     
     public func visible() -> Bool {
@@ -53,7 +62,7 @@ public class KeyboardObserver: ObservableObject {
         return false
     }
     
-    public func height(tabbedView: Bool = true) -> CGFloat {
+    public func height(tabbedView: Bool = false) -> CGFloat {
         if !KeyboardObserver.ignoredFields.contains(self.formID) {
             if !self.keyboardVisible {
                 return 0
@@ -71,10 +80,12 @@ public class KeyboardObserver: ObservableObject {
         }
     }
     
-    public static func observe(_ field: GFormID, _ beginsVisible: Bool = false) {
+    public static func observe(_ field: GFormID, _ beginsVisible: Bool? = nil) {
         KeyboardObserver.ignoredFields.remove(field)
         
-        self.ko(field).keyboardVisible = beginsVisible
+        if let visible = beginsVisible {
+            self.ko(field).keyboardVisible = visible  
+        }
     }
     
     public static func reset() {
@@ -84,21 +95,17 @@ public class KeyboardObserver: ObservableObject {
     //Observer Methods
     @objc private func onKeyboardShow(notification: Notification) {
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue{
-            if !self.keyboardVisible {
-                withAnimation(gAnim(.spring)){
-                    self.keyboardVisible = true
-                    self.keyboardHeight = keyboardSize.height
-                }
+            withAnimation(gAnim(.spring)){
+                self.keyboardVisible = true
+                self.keyboardHeight = keyboardSize.height
             }
         }
     }
     
     @objc private func onKeyboardHide(notification: Notification) {
-        if self.keyboardVisible {
-            withAnimation(gAnim(.spring)){
-                self.keyboardVisible = false
-                self.keyboardHeight = 0
-            }
+        withAnimation(gAnim(.spring)){
+            self.keyboardVisible = false
+            self.keyboardHeight = 0
         }
     }
     

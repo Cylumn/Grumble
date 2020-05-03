@@ -117,16 +117,8 @@ public struct GrubSearchItem: View {
         self.item = item
     }
     
-    private func tokenText(_ text: String) -> some View {
-        Text(text)
-            .padding(3)
-            .padding([.leading, .trailing], 4)
-            .background(Color.white)
-            .font(gFont(.ubuntuLight, .width, 1.8))
-            .overlay(Capsule().stroke(Color(white: 0.8), lineWidth: 1))
-    }
-    
-    public var body: some View {
+    //Getter Methods
+    public func shownIDs() -> [Int] {
         var tags = self.item.grub.tags
         tags["smallestTag"] = nil
         var shownIDs: [Int] = []
@@ -170,11 +162,25 @@ public struct GrubSearchItem: View {
                 break
             }
         }
+        return shownIDs
+    }
+    
+    private func tokenText(_ text: String) -> some View {
+        Text(text)
+            .padding(3)
+            .padding([.leading, .trailing], 4)
+            .background(Color.white)
+            .font(gFont(.ubuntuLight, .width, 1.8))
+            .overlay(Capsule().stroke(Color(white: 0.8), lineWidth: 1))
+    }
+    
+    public var body: some View {
+        let shownIDs: [Int] = self.shownIDs()
         
         return HStack(spacing: 20) {
             VStack(alignment: .leading, spacing: 10) {
                 Text(self.item.grub.food)
-                    .font(gFont(.ubuntuMedium, .width, 2.3))
+                    .font(gFont(.ubuntuMedium, .width, 1.8))
                     .lineLimit(1)
                     
                 HStack(spacing: 10) {

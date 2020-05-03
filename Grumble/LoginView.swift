@@ -201,7 +201,7 @@ public struct LoginView: View, GFieldDelegate {
                     }
                 }
                 
-                Spacer().frame(height: self.ko.height(tabbedView: false) + sHeight() * (self.ko.visible() ? 0.01 : 0.04))
+                Spacer().frame(height: self.ko.height() + sHeight() * (self.ko.visible() ? 0.01 : 0.04))
             }.frame(width: sWidth() * 0.85)
             .foregroundColor(Color.white)
             

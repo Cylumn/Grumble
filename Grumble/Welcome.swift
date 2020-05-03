@@ -133,7 +133,10 @@ public struct Welcome: View, GFieldDelegate {
             withAnimation(gAnim(.easeOut)) {
                 self.isPresented?.wrappedValue = false
             }
-            self.pageIndex = startIndex
+            
+            Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
+                self.pageIndex = self.startIndex
+            }
         }
     }
     
@@ -228,9 +231,6 @@ public struct Welcome: View, GFieldDelegate {
     
     private var assignment: some View {
         VStack(spacing: 0) {
-            if self.ko.visible() {
-                Spacer()
-            }
             VStack(spacing: 10) {
                 self.header("Meet Your Ghorblin")
                 Image("GhorblinIcon")
@@ -257,10 +257,7 @@ public struct Welcome: View, GFieldDelegate {
                     self.next()
                 }
             }
-            if self.ko.visible() {
-                Spacer()
-                Spacer()
-            }
+            Spacer().frame(height: self.ko.height())
         }.background(
             Color.clear
             .contentShape(Rectangle())
@@ -297,7 +294,6 @@ public struct Welcome: View, GFieldDelegate {
                         .disabled(index != self.index())
                 }.frame(maxHeight: sHeight() * 0.7)
             }
-            Spacer().frame(height: self.ko.height())
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white)
     }

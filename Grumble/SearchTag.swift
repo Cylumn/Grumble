@@ -29,12 +29,15 @@ public struct SearchTag: View, GFieldDelegate {
         if self.isPresented.wrappedValue {
             withAnimation(gAnim(.easeOut)) {
                 self.isPresented.wrappedValue = false
-                self.selected.removeAll()
-                self.available = Set(1 ..< tagTitles.count)
-                self.gft.setText(0, "")
-                
-                UIApplication.shared.endEditing()
             }
+
+            self.selected.removeAll()
+            self.available = Set(1 ..< tagTitles.count)
+            self.gft.setText(0, "")
+            
+            UIApplication.shared.endEditing()
+            KeyboardObserver.observe(.addFood)
+            KeyboardObserver.ignore(formID)
         }
     }
     
@@ -160,7 +163,7 @@ public struct SearchTag: View, GFieldDelegate {
                 }).background(self.selected.count > 0 ? gColor(.blue0) : Color(white: 0.9))
                 .cornerRadius(100)
                 .shadow(color: Color.black.opacity(0.2), radius: 12, y: 15)
-                .offset(y: -self.ko.height() - 20)
+                .offset(y: -self.ko.height())
                 .disabled(self.selected.count == 0)
                 .animation(gAnim(.easeOut))
             }.padding(20)

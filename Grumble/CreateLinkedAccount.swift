@@ -118,7 +118,7 @@ public struct CreateLinkedAccount: View, GFieldDelegate {
                 .onTapGesture {
                     UIApplication.shared.endEditing()
                 }.gesture(DragGesture().onChanged({ drag in
-                    if self.ko.visible() && drag.translation.height > 0 {
+                    if drag.translation.height > 0 {
                         UIApplication.shared.endEditing()
                     }
                 })).edgesIgnoringSafeArea(.bottom)

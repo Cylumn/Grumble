@@ -123,7 +123,7 @@ public struct SettingsView: View {
             .listStyle(GroupedListStyle())
             .font(gFont(.ubuntuLight, .width, 1.8))
             Spacer()
-        }.background(Color(white: 0.98))
+        }.background(Color(white: 0.95))
         .font(gFont(.ubuntuLight, 15))
     }
     

@@ -151,7 +151,7 @@ public struct SecurityForm: View, GFieldDelegate {
                 .onTapGesture {
                     UIApplication.shared.endEditing()
                 }.gesture(DragGesture().onChanged({ drag in
-                    if self.ko.visible() && drag.translation.height > 0 {
+                    if drag.translation.height > 0 {
                         UIApplication.shared.endEditing()
                     }
                 })).edgesIgnoringSafeArea(.bottom)
@@ -249,7 +249,7 @@ public struct SecurityForm: View, GFieldDelegate {
                         Spacer()
                     }
                 }.frame(height: sWidth() * 2.5 / 50 + 20)
-                Spacer().frame(height: 60 + self.ko.height())
+                Spacer().frame(height: self.ko.height())
             }.frame(width: sWidth() * 0.75)
         }
     }

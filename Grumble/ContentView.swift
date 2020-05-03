@@ -16,14 +16,6 @@ public struct ContentView: View {
     @State private var slideIndex: Int = PanelIndex.listHome.rawValue
     @State private var slideOffset: CGFloat = 0
     
-    //private var listView: ListView
-    //private var addFood: AddFood
-    
-    public init() {
-        //self.listView = ListView(self)
-        //self.addFood = AddFood(self)
-    }
-    
     //Panel Enums
     private enum PanelIndex: Int {
         case listHome = 0
@@ -60,7 +52,8 @@ public struct ContentView: View {
         }
         UIApplication.shared.endEditing()
         KeyboardObserver.ignore(.filterList)
-        Timer.scheduledTimer(withTimeInterval: 0.33, repeats: false) { timer in
+        KeyboardObserver.ignore(.searchTag)
+        Timer.scheduledTimer(withTimeInterval: 0.43, repeats: false) { timer in
             GFormRouter.gfr().callFirstResponder(.addFood)
         }
         self.tr.hide(true)

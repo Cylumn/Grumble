@@ -40,19 +40,19 @@ public struct AddFood: View, GFieldDelegate {
     public init(_ toListHome: @escaping () -> Void){
         self.toListHome = toListHome
         
-        self.gft.setNames(["Food", "Price", "Restaurant", "Address"])
-        self.gft.setSymbols(["flame.fill", "", "rosette", "mappin.and.ellipse"])
-        self.gft.setError(FieldIndex.price.rawValue, "(Optional)")
+        self.gft.setNames(["Food", "Restaurant", "Address", "Price"])
+        self.gft.setSymbols(["flame.fill", "rosette", "mappin.and.ellipse", ""])
         self.gft.setError(FieldIndex.restaurant.rawValue, "(Optional)")
         self.gft.setError(FieldIndex.address.rawValue, "(Optional)")
+        self.gft.setError(FieldIndex.price.rawValue, "(Optional)")
     }
     
     //Field Enums
     public enum FieldIndex: Int {
         case food = 0
-        case price = 1
-        case restaurant = 2
-        case address = 3
+        case restaurant = 1
+        case address = 2
+        case price = 3
     }
     
     //Edit Enums
@@ -72,7 +72,7 @@ public struct AddFood: View, GFieldDelegate {
     
     private func presentSearchHeight() -> CGFloat {
         let small: CGFloat = sWidth() * 0.08
-        let big: CGFloat = sHeight() - tabHeight
+        let big: CGFloat = sHeight() - safeAreaInset(.top)
         return self.presentSearchTag ? big : small
     }
     
@@ -160,11 +160,11 @@ public struct AddFood: View, GFieldDelegate {
         textField.font = gFont(.ubuntuLight, .width, 2)
         textField.textColor = gColor(.blue2)
         switch index {
+            case FieldIndex.address.rawValue:
+                textField.returnKeyType = .default
             case FieldIndex.price.rawValue:
                 textField.keyboardType = .numberPad
                 textField.textAlignment = .right
-            case FieldIndex.address.rawValue:
-                textField.returnKeyType = .default
             default:
                 break
         }
@@ -220,6 +220,26 @@ public struct AddFood: View, GFieldDelegate {
         }
     }
     
+    private func field(_ index: Int, _ width: CGFloat = .infinity) -> some View {
+        ZStack(alignment: .topLeading) {
+            Color.clear
+            
+            Rectangle()
+                .fill(Color(white: 0.8))
+                .frame(width: 1, height: fieldHeight)
+            
+            Rectangle()
+                .fill(Color(white: 0.8))
+                .frame(height: 1)
+            
+            Text(self.gft.name(index))
+                .padding(7)
+                .font(gFont(.ubuntuMedium, .width, 1.5))
+            
+            GField(formID, index, self)
+        }.frame(maxWidth: width, maxHeight: fieldHeight)
+    }
+    
     private var form: some View {
         HStack(spacing: 0) {
             VStack(spacing: 0) {
@@ -238,41 +258,11 @@ public struct AddFood: View, GFieldDelegate {
                 .frame(width: 10, height: formHeight)
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: 0) {
-                    ForEach(0 ..< FieldIndex.restaurant.rawValue) { index in
-                        ZStack(alignment: .topLeading) {
-                            Color.clear
-                            
-                            if index > 0 {
-                                Rectangle()
-                                .fill(Color(white: 0.8))
-                                .frame(width: 1, height: fieldHeight)
-                            }
-                            
-                            Text(self.gft.name(index))
-                                .padding(7)
-                                .font(gFont(.ubuntuMedium, .width, 1.5))
-                            
-                            GField(formID, index, self)
-                        }.frame(idealWidth: index == FieldIndex.price.rawValue ? sWidth() * 0.35 : .infinity, maxWidth: index == FieldIndex.price.rawValue ? sWidth() * 0.35 : .infinity)
-                        .frame(height: fieldHeight)
-                    }
-                }
-                ForEach(FieldIndex.restaurant.rawValue ..< size(formID)) { index in
-                    ZStack(alignment: .topLeading) {
-                        Color.clear
-                        
-                        Rectangle()
-                            .fill(Color(white: 0.8))
-                            .frame(height: 1)
-                        
-                        Text(self.gft.name(index))
-                            .padding(7)
-                            .font(gFont(.ubuntuMedium, .width, 1.5))
-                        
-                        GField(formID, index, self)
-                    }.frame(idealWidth: .infinity, maxWidth: .infinity)
-                    .frame(height: fieldHeight)
-                }
+                    self.field(FieldIndex.food.rawValue)
+                    self.field(FieldIndex.price.rawValue, sWidth() * 0.35)
+                }.frame(height: fieldHeight)
+                self.field(FieldIndex.restaurant.rawValue)
+                self.field(FieldIndex.address.rawValue)
             }.foregroundColor(Color(white: 0.3))
             .frame(idealWidth: .infinity, maxWidth: .infinity)
         }
@@ -335,6 +325,32 @@ public struct AddFood: View, GFieldDelegate {
         }
     }
     
+    private var searchTag: some View {
+        ZStack(alignment: .center) {
+            SearchTag(self.$presentSearchTag)
+                .clipped()
+            
+            if !self.presentSearchTag {
+                Color(white: 0.9)
+                
+                Button(action: {
+                    withAnimation(gAnim(.easeOut)) {
+                        self.presentSearchTag = true
+                    }
+                    GFormRouter.gfr().callFirstResponder(.searchTag)
+                    
+                    KeyboardObserver.ignore(formID)
+                    KeyboardObserver.observe(.searchTag, true)
+                }, label: {
+                    Image(systemName: "plus")
+                        .padding(15)
+                        .foregroundColor(Color(white: 0.2))
+                        .font(.system(size: 15, weight: .black))
+                })
+            }
+        }
+    }
+    
     public var body: some View {
         let sortedTags: [Int] = self.afc.tags.sorted()
         
@@ -391,35 +407,13 @@ public struct AddFood: View, GFieldDelegate {
                 }.padding(20)
                 .frame(width: sWidth())
                 .shadow(color: Color.black.opacity(0.2), radius: 12, y: 15)
-                .offset(y: -self.ko.height(tabbedView: false))
+                .offset(y: min(-self.ko.height(), -40))
             }
             
-            ZStack(alignment: .center) {
-                SearchTag(self.$presentSearchTag)
-                    .clipped()
-                
-                if !self.presentSearchTag {
-                    Color(white: 0.9)
-                    
-                    Button(action: {
-                        withAnimation(gAnim(.easeOut)) {
-                            self.presentSearchTag = true
-                            
-                            UIApplication.shared.endEditing()
-                            GFormRouter.gfr().callFirstResponder(.searchTag)
-            
-                            KeyboardObserver.observe(.searchTag, true)
-                        }
-                    }, label: {
-                        Image(systemName: "plus")
-                            .padding(15)
-                            .foregroundColor(Color(white: 0.2))
-                            .font(.system(size: 15, weight: .black))
-                    })
-                }
-            }.frame(width: self.presentSearchWidth(), height: self.presentSearchHeight())
-            .cornerRadius(self.presentSearchTag ? 0 : 30)
-            .offset(self.presentSearchOffset())
+            self.searchTag
+                .frame(width: self.presentSearchWidth(), height: self.presentSearchHeight())
+                .cornerRadius(self.presentSearchTag ? 0 : 30)
+                .offset(self.presentSearchOffset())
         }.onTapGesture {
             if !self.presentSearchTag {
                 UIApplication.shared.endEditing()
