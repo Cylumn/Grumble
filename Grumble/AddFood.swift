@@ -10,7 +10,7 @@ import SwiftUI
 
 private let formID: GFormID = GFormID.addFood
 private let navBarHeight: CGFloat = sWidth() * 0.12
-private let fieldHeight: CGFloat = sHeight() * 0.05 + 20
+private let fieldHeight: CGFloat = sHeight() * 0.02 + 35
 private let formHeight: CGFloat = fieldHeight * CGFloat(size(formID) - 1)
 private let tagTitleHeight: CGFloat = sHeight() * 0.08
 
@@ -272,15 +272,23 @@ public struct AddFood: View, GFieldDelegate {
     }
     
     private struct TagBox: View {
+        private static var instances: [Int: TagBox] = [:]
         fileprivate static var width: CGFloat = sWidth() * sWidth() * 0.001
         fileprivate static var height: CGFloat = width * 1.0
         private var name: String
         private var id: Int
         
         //Initializer
-        public init(id: Int) {
+        private init(id: Int) {
             self.name = capFirst(tagTitles[id])
             self.id = id
+        }
+        
+        public static func box(id: Int) -> TagBox {
+            if TagBox.instances[id] == nil {
+                TagBox.instances[id] = TagBox(id: id)
+            }
+            return TagBox.instances[id]!
         }
         
         //Getters
@@ -383,7 +391,7 @@ public struct AddFood: View, GFieldDelegate {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: sHeight() * 0.02) {
                         ForEach(0 ..< sortedTags.count, id: \.self) { index in
-                            TagBox(id: sortedTags[index])
+                            TagBox.box(id: sortedTags[index])
                                 .transition(.opacity)
                                 .animation(gAnim(.spring))
                         }

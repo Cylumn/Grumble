@@ -8,6 +8,8 @@
 
 import SwiftUI
 
+private let isXOffset: CGFloat = isX() ? 110 : 0
+
 private enum Cavity {
     case up
     case down
@@ -191,11 +193,11 @@ public struct GhorblinSheet: Shape {
         dripPath.move(to: CGPoint(x: -dripRadius, y: 0))
         dripPattern(path: &dripPath, firstCavity: .up, originalHeights: GhorblinSheet.blueOrig[0], finalHeights: GhorblinSheet.blueFinal[0], animatableData: self.data(.drip), radius: self.dripRadius)
         let tubeX = dripPath.currentPoint!.x //225
-        dripPath.addLine(to: CGPoint(x: tubeX, y: 170))
-        ghorblinStomach(path: &dripPath, start: CGPoint(x: tubeX, y: 170 + 10 * self.data(.hold)), scale: self.data(.idle), hold: self.data(.hold))
+        dripPath.addLine(to: CGPoint(x: tubeX, y: 170 + isXOffset))
+        ghorblinStomach(path: &dripPath, start: CGPoint(x: tubeX, y: 170 + isXOffset + 10 * self.data(.hold)), scale: self.data(.idle), hold: self.data(.hold))
         
         //After Ghorblin
-        dripPath.addLine(to: CGPoint(x: tubeX + self.dripRadius * 2, y: 150))
+        dripPath.addLine(to: CGPoint(x: tubeX + self.dripRadius * 2, y: 150 + isXOffset))
         dripPattern(path: &dripPath, firstCavity: .down, originalHeights: GhorblinSheet.blueOrig[1], finalHeights: GhorblinSheet.blueFinal[1], animatableData: self.data(.drip), radius: self.dripRadius)
         dripPath.addLine(to: CGPoint(x: 375, y: 0))
         dripPath.closeSubpath()
@@ -231,29 +233,29 @@ public struct GhorblinSheetOverlay: Shape {
         path.move(to: CGPoint(x: 0, y: 0))
         dripPattern(path: &path, firstCavity: .down, originalHeights: GhorblinSheetOverlay.highlightsOrig[0], finalHeights: GhorblinSheetOverlay.highlightsFinal[0], animatableData: self.data(.drip), radius: self.dripRadius)
         let tubeX = path.currentPoint!.x //210
-        path.addLine(to: CGPoint(x: tubeX, y: 150))
+        path.addLine(to: CGPoint(x: tubeX, y: 150 + isXOffset))
         
-        path.addQuadCurve(to: CGPoint(x: tubeX + 10, y: 180),
-                          control: CGPoint(x: tubeX, y: 170))
-        ghorblinLogo(path: &path, start: CGPoint(x: 210 + 5 * self.data(.idle), y: 150 - 5 * self.data(.idle) + 3 * self.data(.hold)), dripRadius: self.dripRadius, scale: self.data(.idle), hold: self.data(.hold))
+        path.addQuadCurve(to: CGPoint(x: tubeX + 10, y: 180 + isXOffset),
+                          control: CGPoint(x: tubeX, y: 170 + isXOffset))
+        ghorblinLogo(path: &path, start: CGPoint(x: 210 + 5 * self.data(.idle), y: 150 + isXOffset - 5 * self.data(.idle) + 3 * self.data(.hold)), dripRadius: self.dripRadius, scale: self.data(.idle), hold: self.data(.hold))
         
-        path.addQuadCurve(to: CGPoint(x: tubeX + self.dripRadius * 2, y: 140),
-                          control: CGPoint(x: tubeX + self.dripRadius * 2, y: 160))
+        path.addQuadCurve(to: CGPoint(x: tubeX + self.dripRadius * 2, y: 140 + isXOffset),
+                          control: CGPoint(x: tubeX + self.dripRadius * 2, y: 160 + isXOffset))
         path.addLine(to: CGPoint(x: tubeX + self.dripRadius * 2, y: 140))
         dripPattern(path: &path, firstCavity: .down, originalHeights: GhorblinSheetOverlay.highlightsOrig[1], finalHeights: GhorblinSheetOverlay.highlightsFinal[1], animatableData: self.data(.drip), radius: self.dripRadius)
         path.addLine(to: CGPoint(x: 375, y: 0))
         path.closeSubpath()
         
         var ghroblinGapMask = Path()
-        ghroblinGapMask.addArc(center: CGPoint(x: 332 + 7 * self.data(.idle), y: 195 - 7 * self.data(.idle)), radius: 10, startAngle: Angle(degrees: -95), endAngle: Angle(degrees: 0), clockwise: false)
-        ghroblinGapMask.addArc(center: CGPoint(x: 332 + 7 * self.data(.idle), y: 205 - 7 * self.data(.idle)), radius: 10, startAngle: Angle(degrees: 0), endAngle: Angle(degrees: 90), clockwise: false)
+        ghroblinGapMask.addArc(center: CGPoint(x: 332 + 7 * self.data(.idle), y: 195 + isXOffset - 7 * self.data(.idle)), radius: 10, startAngle: Angle(degrees: -95), endAngle: Angle(degrees: 0), clockwise: false)
+        ghroblinGapMask.addArc(center: CGPoint(x: 332 + 7 * self.data(.idle), y: 205 + isXOffset - 7 * self.data(.idle)), radius: 10, startAngle: Angle(degrees: 0), endAngle: Angle(degrees: 90), clockwise: false)
         path.addPath(ghroblinGapMask)
         
-        path.addRoundedRect(in: CGRect(x: 215 - 13 * self.data(.idle), y: 355 + 8 * self.data(.hold), width: 40 + 10 * self.data(.idle), height: 7 - 2 * self.data(.idle)), cornerSize: CGSize(width: 3, height: 10))
-        path.addRoundedRect(in: CGRect(x: 176 + 2 * self.data(.idle), y: 372 - 3 * self.data(.idle), width: 10, height: 20), cornerSize: CGSize(width: 5, height: 5))
+        path.addRoundedRect(in: CGRect(x: 215 - 13 * self.data(.idle), y: 355 + isXOffset + 8 * self.data(.hold), width: 40 + 10 * self.data(.idle), height: 7 - 2 * self.data(.idle)), cornerSize: CGSize(width: 3, height: 10))
+        path.addRoundedRect(in: CGRect(x: 176 + 2 * self.data(.idle), y: 372 + isXOffset - 3 * self.data(.idle), width: 10, height: 20), cornerSize: CGSize(width: 5, height: 5))
         
         let xT = 0 + 2 * self.data(.idle) - 3 * self.data(.hold)
-        let yT = 0 - 5 * self.data(.idle) - 5 * self.data(.hold)
+        let yT = 0 - 5 * self.data(.idle) - 5 * self.data(.hold) + isXOffset
         
         path.move(to: CGPoint(x: 193 + xT, y: 469 + yT))
         path.addQuadCurve(to: CGPoint(x: 225 + xT, y: 490 + yT), control: CGPoint(x: 205 + xT, y: 475 + yT))
@@ -261,7 +263,7 @@ public struct GhorblinSheetOverlay: Shape {
         path.addQuadCurve(to: CGPoint(x: 210 + xT, y: 445 + yT), control: CGPoint(x: 235 + xT, y: 450 + yT))
         path.addArc(center: CGPoint(x: 205 + xT, y: 460 + yT), radius: 15, startAngle: Angle(degrees: -90), endAngle: Angle(degrees: 135), clockwise: true)
         
-        path.addRoundedRect(in: CGRect(x: 176 - 50 * self.data(.idle) - 20 * self.data(.hold), y: 522 + 20 * (1 - self.data(.hold)), width: 10, height: 20), cornerSize: CGSize(width: 5, height: 5), transform: CGAffineTransform(rotationAngle: -0.2 - 0.1 * self.data(.idle)))
+        path.addRoundedRect(in: CGRect(x: 176 - isXOffset * 0.3 - 50 * self.data(.idle) - 20 * self.data(.hold), y: 522 + isXOffset + 20 * (1 - self.data(.hold)), width: 10, height: 20), cornerSize: CGSize(width: 5, height: 5), transform: CGAffineTransform(rotationAngle: -0.2 - 0.1 * self.data(.idle)))
         
         return path
     }
@@ -288,7 +290,7 @@ public struct GhorblinSheetHighlights: View {
         
         func path(in rect: CGRect) -> Path {
             let xT = 0 + 2 * self.idle()
-            let yT = 0 - 5 * self.idle() - 5 * self.hold()
+            let yT = 0 - 5 * self.idle() - 5 * self.hold() + isXOffset
             
             var p = Path() { path in
                 path.move(to: CGPoint(x: 120 + xT, y: 450 + yT))
@@ -319,7 +321,7 @@ public struct GhorblinSheetHighlights: View {
         
         func path(in rect: CGRect) -> Path {
             let xT = 0 + 2 * self.idle() - 15 * self.hold()
-            let yT = 0 - 5 * self.idle() - 10 * self.hold()
+            let yT = 0 - 5 * self.idle() - 10 * self.hold() + isXOffset
             
             return Path() { path in
                 path.move(to: CGPoint(x: 295 + xT - 5 * self.idle(), y: 540 + yT))

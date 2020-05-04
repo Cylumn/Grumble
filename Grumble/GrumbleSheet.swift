@@ -253,37 +253,39 @@ public struct GrumbleSheet: View {
                     .fill(GrumbleSheet.tableColors[self.type])
                     .frame(width: sWidth(), height: sHeight() * 0.15)
                 
-                Ellipse()
-                    .fill(Color.black.opacity(0.2))
-                    .frame(width: sWidth() * 0.95, height: sHeight() * 0.18)
-                    .offset(y: sHeight() * -0.02)
-                
-                Image("GhorblinPlate")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: sWidth() * 0.9)
-                    .offset(y: sHeight() * -0.03)
-                
-                Ellipse()
-                    .fill(Color.black.opacity(Double(0.2 - 0.2 * self.dragData())))
-                    .frame(width: sWidth() * (0.7 + 0.2 * self.dragData()), height: sHeight() * (0.13 + 0.1 * self.dragData()))
-                    .offset(y: sHeight() * (-0.09 + 0.05 * self.dragData()))
-                
-                ForEach(self.grubRenderingRange(), id: \.self) { index in
-                    ZStack {
-                        Ellipse()
-                            .fill(Color.black.opacity(Double(0.3 - 0.3 * self.dragHorizontalData(index))))
-                            .frame(width: sWidth() * (0.2 + 0.1 * self.dragData()), height: sHeight() * (0.04 + 0.02 * self.dragData()))
-                            .offset(x: self.grubOffsetX(index),
-                                    y: sHeight() * (-0.08 + 0.01 * self.dragData()) + sHeight() * 0.3 * self.chosenGrubData)
-                            .scaleEffect(1 + 2 * self.chosenGrubData)
-                        
-                        self.tagIcon(self.grub(index)!.tags["smallestTag"]!, index: index)
-                            .rotationEffect(self.grubRotation(index))
-                            .offset(x: self.grubOffsetX(index), y: sHeight() * -0.12 + self.grubOffsetY(index) + self.chosenGrubOffsetY())
-                            .scaleEffect(1 + 2 * self.chosenGrubData)
-                    }
-                }
+                Group {
+                    Ellipse()
+                        .fill(Color.black.opacity(0.2))
+                        .frame(width: sWidth() * 0.95, height: sWidth() * 0.35)
+                        .offset(y: sHeight() * -0.02)
+                    
+                    Image("GhorblinPlate")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: sWidth() * 0.9)
+                        .offset(y: sHeight() * -0.03)
+                    
+                    Ellipse()
+                        .fill(Color.black.opacity(Double(0.2 - 0.2 * self.dragData())))
+                        .frame(width: sWidth() * (0.7 + 0.2 * self.dragData()), height: sWidth() * (0.23 + 0.2 * self.dragData()))
+                        .offset(y: sHeight() * (-0.09 + (isX() ? 0.02 : 0) + 0.05 * self.dragData()))
+                    
+                    ForEach(self.grubRenderingRange(), id: \.self) { index in
+                        ZStack {
+                            Ellipse()
+                                .fill(Color.black.opacity(Double(0.3 - 0.3 * self.dragHorizontalData(index))))
+                                .frame(width: sWidth() * (0.2 + 0.1 * self.dragData()), height: sWidth() * (0.08 + 0.02 * self.dragData()))
+                                .offset(x: self.grubOffsetX(index),
+                                        y: sHeight() * (-0.08 + 0.01 * self.dragData()) + sHeight() * 0.3 * self.chosenGrubData)
+                                .scaleEffect(1 + 2 * self.chosenGrubData)
+                            
+                            self.tagIcon(self.grub(index)!.tags["smallestTag"]!, index: index)
+                                .rotationEffect(self.grubRotation(index))
+                                .offset(x: self.grubOffsetX(index), y: sHeight() * (-0.12 + (isX() ? 0.005 : 0)) + self.grubOffsetY(index) + self.chosenGrubOffsetY())
+                                .scaleEffect(1 + 2 * self.chosenGrubData)
+                        }
+                    }.offset(y: isX() ? sHeight() * 0.01 : 0)
+                }.offset(y: isX() ? sHeight() * -0.05 : 0)
             }.frame(width: sWidth())
         }.frame(width: sWidth())
     }

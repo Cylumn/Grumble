@@ -12,6 +12,22 @@ import Firebase
 
 private let formID: GFormID = GFormID.login
 
+public class LoginAccessCookie {
+    private static var instance: LoginAccessCookie? = nil
+    public var pendingGoogle: Bool
+    
+    private init() {
+        self.pendingGoogle = false
+    }
+    
+    public static func lac() -> LoginAccessCookie {
+        if LoginAccessCookie.instance == nil {
+            LoginAccessCookie.instance = LoginAccessCookie()
+        }
+        return LoginAccessCookie.instance!
+    }
+}
+
 public struct LoginView: View, GFieldDelegate {
     @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
     @ObservedObject private var gft: GFormText = GFormText.gft(formID)
@@ -73,7 +89,10 @@ public struct LoginView: View, GFieldDelegate {
     }
     
     private func attemptLoginGoogle() {
-        GIDSignIn.sharedInstance()?.signIn()
+        if !LoginAccessCookie.lac().pendingGoogle {
+            LoginAccessCookie.lac().pendingGoogle = true
+            GIDSignIn.sharedInstance()?.signIn()
+        }
     }
     
     //GFieldDelegate Implementation Methods
@@ -116,7 +135,7 @@ public struct LoginView: View, GFieldDelegate {
                 })
             
             VStack(spacing: sHeight() * 0.03) {
-                Spacer().frame(height: sHeight() * (self.ko.visible() ? 0.07 : 0.05))
+                Spacer()
                 
                 VStack(spacing: 0){
                     if !self.ko.visible() {
@@ -199,9 +218,9 @@ public struct LoginView: View, GFieldDelegate {
                                 .font(gFont(.ubuntuMedium, .width, 2.5))
                         })
                     }
-                }
+                }.padding(.bottom, 30)
                 
-                Spacer().frame(height: self.ko.height() + sHeight() * (self.ko.visible() ? 0.01 : 0.04))
+                Spacer().frame(maxHeight: self.ko.height())
             }.frame(width: sWidth() * 0.85)
             .foregroundColor(Color.white)
             
