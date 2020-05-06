@@ -19,6 +19,12 @@ public class AddFoodCookie: ObservableObject {
     @Published public var currentFID: String? = nil
     @Published public var tags: Set<Int> = [0]
     
+    public var presentAddImage: (Bool) -> Void
+    
+    private init() {
+        self.presentAddImage = { _ in }
+    }
+    
     public static func afc() -> AddFoodCookie {
         if AddFoodCookie.instance == nil {
             AddFoodCookie.instance = AddFoodCookie()
@@ -130,6 +136,7 @@ public struct AddFood: View, GFieldDelegate {
             appendLocalFood(self.afc.currentFID!, foodDictionary)
             appendCloudFood(self.afc.currentFID!, foodDictionary)
         }
+        self.afc.presentAddImage(false)
         self.toListHome()
         
         AddFood.clearFields()

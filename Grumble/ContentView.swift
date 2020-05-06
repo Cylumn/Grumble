@@ -22,11 +22,6 @@ public struct ContentView: View {
         case addFood = 1
     }
     
-    //Getter Methods
-    private func addFoodOffset() -> CGFloat {
-        return (slideIndex == PanelIndex.listHome.rawValue ? sWidth() : 0) + slideOffset
-    }
-    
     //Slide changes
     public func toListHome(_ withAnim: Bool = true) {
         if withAnim {

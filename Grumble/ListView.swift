@@ -45,6 +45,8 @@ public struct ListView: View {
     @State private var ghorblinType: GrumbleSheet.GhorblinType = .grumble
     @State private var ghorblinList: [String] = []
     
+    @State private var presentAddImage: Bool = false
+    
     //Initializer
     public init(_ toAddFood: @escaping (String?) -> Void) {
         self.toAddFood = toAddFood
@@ -68,6 +70,12 @@ public struct ListView: View {
         Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
             GhorblinAnimations.ga().setDrip(1)
         }
+    }
+    
+    private func showAddImage(isPresented: Bool) {
+        self.presentAddImage = isPresented
+        AddImageCookie.aic().isPresented = isPresented
+        TabRouter.tr().hide(isPresented)
     }
     
     //View Methods
@@ -94,7 +102,11 @@ public struct ListView: View {
             
             Spacer()
             
-            Button(action: { self.toAddFood(nil) }, label: {
+            Button(action: {
+                withAnimation(gAnim(.easeOut)) {
+                    self.showAddImage(isPresented: true)
+                }
+            }, label: {
                 ZStack {
                     Text("+ Add")
                         .padding(10)
@@ -196,7 +208,7 @@ public struct ListView: View {
             Color.black.opacity(self.lc.presentGrubSheet ? maxOverlayOpacity : 0)
             
             GrumbleSheet(self.ghorblinType, show:
-            Binding(get: { self.presentGrumbleSheet }, set: {
+                Binding(get: { self.presentGrumbleSheet }, set: {
                 self.presentGrumbleSheet = $0
                 if !$0 {
                     self.ghorblinList = []
@@ -205,6 +217,9 @@ public struct ListView: View {
                 .offset(y: self.presentGrumbleSheet ? 0 : sHeight() * 1.2)
             
             GrubSheet(self.toAddFood)
+            
+            AddImage(present: self.showAddImage, toAddFood: self.toAddFood)
+                .offset(x: self.presentAddImage ? 0 : sWidth())
         }
     }
 }

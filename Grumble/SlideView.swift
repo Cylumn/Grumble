@@ -96,21 +96,21 @@ public struct SlideView: View {
             }
             
             if self.index.wrappedValue > 0 && drag.predictedEndTranslation.width > sWidth() * 0.5 {
-                withAnimation(gAnim(.spring)) {
+                withAnimation(gAnim(.easeOut)) {
                     self.dragOffset = 0
                     self.index.wrappedValue -= 1
                     self.onSlideChange(self.index.wrappedValue)
                 }
                 UIApplication.shared.endEditing()
             } else if self.index.wrappedValue < self.views.count - 1 && drag.predictedEndTranslation.width < -sWidth() * 0.5 {
-                withAnimation(gAnim(.spring)) {
+                withAnimation(gAnim(.easeOut)) {
                     self.dragOffset = 0
                     self.index.wrappedValue += 1
                     self.onSlideChange(self.index.wrappedValue)
                 }
                 UIApplication.shared.endEditing()
             } else {
-                withAnimation(gAnim(.spring)) {
+                withAnimation(gAnim(.easeOut)) {
                     self.dragOffset = 0
                 }
             }
