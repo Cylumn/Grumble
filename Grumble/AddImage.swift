@@ -8,6 +8,11 @@
 
 import SwiftUI
 
+public let grubImageAspectRatio: CGFloat = 0.75
+
+private let cameraHeight: CGFloat = sHeight() + ImageViewController.buttonOffset * 2 - navBarHeight - safeAreaInset(.top)
+private let borderHeight: CGFloat = (cameraHeight - sWidth() * grubImageAspectRatio) * 0.5
+
 public class AddImageCookie: ObservableObject {
     private static var instance: AddImageCookie? = nil
     public var currentFID: String? = nil
@@ -39,6 +44,10 @@ public struct AddImage: View {
     
     @GestureState(initialValue: CGFloat(0.8), resetTransaction: Transaction(animation: gAnim(.springSlow))) private var holdData
     
+    @State private var isDragging: Bool = false
+    @State private var dragOffset: CGFloat = 0
+    @State private var currentOffset: CGFloat = 0
+    
     //Initializer
     public init(present: @escaping (Bool) -> Void, toAddFood: @escaping (String?) -> Void) {
         self.present = present
@@ -56,6 +65,44 @@ public struct AddImage: View {
     //Getter Methods
     private func presentImagePicker() -> Bool {
         return self.aic.isPresented && self.aic.image == nil
+    }
+    
+    private func adjustImageScreen() -> Bool {
+        return self.aic.image != nil
+    }
+    
+    private var captureButton: some View {
+        ZStack {
+            Ellipse()
+                .fill(AddImage.accentColor)
+                .frame(width: ImageViewController.buttonSize, height: ImageViewController.buttonSize)
+            
+            Ellipse()
+                .fill(AddImage.bgColor)
+                .frame(width: ImageViewController.buttonSize * 0.9, height: ImageViewController.buttonSize * 0.9)
+            
+            Ellipse()
+                .fill(AddImage.accentColor)
+                .frame(width: ImageViewController.buttonSize * self.holdData, height: ImageViewController.buttonSize * self.holdData)
+        }.position(x: sWidth() * 0.5, y: sHeight() + ImageViewController.buttonOffset - tabHeight)
+        .gesture(LongPressGesture(minimumDuration: 1, maximumDistance: ImageViewController.buttonSize)
+            .updating(self.$holdData) { value, state, transaction in
+                transaction.animation = gAnim(.springSlow)
+                state = 0.5
+                
+                let impactLight = UIImpactFeedbackGenerator(style: .light)
+                impactLight.impactOccurred()
+        }.onEnded { _ in
+            self.aic.capture()
+            
+            let impactLight = UIImpactFeedbackGenerator(style: .light)
+            impactLight.impactOccurred()
+        }.simultaneously(with: TapGesture().onEnded {
+            self.aic.capture()
+            
+            let impactLight = UIImpactFeedbackGenerator(style: .light)
+            impactLight.impactOccurred()
+        }))
     }
     
     private func tabButton(_ label: String, _ page: Pages) -> some View {
@@ -78,11 +125,47 @@ public struct AddImage: View {
                 self.aic.image?
                     .resizable()
                     .frame(width: sWidth(), height: self.aic.aspectRatio * sWidth())
+                    .offset(y: self.dragOffset)
+                
+                gColor(.blue0)
+                    .frame(height: safeAreaInset(.top))
+                    .edgesIgnoringSafeArea(.top)
             }.frame(width: sWidth())
             
             ImagePicker()
                 .opacity(self.presentImagePicker() ? 1 : 0)
                 .disabled(!self.presentImagePicker())
+            
+            ZStack(alignment: .top) {
+                VStack(spacing: 0) {
+                    Color.white
+                        .frame(width: sWidth(), height: navBarHeight + borderHeight)
+                    
+                    Spacer()
+                        .frame(width: sWidth(), height: sWidth() * grubImageAspectRatio)
+                    
+                    Color.white
+                        .frame(maxWidth: sWidth(), maxHeight: .infinity)
+                }.opacity((self.adjustImageScreen() && !self.isDragging) ? 1 : 0.8)
+            }.contentShape(Rectangle())
+            .gesture(DragGesture().onChanged { drag in
+                if self.adjustImageScreen() {
+                    withAnimation(gAnim(.easeOut)) {
+                        self.isDragging = true
+                    }
+                    
+                    let maxDrag: CGFloat = navBarHeight + borderHeight
+                    let minDrag: CGFloat = sWidth() * self.aic.aspectRatio - cameraHeight - navBarHeight + borderHeight
+                    self.dragOffset = max(min(drag.translation.height + self.currentOffset, maxDrag), -minDrag)
+                }
+            }.onEnded { drag in
+                if self.adjustImageScreen() {
+                    self.currentOffset = self.dragOffset
+                }
+                withAnimation(gAnim(.easeOut)) {
+                    self.isDragging = false
+                }
+            })
             
             ZStack(alignment: .bottom) {
                 Color.clear
@@ -92,75 +175,51 @@ public struct AddImage: View {
                     .frame(height: abs(ImageViewController.buttonOffset * 2))
             }
             
-            if self.aic.image == nil {
-                ZStack {
-                    Ellipse()
-                        .fill(AddImage.accentColor)
-                        .frame(width: ImageViewController.buttonSize, height: ImageViewController.buttonSize)
-                    
-                    Ellipse()
-                        .fill(AddImage.bgColor)
-                        .frame(width: ImageViewController.buttonSize * 0.9, height: ImageViewController.buttonSize * 0.9)
-                    
-                    Ellipse()
-                        .fill(AddImage.accentColor)
-                        .frame(width: ImageViewController.buttonSize * self.holdData, height: ImageViewController.buttonSize * self.holdData)
-                }.position(x: sWidth() * 0.5, y: sHeight() + ImageViewController.buttonOffset - tabHeight)
-                .gesture(LongPressGesture(minimumDuration: 1, maximumDistance: ImageViewController.buttonSize)
-                    .updating(self.$holdData) { value, state, transaction in
-                        transaction.animation = gAnim(.springSlow)
-                        state = 0.5
-                        
-                        let impactLight = UIImpactFeedbackGenerator(style: .light)
-                        impactLight.impactOccurred()
-                }.onEnded { _ in
-                    self.aic.capture()
-                    
-                    let impactLight = UIImpactFeedbackGenerator(style: .light)
-                    impactLight.impactOccurred()
-                }.simultaneously(with: TapGesture().onEnded {
-                    self.aic.capture()
-                    
-                    let impactLight = UIImpactFeedbackGenerator(style: .light)
-                    impactLight.impactOccurred()
-                }))
+            if !self.adjustImageScreen() {
+                self.captureButton
             }
             
             VStack(spacing: 0) {
-                HStack {
-                    Button(action: {
-                        withAnimation(gAnim(.easeOut)) {
-                            self.present(false)
-                            self.tab = .capture
-                        }
-                        self.aic.image = nil
-                    }, label: {
-                        Text("Cancel")
-                    })
+                ZStack {
+                    HStack {
+                        Button(action: {
+                            withAnimation(gAnim(.easeOut)) {
+                                self.present(false)
+                                self.tab = .capture
+                                self.dragOffset = 0
+                                self.currentOffset = 0
+                            }
+                            self.aic.image = nil
+                        }, label: {
+                            Text("Cancel")
+                        }).font(gFont(.ubuntuLight, 18))
+                        
+                        Spacer()
+                    }
                     
-                    Spacer()
+                    if self.adjustImageScreen() {
+                        Text("Adjust Image")
+                    } else {
+                        Text("Take Image of Grub")
+                    }
                 }.padding([.leading, .trailing], 20)
                 .frame(height: navBarHeight)
                 .background(gColor(.blue0))
-                .font(gFont(.ubuntuLight, 18))
+                .font(navBarFont)
                 
                 Spacer()
                 
-                if self.aic.image == nil {
-                    HStack {
-                        self.tabButton("Library", .library)
-                        self.tabButton("Capture", .capture)
-                    }.padding([.top, .bottom], 10)
-                    .frame(height: tabHeight)
-                    .background(gColor(.blue0))
-                    .font(gFont(.ubuntuBold, .width, 2.5))
-                } else {
+                if self.adjustImageScreen() {
                     HStack {
                         Button(action: {
                             self.aic.image = nil
+                            self.dragOffset = 0
+                            self.currentOffset = 0
                         }, label: {
                             Text("Retake")
-                        }).frame(maxWidth: .infinity)
+                                .padding([.leading, .trailing], sWidth() * 0.1)
+                                .font(gFont(.ubuntuLight, .width, 2))
+                        })
                         
                         Spacer()
                         
@@ -168,9 +227,22 @@ public struct AddImage: View {
                             self.toAddFood(nil)
                         }, label: {
                             Text("Next")
+                                .padding(10)
+                                .foregroundColor(gColor(.blue0))
                         }).frame(maxWidth: .infinity)
-                    }.frame(height: abs(ImageViewController.buttonOffset * 2))
+                        .background(Color.white)
+                        .cornerRadius(10)
+                    }.padding(20)
+                    .frame(height: abs(ImageViewController.buttonOffset * 2))
                     .font(gFont(.ubuntuMedium, .width, 2.5))
+                } else {
+                    HStack {
+                        self.tabButton("Library", .library)
+                        self.tabButton("Capture", .capture)
+                    }.padding([.top, .bottom], 10)
+                    .frame(height: tabHeight)
+                    .background(gColor(.blue0))
+                    .font(gFont(.ubuntuBold, .width, 2.5))
                 }
             }.foregroundColor(AddImage.textColor)
         }

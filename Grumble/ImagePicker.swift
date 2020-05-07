@@ -10,6 +10,8 @@ import Foundation
 import SwiftUI
 import AVFoundation
 
+public let shouldKeepCameraRunning: Bool = true
+
 extension UIButton {
     private func image(withColor color: UIColor) -> UIImage? {
         let rect = CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0)
@@ -73,10 +75,14 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
     }
     
     private func run(_ shouldRun: Bool) {
-        if shouldRun && !self.captureSession.isRunning {
+        if shouldKeepCameraRunning && !self.captureSession.isRunning {
             self.captureSession.startRunning()
-        } else if !shouldRun && self.captureSession.isRunning {
-            self.captureSession.stopRunning()
+        } else if !shouldKeepCameraRunning {
+            if shouldRun && !self.captureSession.isRunning {
+                self.captureSession.startRunning()
+            } else if !shouldRun && self.captureSession.isRunning {
+                self.captureSession.stopRunning()
+            }
         }
     }
     
@@ -123,6 +129,10 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
         self.previewLayer!.connection?.videoOrientation = AVCaptureVideoOrientation.portrait
         self.previewLayer!.frame = CGRect(x: 0, y: navBarHeight, width: sWidth(), height: sHeight() - navBarHeight - abs(ImageViewController.buttonOffset * 2))
         self.view.layer.insertSublayer(self.previewLayer!, at: 0)
+        
+        if shouldKeepCameraRunning {
+            self.run(true)
+        }
     }
     
     //Implemented AVCapturePhotoCaptureDelegate Methods
