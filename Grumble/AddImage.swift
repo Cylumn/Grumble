@@ -16,6 +16,7 @@ public class AddImageCookie: ObservableObject {
     @Published public var isPresented: Bool = false
     
     public var capture: () -> Void = { }
+    public var run: (Bool) -> Void = { _ in }
     
     public static func aic() -> AddImageCookie {
         if AddImageCookie.instance == nil {
@@ -165,7 +166,6 @@ public struct AddImage: View {
                         
                         Button(action: {
                             self.toAddFood(nil)
-                            ListCookie.lc().onAddFoodHide = {}
                         }, label: {
                             Text("Next")
                         }).frame(maxWidth: .infinity)

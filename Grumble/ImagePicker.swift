@@ -57,7 +57,8 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
         
         super.init(nibName: nil, bundle: nil)
         
-        AddImageCookie.aic().capture = { self.capture() }
+        AddImageCookie.aic().capture = self.capture
+        AddImageCookie.aic().run = self.run
     }
     
     public required init?(coder decoder: NSCoder) {
@@ -67,8 +68,16 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
     }
     
     //Function Methods
-    @objc private func capture(sender: UIButton? = nil) {
+    private func capture() {
         self.output?.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
+    }
+    
+    private func run(_ shouldRun: Bool) {
+        if shouldRun && !self.captureSession.isRunning {
+            self.captureSession.startRunning()
+        } else if !shouldRun && self.captureSession.isRunning {
+            self.captureSession.stopRunning()
+        }
     }
     
     //Implemented UIViewController Methods
@@ -114,9 +123,6 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
         self.previewLayer!.connection?.videoOrientation = AVCaptureVideoOrientation.portrait
         self.previewLayer!.frame = CGRect(x: 0, y: navBarHeight, width: sWidth(), height: sHeight() - navBarHeight - abs(ImageViewController.buttonOffset * 2))
         self.view.layer.insertSublayer(self.previewLayer!, at: 0)
-
-        //Setup Running Capture Session
-        self.captureSession.startRunning()
     }
     
     //Implemented AVCapturePhotoCaptureDelegate Methods

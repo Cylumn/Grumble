@@ -11,8 +11,11 @@ import Firebase
 
 public struct SettingsView: View {
     @State private var page: PageForm? = nil
+    private var contentView: ContentView
     
-    public init() {
+    public init(_ contentView: ContentView) {
+        self.contentView = contentView
+        
         UITableView.appearance().backgroundColor = .clear
         UITableViewCell.appearance().selectionStyle = UITableViewCell.SelectionStyle.default
         let bg = UIView()
@@ -63,7 +66,6 @@ public struct SettingsView: View {
             self.page == page
         }, set: {
             self.page = $0 ? page : nil
-            TabRouter.tr().hide($0)
             
             if !$0 {
                 UIApplication.shared.endEditing()
@@ -94,15 +96,12 @@ public struct SettingsView: View {
                     .padding(.top, 30)) {
                     self.buttonLabel("About") {
                         self.page = .about
-                        TabRouter.tr().hide(true)
                     }
                     self.buttonLabel("Your Ghorblin") {
                         self.page = .ghorblin
-                        TabRouter.tr().hide(true)
                     }
                     self.buttonLabel("Security") {
                         self.page = .security
-                        TabRouter.tr().hide(true)
                     }
                 }.listRowBackground(Color.white)
                 
@@ -132,6 +131,8 @@ public struct SettingsView: View {
             self.settings
                 .offset(x: self.page == nil ? 0 : sWidth() * -0.3)
             
+            TabView(self.contentView)
+            
             Welcome(startIndex: Welcome.Pages.introduction.rawValue, isPresented: self.isPagePresented(page: .about))
                 .offset(x: self.page == .about ? 0 : sWidth())
             
@@ -148,11 +149,11 @@ public struct SettingsView: View {
 struct SettingsView_Previews: PreviewProvider {
    static var previews: some View {
       Group {
-         SettingsView()
+         SettingsView(ContentView())
             .previewDevice(PreviewDevice(rawValue: "iPhone SE"))
             .previewDisplayName("iPhone SE")
 
-         SettingsView()
+         SettingsView(ContentView())
             .previewDevice(PreviewDevice(rawValue: "iPhone XS Max"))
             .previewDisplayName("iPhone XS Max")
       }

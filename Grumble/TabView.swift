@@ -46,17 +46,20 @@ public struct TabView: View {
     
     public var body: some View {
         VStack(spacing: 0) {
-            Rectangle()
-                .fill(Color(white: 0.8))
-                .frame(width: sWidth(), height: 1)
-            HStack(spacing: 0) {
-                self.tabIcon("cube.box", .list, self.toList)
-                
-                self.tabIcon("gear", .settings, self.toSettings)
-            }
-        }.frame(width: sWidth(), height: tabHeight)
-        .background(Color.white)
-        .font(.system(size: sWidth() * 0.06))
+            Spacer()
+            
+            VStack(spacing: 0) {
+                Rectangle()
+                    .fill(Color(white: 0.8))
+                    .frame(width: sWidth(), height: 1)
+                HStack(spacing: 0) {
+                    self.tabIcon("cube.box", .list, self.toList)
+                    
+                    self.tabIcon("gear", .settings, self.toSettings)
+                }
+            }.frame(width: sWidth(), height: tabHeight)
+            .background(Color.white)
+        }.font(.system(size: sWidth() * 0.06))
     }
 }
 

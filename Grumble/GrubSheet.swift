@@ -54,7 +54,6 @@ public struct GrubSheet: View {
         withAnimation(gAnim(.easeInOut)) {
             self.lc.presentGrubSheet = false
         }
-        self.lc.onGrubSheetHide()
     }
     
     private func grubContentHeight() -> CGFloat {

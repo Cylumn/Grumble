@@ -43,10 +43,7 @@ public struct AddFood: View, GFieldDelegate {
     
     //Initializer
     public init(_ toListHome: @escaping () -> Void){
-        self.toListHome = {
-            toListHome()
-            ListCookie.lc().onAddFoodHide()
-        }
+        self.toListHome = toListHome
         
         self.gft.setNames(["Food", "Restaurant", "Address", "Price"])
         self.gft.setSymbols(["flame.fill", "rosette", "mappin.and.ellipse", ""])

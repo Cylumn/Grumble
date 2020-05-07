@@ -23,8 +23,6 @@ public class ListCookie: ObservableObject {
     @Published public var searchFocused: Bool = false
     
     @Published public var presentGrubSheet: Bool = false
-    public var onGrubSheetHide: () -> Void = {}
-    public var onAddFoodHide: () -> Void = {}
     
     public static func lc() -> ListCookie {
         if ListCookie.instance == nil {
@@ -37,7 +35,7 @@ public class ListCookie: ObservableObject {
 public struct ListView: View {
     @ObservedObject private var uc: UserCookie = UserCookie.uc()
     @ObservedObject private var lc: ListCookie = ListCookie.lc()
-    private var toAddFood: (String?) -> Void
+    private var contentView: ContentView
     
     @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
     
@@ -48,8 +46,8 @@ public struct ListView: View {
     @State private var presentAddImage: Bool = false
     
     //Initializer
-    public init(_ toAddFood: @escaping (String?) -> Void) {
-        self.toAddFood = toAddFood
+    public init(_ contentView: ContentView) {
+        self.contentView = contentView
     }
     
     //Getter Methods
@@ -61,7 +59,6 @@ public struct ListView: View {
     private func showGrumbleSheet(_ ghorblinType: GrumbleSheet.GhorblinType) {
         withAnimation(gAnim(.easeOut)) {
             self.presentGrumbleSheet = true
-            TabRouter.tr().hide(true)
         }
         
         self.ghorblinType = ghorblinType
@@ -75,7 +72,7 @@ public struct ListView: View {
     private func showAddImage(isPresented: Bool) {
         self.presentAddImage = isPresented
         AddImageCookie.aic().isPresented = isPresented
-        TabRouter.tr().hide(isPresented)
+        AddImageCookie.aic().run(isPresented)
     }
     
     //View Methods
@@ -143,59 +140,67 @@ public struct ListView: View {
         }
     }
     
+    private var listContent: some View {
+        ScrollView(.vertical) {
+            ZStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 20) {
+                    self.listHeader
+                        .frame(height: titleHeight)
+                    
+                    Spacer()
+                        .frame(height: searchHeight)
+                    
+                    self.grumbleButtons
+                    
+                    Text("My List")
+                        .font(gFont(.ubuntuBold, .width, 3))
+                        .frame(height: myListTitleHeight)
+                        .foregroundColor(Color(white: 0.2))
+                }.padding([.leading, .trailing], 20)
+                .opacity(self.searchListExpanded() ? 0 : 1)
+                
+                VStack(alignment: .leading, spacing: 20) {
+                    if !self.searchListExpanded() {
+                        Spacer()
+                            .frame(height: titleHeight)
+                    }
+                    
+                    SearchList(expanded: self.searchListExpanded)
+                }
+            }.padding(.top, 20)
+            
+            if !self.searchListExpanded() {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 20) {
+                        if !self.uc.foodList().isEmpty {
+                            ForEach((0 ..< self.uc.foodListByDate().count).reversed(), id: \.self) { index in
+                                GrubItem(fid: self.uc.foodListByDate()[index].0, self.uc.foodListByDate()[index].1)
+                            }
+                        } else {
+                            Text(self.uc.loadingStatus == .loading ? "Loading..." : "List is Empty!")
+                                .font(gFont(.ubuntu, .width, 2))
+                                .foregroundColor(Color(white: 0.2))
+                        }
+                        
+                        Spacer()
+                    }.padding(.leading, 20)
+                    .padding(.bottom, 40)
+                    .frame(minWidth: sWidth())
+                }.frame(width: sWidth())
+            }
+            
+            Spacer()
+        }
+    }
+    
     public var body: some View {
         ZStack(alignment: .bottom) {
             Color(white: 0.98)
             
-            ScrollView(.vertical) {
-                ZStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 20) {
-                        self.listHeader
-                            .frame(height: titleHeight)
-                        
-                        Spacer()
-                            .frame(height: searchHeight)
-                        
-                        self.grumbleButtons
-                        
-                        Text("My List")
-                            .font(gFont(.ubuntuBold, .width, 3))
-                            .frame(height: myListTitleHeight)
-                            .foregroundColor(Color(white: 0.2))
-                    }.padding([.leading, .trailing], 20)
-                    .opacity(self.searchListExpanded() ? 0 : 1)
-                    
-                    VStack(alignment: .leading, spacing: 20) {
-                        if !self.searchListExpanded() {
-                            Spacer()
-                                .frame(height: titleHeight)
-                        }
-                        
-                        SearchList(expanded: self.searchListExpanded)
-                    }
-                }.padding(.top, 20)
+            Group {
+                self.listContent
                 
-                if !self.searchListExpanded() {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 20) {
-                            if !self.uc.foodList().isEmpty {
-                                ForEach((0 ..< self.uc.foodListByDate().count).reversed(), id: \.self) { index in
-                                    GrubItem(fid: self.uc.foodListByDate()[index].0, self.uc.foodListByDate()[index].1)
-                                }
-                            } else {
-                                Text(self.uc.loadingStatus == .loading ? "Loading..." : "List is Empty!")
-                                    .font(gFont(.ubuntu, .width, 2))
-                                    .foregroundColor(Color(white: 0.2))
-                            }
-                            
-                            Spacer()
-                        }.padding(.leading, 20)
-                        .padding(.bottom, 40)
-                        .frame(minWidth: sWidth())
-                    }.frame(width: sWidth())
-                }
-                
-                Spacer()
+                TabView(self.contentView)
             }.offset(x: self.presentAddImage ? sWidth() * -0.3 : 0)
             
             ZStack(alignment: .top) {
@@ -216,9 +221,9 @@ public struct ListView: View {
             }), self.ghorblinList)
                 .offset(y: self.presentGrumbleSheet ? 0 : sHeight() * 1.2)
             
-            GrubSheet(self.toAddFood)
+            GrubSheet(self.contentView.toAddFood)
             
-            AddImage(present: self.showAddImage, toAddFood: self.toAddFood)
+            AddImage(present: self.showAddImage, toAddFood: self.contentView.toAddFood)
                 .offset(x: self.presentAddImage ? 0 : sWidth())
         }
     }

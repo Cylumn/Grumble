@@ -53,15 +53,12 @@ public struct ContentView: View {
         Timer.scheduledTimer(withTimeInterval: 0.43, repeats: false) { timer in
             GFormRouter.gfr().callFirstResponder(.addFood)
         }
-        self.tr.hide(true)
         
         switch currentFID {
         case nil:
             AddFood.clearFields()
-            ListCookie.lc().onAddFoodHide = { self.tr.hide(false) }
         default:
             AddFoodCookie.afc().currentFID = currentFID
-            ListCookie.lc().onAddFoodHide = { }
         }
     }
     
@@ -69,7 +66,6 @@ public struct ContentView: View {
         switch index {
         case PanelIndex.listHome.rawValue:
             toListHome()
-            ListCookie.lc().onAddFoodHide()
         case PanelIndex.addFood.rawValue:
             toAddFood()
         default:
@@ -77,26 +73,19 @@ public struct ContentView: View {
         }
     }
     
-    private var tab: some View {
-        switch self.tr.tab() {
-        case .list:
-            return AnyView(SlideView(index: self.$slideIndex, offsetFactor: 0.3,
-                          views: [AnyView(ListView(self.toAddFood)),
-                                  AnyView(AddFood(self.toListHome))],
-                                         padding: 0, unDraggable: [PanelIndex.listHome.rawValue],
-                                         onSlideChange: self.slideChange))
-        case .settings:
-            return AnyView(SettingsView())
-        }
-    }
-    
     public var body: some View {
         ZStack(alignment: .bottom) {
-            self.tab
+            SlideView(index: self.$slideIndex, offsetFactor: 0.3,
+                views: [AnyView(ListView(self)),
+                        AnyView(AddFood(self.toListHome))],
+                padding: 0, unDraggable: [PanelIndex.listHome.rawValue],
+                onSlideChange: self.slideChange)
+                .opacity(self.tr.tab() == .list ? 1 : 0)
+                .disabled(self.tr.tab() != .list)
             
-            if !self.tr.hidden() {
-                TabView(self)
-            }
+            SettingsView(self)
+                .opacity(self.tr.tab() == .settings ? 1 : 0)
+                .disabled(self.tr.tab() != .settings)
         }.edgesIgnoringSafeArea(.bottom)
     }
 }

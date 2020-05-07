@@ -189,7 +189,6 @@ public struct GrumbleSheet: View {
             self.dragDistance = 0
             self.coverDragState = .covered
         }
-        TabRouter.tr().hide(false)
         self.ga.endIdleAnimation()
         self.chosenGrubData = 0
         self.presentHideModal = .hidden
@@ -476,7 +475,6 @@ public struct GrumbleSheet: View {
                         withAnimation(gAnim(.easeOut)) {
                             ListCookie.lc().presentGrubSheet = true
                         }
-                        ListCookie.lc().onGrubSheetHide = {}
                     }, label: {
                         Text("View")
                             .padding(10)

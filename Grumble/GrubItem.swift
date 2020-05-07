@@ -53,10 +53,7 @@ public struct GrubItem: View {
         withAnimation(gAnim(.easeOut)) {
             self.lc.presentGrubSheet = true
         }
-        TabRouter.tr().hide(true)
         UIApplication.shared.endEditing()
-        
-        self.lc.onGrubSheetHide = { TabRouter.tr().hide(false) }
     }
     
     public var body: some View {
