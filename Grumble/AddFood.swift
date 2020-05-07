@@ -9,7 +9,6 @@
 import SwiftUI
 
 private let formID: GFormID = GFormID.addFood
-private let navBarHeight: CGFloat = sWidth() * 0.12
 private let fieldHeight: CGFloat = sHeight() * 0.02 + 35
 private let formHeight: CGFloat = fieldHeight * CGFloat(size(formID) - 1)
 private let tagTitleHeight: CGFloat = sHeight() * 0.08
@@ -223,7 +222,7 @@ public struct AddFood: View, GFieldDelegate {
             }
             
             Text("Add Grub to List")
-                .font(gFont(.ubuntuBold, 18))
+                .font(navBarFont)
                 .fontWeight(.bold)
                 .foregroundColor(Color.white)
                 .padding(12)

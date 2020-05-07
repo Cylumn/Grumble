@@ -10,22 +10,73 @@ import Foundation
 import SwiftUI
 import AVFoundation
 
-public class ImageViewController: UIViewController {
-    private var captureSession: AVCaptureSession = AVCaptureSession()
+extension UIButton {
+    private func image(withColor color: UIColor) -> UIImage? {
+        let rect = CGRect(x: 0.0, y: 0.0, width: 1.0, height: 1.0)
+        UIGraphicsBeginImageContext(rect.size)
+        let context = UIGraphicsGetCurrentContext()
+
+        context?.setFillColor(color.cgColor)
+        context?.fill(rect)
+
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        return image
+    }
+
+    func setBackgroundColor(_ color: UIColor, for state: UIControl.State) {
+        self.setBackgroundImage(image(withColor: color), for: state)
+    }
+}
+
+public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegate {
+    public static var buttonOffset: CGFloat = -100
+    public static var buttonSize: CGFloat = 70
     
-    private var frontCamera: AVCaptureDevice? = nil
-    private var backCamera: AVCaptureDevice? = nil
-    private var currentCamera: AVCaptureDevice? = nil
+    private var captureSession: AVCaptureSession
     
-    private var output: AVCapturePhotoOutput? = nil
+    private var frontCamera: AVCaptureDevice?
+    private var backCamera: AVCaptureDevice?
+    private var currentCamera: AVCaptureDevice?
     
-    private var previewLayer: AVCaptureVideoPreviewLayer? = nil
+    private var output: AVCapturePhotoOutput?
     
+    private var previewLayer: AVCaptureVideoPreviewLayer?
+    
+    fileprivate init() {
+        self.captureSession = AVCaptureSession()
+        
+        self.frontCamera = nil
+        self.backCamera = nil
+        self.currentCamera = nil
+        
+        self.output = nil
+        
+        self.previewLayer = nil
+        
+        super.init(nibName: nil, bundle: nil)
+        
+        AddImageCookie.aic().capture = { self.capture() }
+    }
+    
+    public required init?(coder decoder: NSCoder) {
+        self.captureSession = AVCaptureSession()
+        
+        super.init(coder: decoder)
+    }
+    
+    //Function Methods
+    @objc private func capture(sender: UIButton? = nil) {
+        self.output?.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
+    }
+    
+    //Implemented UIViewController Methods
     public override func viewDidLoad() {
         super.viewDidLoad()
         
         //Setup Capture Session
-        captureSession.sessionPreset = AVCaptureSession.Preset.photo
+        self.captureSession.sessionPreset = AVCaptureSession.Preset.photo
         
         //Setup Device
         let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes:
@@ -43,71 +94,56 @@ public class ImageViewController: UIViewController {
             }
         }
         
-        currentCamera = backCamera
+        self.currentCamera = self.backCamera
         
         //Setup Input Output
         do {
-            let captureDeviceInput = try AVCaptureDeviceInput(device: currentCamera!)
-            captureSession.addInput(captureDeviceInput)
-            output?.setPreparedPhotoSettingsArray([AVCapturePhotoSettings(format:
+            let captureDeviceInput = try AVCaptureDeviceInput(device: self.currentCamera!)
+            self.captureSession.addInput(captureDeviceInput)
+            self.output = AVCapturePhotoOutput()
+            self.output?.setPreparedPhotoSettingsArray([AVCapturePhotoSettings(format:
                 [AVVideoCodecKey: AVVideoCodecType.jpeg])], completionHandler: nil)
+            self.captureSession.addOutput(self.output!)
         } catch {
             print("error:\(error)")
         }
         
         //Setup Preview Layer
-        previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        previewLayer!.videoGravity = AVLayerVideoGravity.resizeAspectFill
-        previewLayer!.connection?.videoOrientation = AVCaptureVideoOrientation.portrait
-        previewLayer!.frame = self.view.frame
-        self.view.layer.insertSublayer(previewLayer!, at: 0)
-        
-        //Setup Running Capture Session
-        captureSession.startRunning()
-    }
-}
+        self.previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        self.previewLayer!.videoGravity = AVLayerVideoGravity.resizeAspectFill
+        self.previewLayer!.connection?.videoOrientation = AVCaptureVideoOrientation.portrait
+        self.previewLayer!.frame = CGRect(x: 0, y: navBarHeight, width: sWidth(), height: sHeight() - navBarHeight - abs(ImageViewController.buttonOffset * 2))
+        self.view.layer.insertSublayer(self.previewLayer!, at: 0)
 
-public class ImagePickerCoordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-    private var isPresented: Binding<Bool>
-    private var image: Binding<Image?>
-    
-    public init(isPresented: Binding<Bool>, image: Binding<Image?>) {
-        self.isPresented = isPresented
-        self.image = image
+        //Setup Running Capture Session
+        self.captureSession.startRunning()
     }
     
-    public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        let uiImage = info[UIImagePickerController.InfoKey.originalImage] as! UIImage
-        self.image.wrappedValue = Image(uiImage: uiImage)
-        self.isPresented.wrappedValue = false
+    //Implemented AVCapturePhotoCaptureDelegate Methods
+    public func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+        if let imageData = photo.fileDataRepresentation() {
+            let image = UIImage(data: imageData)!
+            
+            AddImageCookie.aic().aspectRatio = image.size.height / image.size.width
+            AddImageCookie.aic().image = Image(uiImage: image)
+            
+            //UIImageWriteToSavedPhotosAlbum(UIImage(data: imageData)!, nil, nil, nil)
+        }
     }
-    
-    public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        self.isPresented.wrappedValue = false
-    }
-    
 }
 
 public struct ImagePicker: UIViewControllerRepresentable {
-    private var isPresented: Binding<Bool>
-    private var image: Binding<Image?>
-    
-    public init(isPresented: Binding<Bool>, image: Binding<Image?>) {
-        self.isPresented = isPresented
-        self.image = image
+
+    public init() {
     }
     
+    //Implemented UIViewControllerRepresentable Methods
     public func updateUIViewController(_ uiViewController: ImageViewController, context: UIViewControllerRepresentableContext<ImagePicker>) {
         
     }
     
-    public func makeCoordinator() -> ImagePickerCoordinator {
-        return ImagePickerCoordinator(isPresented: isPresented, image: image)
-    }
-    
     public func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> ImageViewController {
-        let picker = ImageViewController()
-        return picker
+        return ImageViewController()
     }
     
 }

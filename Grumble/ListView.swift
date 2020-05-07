@@ -196,7 +196,7 @@ public struct ListView: View {
                 }
                 
                 Spacer()
-            }
+            }.offset(x: self.presentAddImage ? sWidth() * -0.3 : 0)
             
             ZStack(alignment: .top) {
                 Color.clear

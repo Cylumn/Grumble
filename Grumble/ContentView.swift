@@ -8,7 +8,10 @@
 
 import SwiftUI
 
+public let navBarHeight: CGFloat = sWidth() * 0.12
 public let tabHeight: CGFloat = sHeight() * 0.085
+
+public let navBarFont: Font = gFont(.ubuntuBold, 18)
 
 public struct ContentView: View {
     @ObservedObject private var uc: UserCookie = UserCookie.uc()
