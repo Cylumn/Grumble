@@ -326,34 +326,65 @@ public func loadImages() {
         }
     }
     
-    DispatchQueue.main.async {
-        var assets: [PHAsset] = []
-        var photos: [UIImage] = []
-        let options = PHFetchOptions()
-        //options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-        let collection = PHAsset.fetchAssets(with: PHAssetMediaType.image, options: options)
-        let imageManager = AddImageCookie.aic().phManager
-        collection.enumerateObjects{ (asset, count, stop) in
-            assets.append(asset)
-            let ratio: CGFloat = 0.1
-            let imageSize = CGSize(width: CGFloat(asset.pixelWidth) * ratio,
-                                   height: CGFloat(asset.pixelHeight) * ratio)
+    let ratio: CGFloat = 0.2
+    var assets: [PHAsset] = []
+    var photos: [UIImage] = []
+    
+    let options = PHFetchOptions()
+    let cameraRoll = PHAssetCollection.fetchAssetCollections(with:.smartAlbum, subtype:.smartAlbumUserLibrary, options: options).firstObject
+    
+    options.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue)
+    let collection = PHAsset.fetchAssets(in: cameraRoll!, options: options)
+    
+    let imageManager = AddImageCookie.aic().phManager
+    collection.enumerateObjects{ (asset, count, stop) in
+        assets.append(asset)
+        let imageSize = CGSize(width: CGFloat(asset.pixelWidth) * ratio,
+                               height: CGFloat(asset.pixelHeight) * ratio)
 
-            /* For faster performance, and maybe degraded image */
-            let options = PHImageRequestOptions()
-            options.deliveryMode = .fastFormat
-            options.isSynchronous = true
+        /* For faster performance, and maybe degraded image */
+        let options = PHImageRequestOptions()
+        options.deliveryMode = .fastFormat
+        options.isSynchronous = true
 
-            imageManager.requestImage(for: asset, targetSize: imageSize, contentMode: .aspectFill, options: options,
-                                      resultHandler: { (image, info) -> Void in
-                photos.append(image!)
-            })
+        imageManager.requestImage(for: asset, targetSize: imageSize, contentMode: .aspectFill, options: options) { (image, info) in
+            photos.append(image!)
         }
+    }
+    
+    assets.reverse()
+    photos.reverse()
+    
+    AddImageCookie.aic().photoAssets = assets
+    AddImageCookie.aic().photos = photos
+    
+    if assets.count > 0 {
+        let size: CGSize = CGSize(width: assets[0].pixelWidth, height: assets[0].pixelHeight)
+        AddImageCookie.aic().phManager.requestImage(for: assets[0], targetSize: size, contentMode: .aspectFill, options: nil, resultHandler: { image, info in
+            if info?["PHImageResultIsDegradedKey"] as! Int == 0 {
+                let image = Image(uiImage: image!)
+                AddImageCookie.aic().defaultLibraryPhotoAspectRatio = size.height / size.width
+                AddImageCookie.aic().defaultLibraryPhoto = image
+            }
+        })
+    }
+    
+    let updatePhotosPerCount: Int = 10
+    var updateCount: Int = 0
+    for index in 0 ..< assets.count {
+        let asset = assets[index]
+        let imageSize = CGSize(width: CGFloat(asset.pixelWidth) * ratio,
+                               height: CGFloat(asset.pixelHeight) * ratio)
+        let options = PHImageRequestOptions()
+        options.deliveryMode = .highQualityFormat
         
-        assets.reverse()
-        photos.reverse()
-        
-        AddImageCookie.aic().photoAssets = assets
-        AddImageCookie.aic().photos = photos
+        imageManager.requestImage(for: asset, targetSize: imageSize, contentMode: .aspectFill, options: options) { (image, info) in
+            photos[index] = image!
+            updateCount += 1
+            
+            if updateCount % updatePhotosPerCount == 0 || updateCount == photos.count {
+                AddImageCookie.aic().photos = photos
+            }
+        }
     }
 }
