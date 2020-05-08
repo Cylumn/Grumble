@@ -65,7 +65,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
     //on Google SignOut
     func sign(_ signIn: GIDSignIn!, didDisconnectWith user: GIDGoogleUser!,
               withError error: Error!) {
-        print("test")
     }
 
     //On application launch
@@ -89,6 +88,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
                 }
             }
         }
+        
+        loadImages()
         
         return true
     }

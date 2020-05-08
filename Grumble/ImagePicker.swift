@@ -71,7 +71,9 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
     
     //Function Methods
     private func capture() {
-        self.output?.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
+        if AddImageCookie.aic().cameraAuthorized {
+            self.output?.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
+        }
     }
     
     private func run(_ shouldRun: Bool) {
@@ -130,8 +132,21 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
         self.previewLayer!.frame = CGRect(x: 0, y: navBarHeight, width: sWidth(), height: sHeight() - navBarHeight - abs(ImageViewController.buttonOffset * 2))
         self.view.layer.insertSublayer(self.previewLayer!, at: 0)
         
+        //Start Running
         if shouldKeepCameraRunning {
             self.run(true)
+        }
+        
+        //Check if camera is enabled
+        if AVCaptureDevice.authorizationStatus(for: AVMediaType.video) ==  AVAuthorizationStatus.authorized {
+            // Already Authorized
+            if !AddImageCookie.aic().cameraAuthorized {
+                AddImageCookie.aic().cameraAuthorized = true
+            }
+        } else {
+            if AddImageCookie.aic().cameraAuthorized {
+                AddImageCookie.aic().cameraAuthorized = false
+            }
         }
     }
     
@@ -155,7 +170,16 @@ public struct ImagePicker: UIViewControllerRepresentable {
     
     //Implemented UIViewControllerRepresentable Methods
     public func updateUIViewController(_ uiViewController: ImageViewController, context: UIViewControllerRepresentableContext<ImagePicker>) {
-        
+        if AVCaptureDevice.authorizationStatus(for: AVMediaType.video) ==  AVAuthorizationStatus.authorized {
+            // Already Authorized
+            if !AddImageCookie.aic().cameraAuthorized {
+                AddImageCookie.aic().cameraAuthorized = true
+            }
+        } else {
+            if AddImageCookie.aic().cameraAuthorized {
+                AddImageCookie.aic().cameraAuthorized = false
+            }
+        }
     }
     
     public func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> ImageViewController {

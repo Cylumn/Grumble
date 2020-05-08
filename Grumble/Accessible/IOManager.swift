@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Firebase
+import Photos
 
 private struct DataList: Decodable {
     var foodList: [String: Grub]?
@@ -314,5 +315,45 @@ public func changePassword(old: String, new: String, _ finishedWithError: @escap
             
             finishedWithError(nil)
         }
+    }
+}
+
+//Images
+public func loadImages() {
+    if PHPhotoLibrary.authorizationStatus() != .authorized {
+        PHPhotoLibrary.requestAuthorization { handler in
+            AddImageCookie.aic().libraryAuthorized = handler == PHAuthorizationStatus.authorized
+        }
+    }
+    
+    DispatchQueue.main.async {
+        var assets: [PHAsset] = []
+        var photos: [UIImage] = []
+        let options = PHFetchOptions()
+        //options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        let collection = PHAsset.fetchAssets(with: PHAssetMediaType.image, options: options)
+        let imageManager = AddImageCookie.aic().phManager
+        collection.enumerateObjects{ (asset, count, stop) in
+            assets.append(asset)
+            let ratio: CGFloat = 0.1
+            let imageSize = CGSize(width: CGFloat(asset.pixelWidth) * ratio,
+                                   height: CGFloat(asset.pixelHeight) * ratio)
+
+            /* For faster performance, and maybe degraded image */
+            let options = PHImageRequestOptions()
+            options.deliveryMode = .fastFormat
+            options.isSynchronous = true
+
+            imageManager.requestImage(for: asset, targetSize: imageSize, contentMode: .aspectFill, options: options,
+                                      resultHandler: { (image, info) -> Void in
+                photos.append(image!)
+            })
+        }
+        
+        assets.reverse()
+        photos.reverse()
+        
+        AddImageCookie.aic().photoAssets = assets
+        AddImageCookie.aic().photos = photos
     }
 }
