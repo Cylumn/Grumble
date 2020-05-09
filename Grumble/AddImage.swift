@@ -13,12 +13,15 @@ public let grubImageAspectRatio: CGFloat = 0.75
 
 private let cameraHeight: CGFloat = sHeight() + ImageViewController.buttonOffset * 2 - navBarHeight - safeAreaInset(.top)
 private let borderHeight: CGFloat = (cameraHeight - sWidth() * grubImageAspectRatio) * 0.5
+private let cameraBodyHeight: CGFloat = abs(ImageViewController.buttonOffset * 2)
 
 private let libraryColumns: Int = 4
+private let libraryBodyHeight: CGFloat = (abs(ImageViewController.buttonOffset) + borderHeight) * 2 - tabHeight
 
 public class AddImageCookie: ObservableObject {
     private static var instance: AddImageCookie? = nil
     public var currentFID: String? = nil
+    @Published fileprivate var tab: AddImage.Pages = AddImage.Pages.capture
     @Published public var image: Image? = nil
     @Published public var aspectRatio: CGFloat = 4 / 3
     @Published public var selectedIndex: Int = 0
@@ -28,11 +31,15 @@ public class AddImageCookie: ObservableObject {
     @Published public var cameraAuthorized: Bool = true
     
     public var phManager: PHCachingImageManager = PHCachingImageManager()
-    @Published public var photoAssets: [PHAsset] = []
-    @Published public var photos: [UIImage] = []
+    @Published public var photoAssets: [Int: PHAsset] = [:]
+    @Published public var photos: [PHAsset: UIImage] = [:]
     @Published public var defaultLibraryPhotoAspectRatio: CGFloat = 4 / 3
     @Published public var defaultLibraryPhoto: Image? = nil
     
+    @Published public var flash: Bool = false
+    
+    public var attemptResetDefaultPhoto: () -> Void = { }
+    public var toggleFlash: (Bool) -> Void = { _ in }
     public var capture: () -> Void = { }
     public var run: (Bool) -> Void = { _ in }
     
@@ -71,8 +78,6 @@ public struct AddImage: View {
     private var present: (Bool) -> Void
     private var toAddFood: (String?) -> Void
     
-    @State private var tab: Pages = Pages.capture
-    
     @GestureState(initialValue: CGFloat(0.8), resetTransaction: Transaction(animation: gAnim(.springSlow))) private var holdData
     
     //Initializer
@@ -81,21 +86,32 @@ public struct AddImage: View {
         self.toAddFood = toAddFood
         
         AddFoodCookie.afc().presentAddImage = self.present
+        AddImageCookie.aic().attemptResetDefaultPhoto = self.attemptResetDefaultPhoto
     }
     
     //Page Enums
-    private enum Pages {
+    fileprivate enum Pages {
         case library
         case capture
     }
     
     //Getter Methods
     private func presentImagePicker() -> Bool {
-        return self.aic.isPresented && self.aic.image == nil && self.tab == .capture
+        return self.aic.isPresented && self.aic.image == nil && self.aic.tab == .capture
     }
     
-    private func adjustImageScreen() -> Bool {
-        return self.aic.image != nil && self.tab == .capture
+    private func cropImageScreen() -> Bool {
+        return self.aic.image != nil && self.aic.tab == .capture
+    }
+    
+    //Function Methods
+    private func attemptResetDefaultPhoto() {
+        if self.aic.tab == .library {
+            self.aic.selectedIndex = 0
+            self.aic.image = self.aic.defaultLibraryPhoto
+            self.aic.aspectRatio = self.aic.defaultLibraryPhotoAspectRatio
+            CropImageCookie.cic().resetOffset()
+        }
     }
     
     private var header: some View {
@@ -106,7 +122,7 @@ public struct AddImage: View {
                         self.present(false)
                         CropImageCookie.cic().resetOffset()
                     }
-                    self.tab = .capture
+                    self.aic.tab = .capture
                     self.aic.image = nil
                 }, label: {
                     Text("Cancel")
@@ -123,24 +139,27 @@ public struct AddImage: View {
                 }
             }
             
-            if self.adjustImageScreen() {
+            if self.cropImageScreen() {
                 Text("Adjust Image")
-            } else if self.tab == .capture {
+            } else if self.aic.tab == .capture {
                 Text("Take Image of Grub")
-            } else if self.tab == .library {
+            } else if self.aic.tab == .library {
                 Text("Select Image of Grub")
             }
         }
     }
     
     private var authorizePage: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 50) {
             Spacer()
-                .frame(height: navBarHeight + borderHeight)
+                .frame(height: navBarHeight + (self.aic.tab == .capture ? borderHeight : 0))
             
-            Text("Grumble does not have permission to access your camera.")
+            Text("Grumble does not have permission to access your " + (self.aic.tab == .capture ? "camera." : "camera roll."))
+                .padding([.leading, .trailing], sWidth() * 0.1)
                 .font(gFont(.ubuntuLight, .width, 1.8))
                 .foregroundColor(Color.white)
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.center)
             
             Button(action: {
                 guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
@@ -159,26 +178,53 @@ public struct AddImage: View {
             .cornerRadius(100)
             
             Spacer()
-                .frame(height: abs(ImageViewController.buttonOffset * 2))
+                .frame(height: self.aic.tab == .capture ? cameraBodyHeight : libraryBodyHeight)
+        }
+    }
+    
+    private var emptyCameraRoll: some View {
+        VStack(spacing: 50) {
+            Spacer()
+                .frame(height: navBarHeight)
+            
+            Text("Your camera roll is empty!")
+                .padding([.leading, .trailing], sWidth() * 0.1)
+                .font(gFont(.ubuntuLight, .width, 1.8))
+                .foregroundColor(Color.white)
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.center)
+            
+            Spacer()
+                .frame(height: self.aic.tab == .capture ? cameraBodyHeight : libraryBodyHeight)
         }
     }
     
     private var library: some View {
-        let rows = 0 ..< Int(ceil(CGFloat(self.aic.photos.count) / CGFloat(libraryColumns)))
+        let rows = 0 ..< Int(ceil(CGFloat(self.aic.photoAssets.count) / CGFloat(libraryColumns)))
         
         let size: CGFloat = (sWidth() - CGFloat(libraryColumns) + 1) / CGFloat(libraryColumns)
-       
         return ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: 1) {
                 ForEach(rows, id: \.self) { row in
                     HStack(spacing: 1) {
-                        ForEach((row * libraryColumns ..< min((row + 1) * libraryColumns, self.aic.photos.count)), id: \.self) { index in
-                            ImageItem(self.aic.photoAssets[index], self.aic.photos[index], size: size, index: index)
+                        ForEach((row * libraryColumns ..< min((row + 1) * libraryColumns, self.aic.photoAssets.count)), id: \.self) { index in
+                            ImageItem(self.aic.photoAssets[index]!, self.aic.photos[self.aic.photoAssets[index]!]!, size: size, index: index)
                         }
                     }
                 }
             }.offset(y: 1)
         }
+    }
+    
+    private var flashButton: some View {
+        Button(action: {
+            self.aic.toggleFlash(!self.aic.flash)
+        }, label: {
+            Image(systemName: self.aic.flash ? "bolt.fill" : "bolt")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: ImageViewController.buttonSize * 0.5, height: ImageViewController.buttonSize * 0.5)
+        }).foregroundColor(Color.white)
     }
     
     private var captureButton: some View {
@@ -217,16 +263,16 @@ public struct AddImage: View {
     
     private func tabButton(_ label: String, _ page: Pages, _ action: @escaping () -> Void = {}) -> some View {
         Button(action: {
-            if self.tab != page {
+            if self.aic.tab != page {
                 self.aic.image = nil
                 CropImageCookie.cic().resetOffset()
             }
-            self.tab = page
+            self.aic.tab = page
             action()
         }, label: {
             Text(label)
         }).frame(maxWidth: .infinity)
-        .foregroundColor(self.tab == page ? Color.white : Color(white: 0.9))
+        .foregroundColor(self.aic.tab == page ? Color.white : Color(white: 0.9))
     }
     
     private var bodyOverlay: some View {
@@ -252,7 +298,7 @@ public struct AddImage: View {
         }
     }
     
-    fileprivate struct AdjustImage: View {
+    fileprivate struct CropImage: View {
         @ObservedObject private var cic: CropImageCookie = CropImageCookie.cic()
         private var aic: AddImageCookie = AddImageCookie.aic()
         private var parent: AddImage
@@ -266,11 +312,11 @@ public struct AddImage: View {
         public var body: some View {
             let imageWidth: CGFloat = self.aic.aspectRatio < grubImageAspectRatio ? grubImageAspectRatio * sWidth() / self.aic.aspectRatio : sWidth()
             let imageHeight: CGFloat = self.aic.aspectRatio < grubImageAspectRatio ? grubImageAspectRatio * sWidth() : self.aic.aspectRatio * sWidth()
-            
+
             return ZStack(alignment: .top) {
                     Color.clear
                     
-                    if self.parent.tab == .capture {
+                    if self.aic.tab == .capture {
                         self.aic.image?
                             .resizable()
                             .frame(width: imageWidth, height: imageHeight)
@@ -286,7 +332,7 @@ public struct AddImage: View {
                         .frame(height: safeAreaInset(.top))
                         .edgesIgnoringSafeArea(.top)
                     
-                    if self.parent.tab == .capture {
+                if self.aic.tab == .capture {
                         VStack(spacing: 0) {
                             Color.white
                                 .frame(width: sWidth(), height: navBarHeight + borderHeight)
@@ -296,12 +342,12 @@ public struct AddImage: View {
                             
                             Color.white
                                 .frame(maxWidth: sWidth(), maxHeight: .infinity)
-                        }.opacity((self.parent.adjustImageScreen() && !self.isDragging) ? 1 : 0.8)
+                        }.opacity((self.parent.cropImageScreen() && !self.isDragging) ? 1 : 0.8)
                     }
             }.frame(width: sWidth())
             .contentShape(Rectangle())
             .gesture(DragGesture().onChanged { drag in
-                if self.parent.adjustImageScreen() {
+                if self.parent.cropImageScreen() {
                     withAnimation(gAnim(.easeOut)) {
                         self.isDragging = true
                     }
@@ -309,13 +355,13 @@ public struct AddImage: View {
                     let maxDrag: CGFloat = navBarHeight + borderHeight
                     let minDrag: CGFloat = imageHeight - cameraHeight - navBarHeight + borderHeight
                     self.cic.dragOffset = max(min(drag.translation.height + self.cic.currentOffset, maxDrag), -minDrag)
-                } else if self.parent.tab == .library {
+                } else if self.aic.tab == .library {
                     let maxDrag: CGFloat = (imageHeight - sWidth() * grubImageAspectRatio) * 0.5
                     let minDrag: CGFloat = maxDrag
                     self.cic.dragOffset = max(min(drag.translation.height + self.cic.currentOffset, maxDrag), -minDrag)
                 }
             }.onEnded { drag in
-                if self.parent.adjustImageScreen() || self.parent.tab == .library {
+                if self.parent.cropImageScreen() || self.aic.tab == .library {
                     self.cic.currentOffset = self.cic.dragOffset
                 }
                 withAnimation(gAnim(.easeOut)) {
@@ -330,14 +376,21 @@ public struct AddImage: View {
             Color.black
                 .edgesIgnoringSafeArea(.bottom)
             
-            ImagePicker()
+            GCamera()
                 .opacity(self.presentImagePicker() ? 1 : 0)
                 .disabled(!self.presentImagePicker())
             
-            AdjustImage(self)
+            CropImage(self)
             
-            if self.tab == .capture && !self.aic.cameraAuthorized {
+            if self.aic.tab == .capture && !self.aic.cameraAuthorized ||
+                self.aic.tab == .library && !self.aic.libraryAuthorized {
                 self.authorizePage
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(white: 0.2))
+            }
+            
+            if self.aic.tab == .library && self.aic.libraryAuthorized && self.aic.photoAssets.count == 0 {
+                self.emptyCameraRoll
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color(white: 0.2))
             }
@@ -347,24 +400,28 @@ public struct AddImage: View {
                 
                 Rectangle()
                     .fill(AddImage.bgColor)
-                    .frame(height: abs(ImageViewController.buttonOffset * 2))
+                    .frame(height: self.aic.tab == .capture ? cameraBodyHeight : libraryBodyHeight)
                 
                 self.library
-                    .frame(height: (abs(ImageViewController.buttonOffset) + borderHeight) * 2 - tabHeight)
+                    .frame(height: libraryBodyHeight)
                     .background(Color.white)
                     .offset(y: -tabHeight)
-                    .opacity(self.tab == .library ? 1 : 0)
-                    .disabled(self.tab != .library)
+                    .opacity(self.aic.tab == .library ? 1 : 0)
+                    .disabled(self.aic.tab != .library)
             }
             
-            self.captureButton
-                .opacity(self.presentImagePicker() ? 1 : 0)
-                .disabled(!self.presentImagePicker())
+            ZStack {
+                self.flashButton
+                    .position(x: sWidth() * 0.9, y: navBarHeight + borderHeight + sWidth() * grubImageAspectRatio - sWidth() * 0.1)
+                
+                self.captureButton
+            }.opacity(self.presentImagePicker() ? 1 : 0)
+            .disabled(!self.presentImagePicker())
             
             self.bodyOverlay
                 .foregroundColor(AddImage.textColor)
             
-            if self.adjustImageScreen() {
+            if self.cropImageScreen() {
                 Button(action: {
                     self.aic.image = nil
                     CropImageCookie.cic().resetOffset()

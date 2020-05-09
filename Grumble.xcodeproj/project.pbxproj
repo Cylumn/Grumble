@@ -25,8 +25,9 @@
 		D524481B24310C9700903BE3 /* GrumbleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D524481A24310C9700903BE3 /* GrumbleTests.swift */; };
 		D524482924310C9E00903BE3 /* GrumbleUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D524482824310C9E00903BE3 /* GrumbleUITests.swift */; };
 		D54006FA246323BD0053B51C /* AddImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54006F9246323BC0053B51C /* AddImage.swift */; };
-		D54006FC24632F790053B51C /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54006FB24632F790053B51C /* ImagePicker.swift */; };
+		D54006FC24632F790053B51C /* GCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54006FB24632F790053B51C /* GCamera.swift */; };
 		D54006FE2464D1B20053B51C /* ImageItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54006FD2464D1B20053B51C /* ImageItem.swift */; };
+		D5400705246683140053B51C /* LibraryObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5400704246683140053B51C /* LibraryObserver.swift */; };
 		D540148824393502008F8CCF /* FieldParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D540148724393502008F8CCF /* FieldParser.swift */; };
 		D541F5E6244A4B8F00E98EF1 /* GrumbleSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5E5244A4B8F00E98EF1 /* GrumbleSheet.swift */; };
 		D541F5E9244A522200E98EF1 /* GhorblinSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5E8244A522200E98EF1 /* GhorblinSheet.swift */; };
@@ -117,8 +118,9 @@
 		D524482824310C9E00903BE3 /* GrumbleUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrumbleUITests.swift; sourceTree = "<group>"; };
 		D524482A24310C9E00903BE3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D54006F9246323BC0053B51C /* AddImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddImage.swift; sourceTree = "<group>"; };
-		D54006FB24632F790053B51C /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
+		D54006FB24632F790053B51C /* GCamera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GCamera.swift; sourceTree = "<group>"; };
 		D54006FD2464D1B20053B51C /* ImageItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageItem.swift; sourceTree = "<group>"; };
+		D5400704246683140053B51C /* LibraryObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryObserver.swift; sourceTree = "<group>"; };
 		D540148724393502008F8CCF /* FieldParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldParser.swift; sourceTree = "<group>"; };
 		D541F5E5244A4B8F00E98EF1 /* GrumbleSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrumbleSheet.swift; sourceTree = "<group>"; };
 		D541F5E8244A522200E98EF1 /* GhorblinSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhorblinSheet.swift; sourceTree = "<group>"; };
@@ -215,6 +217,7 @@
 				D50292392437F7B3008A5BFC /* GForm.swift */,
 				D51FECC8243131FA00BF129C /* KeyboardObserver.swift */,
 				D541F5EA244CE73200E98EF1 /* GhorblinAnimations.swift */,
+				D5400704246683140053B51C /* LibraryObserver.swift */,
 			);
 			path = "Observable Instances";
 			sourceTree = "<group>";
@@ -225,7 +228,7 @@
 				D51FECCA24316DC600BF129C /* SheetView.swift */,
 				D51FECD72434189300BF129C /* SlideView.swift */,
 				D573A82724386DDC00DB6067 /* GField.swift */,
-				D54006FB24632F790053B51C /* ImagePicker.swift */,
+				D54006FB24632F790053B51C /* GCamera.swift */,
 			);
 			name = Structures;
 			sourceTree = "<group>";
@@ -742,7 +745,8 @@
 				D502923A2437F7B3008A5BFC /* GForm.swift in Sources */,
 				D5DFD721245A2BAF00B78451 /* Welcome.swift in Sources */,
 				D5AA593E2426C24F000BEC5C /* IOManager.swift in Sources */,
-				D54006FC24632F790053B51C /* ImagePicker.swift in Sources */,
+				D54006FC24632F790053B51C /* GCamera.swift in Sources */,
+				D5400705246683140053B51C /* LibraryObserver.swift in Sources */,
 				D5014C242441431500C5530B /* GrubSheet.swift in Sources */,
 				D50292332437AE06008A5BFC /* ScreenDimension.swift in Sources */,
 				D5AA594D24271391000BEC5C /* ContentView.swift in Sources */,

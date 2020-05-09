@@ -1,5 +1,5 @@
 //
-//  ImagePicker.swift
+//  GCamera.swift
 //  Grumble
 //
 //  Created by Allen Chang on 5/6/20.
@@ -46,6 +46,8 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
     
     private var previewLayer: AVCaptureVideoPreviewLayer?
     
+    private var captureSettings: AVCapturePhotoSettings?
+    
     fileprivate init() {
         self.captureSession = AVCaptureSession()
         
@@ -57,8 +59,11 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
         
         self.previewLayer = nil
         
+        self.captureSettings = AVCapturePhotoSettings()
+        
         super.init(nibName: nil, bundle: nil)
         
+        AddImageCookie.aic().toggleFlash = self.toggleFlash
         AddImageCookie.aic().capture = self.capture
         AddImageCookie.aic().run = self.run
     }
@@ -70,9 +75,16 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
     }
     
     //Function Methods
+    private func toggleFlash(_ on: Bool) {
+        self.captureSettings?.flashMode = on ? .on : .off
+        AddImageCookie.aic().flash = on
+    }
+    
     private func capture() {
         if AddImageCookie.aic().cameraAuthorized {
-            self.output?.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
+            self.output?.capturePhoto(with: self.captureSettings!, delegate: self)
+            self.captureSettings = AVCapturePhotoSettings()
+            self.captureSettings!.flashMode = AddImageCookie.aic().flash ? .on : .off
         }
     }
     
@@ -136,6 +148,7 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
         if shouldKeepCameraRunning {
             self.run(true)
         }
+        AddImageCookie.aic().flash = self.captureSettings!.flashMode == .on
         
         //Check if camera is enabled
         if AVCaptureDevice.authorizationStatus(for: AVMediaType.video) ==  AVAuthorizationStatus.authorized {
@@ -163,13 +176,10 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
     }
 }
 
-public struct ImagePicker: UIViewControllerRepresentable {
-
-    public init() {
-    }
+public struct GCamera: UIViewControllerRepresentable {
     
     //Implemented UIViewControllerRepresentable Methods
-    public func updateUIViewController(_ uiViewController: ImageViewController, context: UIViewControllerRepresentableContext<ImagePicker>) {
+    public func updateUIViewController(_ uiViewController: ImageViewController, context: UIViewControllerRepresentableContext<GCamera>) {
         if AVCaptureDevice.authorizationStatus(for: AVMediaType.video) ==  AVAuthorizationStatus.authorized {
             // Already Authorized
             if !AddImageCookie.aic().cameraAuthorized {
@@ -182,7 +192,7 @@ public struct ImagePicker: UIViewControllerRepresentable {
         }
     }
     
-    public func makeUIViewController(context: UIViewControllerRepresentableContext<ImagePicker>) -> ImageViewController {
+    public func makeUIViewController(context: UIViewControllerRepresentableContext<GCamera>) -> ImageViewController {
         return ImageViewController()
     }
     
