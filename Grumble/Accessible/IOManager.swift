@@ -389,7 +389,6 @@ public func loadImages() {
             
             if updateCount % updatePhotosPerCount == 0 || updateCount == photos.count {
                 AddImageCookie.aic().photos.merge(photos, uniquingKeysWith: { (_, new) in new })
-                print("\n--updating photos--\n")
             }
         }
     }

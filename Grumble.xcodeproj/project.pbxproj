@@ -74,6 +74,7 @@
 		D5F0895724253AC6000D375D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D5F0895624253AC6000D375D /* Preview Assets.xcassets */; };
 		D5F0895A24253AC6000D375D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D5F0895824253AC6000D375D /* LaunchScreen.storyboard */; };
 		D5F0898A24257849000D375D /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = D5F0898924257849000D375D /* Podfile */; };
+		D5FF430E2468DDE100B348C4 /* GTagClassifier.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = D5FF430D2468DDE100B348C4 /* GTagClassifier.mlmodel */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -173,6 +174,7 @@
 		D5F0896F24253AC6000D375D /* GrumbleUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrumbleUITests.swift; sourceTree = "<group>"; };
 		D5F0897124253AC6000D375D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D5F0898924257849000D375D /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		D5FF430D2468DDE100B348C4 /* GTagClassifier.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = GTagClassifier.mlmodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -362,6 +364,7 @@
 		D5AA593F2426C3BA000BEC5C /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				D5FF430D2468DDE100B348C4 /* GTagClassifier.mlmodel */,
 				D5AD27672425B07000462F1C /* Fonts */,
 				D5636C4D242EEC3A00476DCB /* data.plist */,
 			);
@@ -737,6 +740,7 @@
 				D5DFD71E2458F43600B78451 /* SignupSheet.swift in Sources */,
 				D541F5F0244FCE2F00E98EF1 /* GBurger.swift in Sources */,
 				D5DFD723245BA6E000B78451 /* CreateLinkedAccount.swift in Sources */,
+				D5FF430E2468DDE100B348C4 /* GTagClassifier.mlmodel in Sources */,
 				D56BA4BD245132C50065E3E4 /* GSoup.swift in Sources */,
 				D5F0895024253AC4000D375D /* SceneDelegate.swift in Sources */,
 				D54006FE2464D1B20053B51C /* ImageItem.swift in Sources */,
