@@ -61,6 +61,7 @@
 		D5AD27782425B0D400462F1C /* Ubuntu-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD27692425B07B00462F1C /* Ubuntu-Medium.ttf */; };
 		D5AD27792425B0D400462F1C /* Ubuntu-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD276A2425B07C00462F1C /* Ubuntu-MediumItalic.ttf */; };
 		D5AD277A2425B0D400462F1C /* Ubuntu-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD276B2425B07C00462F1C /* Ubuntu-Regular.ttf */; };
+		D5B4CAB72468ED7300619890 /* GTagLabeler.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5B4CAB62468ED7300619890 /* GTagLabeler.swift */; };
 		D5B94B17243E8FD3001E384A /* SearchTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5B94B16243E8FD3001E384A /* SearchTag.swift */; };
 		D5C4D0BA243FE8120033EFB0 /* GDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5C4D0B9243FE8120033EFB0 /* GDate.swift */; };
 		D5DFD71C24579EC100B78451 /* SecurityForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DFD71B24579EC100B78451 /* SecurityForm.swift */; };
@@ -155,6 +156,7 @@
 		D5AD276D2425B07C00462F1C /* Ubuntu-LightItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-LightItalic.ttf"; sourceTree = "<group>"; };
 		D5AD276E2425B07C00462F1C /* Ubuntu-BoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-BoldItalic.ttf"; sourceTree = "<group>"; };
 		D5AD276F2425B07C00462F1C /* Ubuntu-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-Italic.ttf"; sourceTree = "<group>"; };
+		D5B4CAB62468ED7300619890 /* GTagLabeler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GTagLabeler.swift; sourceTree = "<group>"; };
 		D5B94B16243E8FD3001E384A /* SearchTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTag.swift; sourceTree = "<group>"; };
 		D5C4D0B9243FE8120033EFB0 /* GDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GDate.swift; sourceTree = "<group>"; };
 		D5DFD71B24579EC100B78451 /* SecurityForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityForm.swift; sourceTree = "<group>"; };
@@ -220,6 +222,7 @@
 				D51FECC8243131FA00BF129C /* KeyboardObserver.swift */,
 				D541F5EA244CE73200E98EF1 /* GhorblinAnimations.swift */,
 				D5400704246683140053B51C /* LibraryObserver.swift */,
+				D5B4CAB62468ED7300619890 /* GTagLabeler.swift */,
 			);
 			path = "Observable Instances";
 			sourceTree = "<group>";
@@ -740,6 +743,7 @@
 				D5DFD71E2458F43600B78451 /* SignupSheet.swift in Sources */,
 				D541F5F0244FCE2F00E98EF1 /* GBurger.swift in Sources */,
 				D5DFD723245BA6E000B78451 /* CreateLinkedAccount.swift in Sources */,
+				D5B4CAB72468ED7300619890 /* GTagLabeler.swift in Sources */,
 				D5FF430E2468DDE100B348C4 /* GTagClassifier.mlmodel in Sources */,
 				D56BA4BD245132C50065E3E4 /* GSoup.swift in Sources */,
 				D5F0895024253AC4000D375D /* SceneDelegate.swift in Sources */,

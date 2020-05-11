@@ -35,9 +35,8 @@ public struct ImageItem: View {
                     let size: CGSize = CGSize(width: self.asset.pixelWidth, height: self.asset.pixelHeight)
                     self.aic.phManager.requestImage(for: self.asset, targetSize: size, contentMode: .aspectFill, options: nil, resultHandler: { image, info in
                         if info?["PHImageResultIsDegradedKey"] as! Int == 0 {
-                            let image = Image(uiImage: image!)
                             self.aic.aspectRatio = size.height / size.width
-                            self.aic.image = image
+                            self.aic.setImage(image!)
                             CropImageCookie.cic().resetOffset()
                         }
                     })

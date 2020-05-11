@@ -365,9 +365,8 @@ public func loadImages() {
         let size: CGSize = CGSize(width: assets[0]!.pixelWidth, height: assets[0]!.pixelHeight)
         AddImageCookie.aic().phManager.requestImage(for: assets[0]!, targetSize: size, contentMode: .aspectFill, options: nil, resultHandler: { image, info in
             if info?["PHImageResultIsDegradedKey"] as! Int == 0 {
-                let image = Image(uiImage: image!)
                 AddImageCookie.aic().defaultLibraryPhotoAspectRatio = size.height / size.width
-                AddImageCookie.aic().defaultLibraryPhoto = image
+                AddImageCookie.aic().defaultLibraryPhoto = image!
                 AddImageCookie.aic().attemptResetDefaultPhoto()
             }
         })

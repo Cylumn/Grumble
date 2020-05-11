@@ -90,6 +90,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
         }
         
         loadImages()
+        _ = GTagLabeler.gtl()
         
         return true
     }

@@ -169,9 +169,7 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
             let image = UIImage(data: imageData)!
             
             AddImageCookie.aic().aspectRatio = image.size.height / image.size.width
-            AddImageCookie.aic().image = Image(uiImage: image)
-            
-            //UIImageWriteToSavedPhotosAlbum(UIImage(data: imageData)!, nil, nil, nil)
+            AddImageCookie.aic().setImage(image)
         }
     }
 }

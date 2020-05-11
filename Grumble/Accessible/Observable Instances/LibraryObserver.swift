@@ -115,9 +115,8 @@ public class LibraryObserver: NSObject, PHPhotoLibraryChangeObserver {
                         let size: CGSize = CGSize(width: origAssets[0]!.pixelWidth, height: origAssets[0]!.pixelHeight)
                         AddImageCookie.aic().phManager.requestImage(for: origAssets[0]!, targetSize: size, contentMode: .aspectFill, options: nil, resultHandler: { image, info in
                             if info?["PHImageResultIsDegradedKey"] as! Int == 0 {
-                                let image = Image(uiImage: image!)
                                 AddImageCookie.aic().defaultLibraryPhotoAspectRatio = size.height / size.width
-                                AddImageCookie.aic().defaultLibraryPhoto = image
+                                AddImageCookie.aic().defaultLibraryPhoto = image!
                                 AddImageCookie.aic().attemptResetDefaultPhoto()
                             }
                         })
