@@ -72,7 +72,7 @@ public struct SearchList: View, GFieldDelegate {
                 self.searchBar
                     .background(Color(white: 0.93))
                     .cornerRadius(8)
-                    .frame(height: searchHeight)
+                    .frame(maxWidth: .infinity, maxHeight: searchHeight)
                 
                 if self.expanded() {
                     Button(action: {
@@ -111,7 +111,7 @@ public struct SearchList: View, GFieldDelegate {
                             self.grubContainsToken(self.uc.foodListByDate()[$0].1)
                         }, id: \.self) {
                             index in
-                            GrubSearchItem(GrubItem(fid: self.uc.foodListByDate()[index].0, self.uc.foodListByDate()[index].1))
+                            GrubSearchItem(GrubItem(self.uc.foodListByDate()[index].1))
                         }
                         
                         Spacer().frame(maxWidth: .infinity, minHeight: self.ko.height() + sHeight() * 0.1)

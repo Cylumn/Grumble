@@ -64,6 +64,9 @@ public func gTagView(_ tag: GrubTag, _ boundingSize: CGSize, idleData: CGFloat, 
 }
 
 public struct Grub: Decodable {
+    public static var images: [String: Image] = [:]
+    public var fid: String
+    
     public var food: String
     public var price: Double?
     public var restaurant: String?
@@ -72,8 +75,28 @@ public struct Grub: Decodable {
     public var priorityTag: GrubTag
     public var date: String
     
+    enum GrubKeys: String, CodingKey {
+        case fid, food, price, restaurant, address, tags, priorityTag, date
+    }
+    
     //Initializer
-    public init(_ foodItem: NSDictionary?){
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: GrubKeys.self)
+        self.fid = try values.decode(String.self, forKey: .fid)
+        self.food = try values.decode(String.self, forKey: .food)
+        self.price = try values.decodeIfPresent(Double.self, forKey: .price)
+        self.restaurant = try values.decodeIfPresent(String.self, forKey: .restaurant)
+        self.address = try values.decodeIfPresent(String.self, forKey: .address)
+        self.tags = try values.decode([GrubTag: Double].self, forKey: .tags)
+        self.priorityTag = try values.decode(GrubTag.self, forKey: .priorityTag)
+        self.date = try values.decode(String.self, forKey: .date)
+        
+        Grub.images[self.fid] = Image(uiImage: grubImage(self.fid))
+    }
+    
+    public init(fid: String, _ foodItem: NSDictionary?, image: UIImage? = nil) {
+        self.fid = fid
+        
         self.food = foodItem?.value(forKey: "food") as! String
         self.price = foodItem?.value(forKey: "price") as? Double
         self.restaurant = foodItem?.value(forKey: "restaurant") as? String
@@ -81,6 +104,8 @@ public struct Grub: Decodable {
         self.tags = foodItem?.value(forKey: "tags") as! [GrubTag: Double]
         self.priorityTag = foodItem?.value(forKey: "priorityTag") as! GrubTag
         self.date = foodItem?.value(forKey: "date") as! String
+
+        Grub.images[self.fid] = image == nil ? Image(uiImage: grubImage(self.fid)) : Image(uiImage: image!)
     }
     
     //Function Methods
@@ -107,6 +132,10 @@ public struct Grub: Decodable {
         removeCloudFood(fid)
     }
     
+    public func image() -> Image {
+        return Grub.images[self.fid]!
+    }
+    
     @available(*, deprecated) //remove in future
     public static func testGrub() -> Grub {
         var grubTest: [String: Any] = [:]
@@ -119,7 +148,7 @@ public struct Grub: Decodable {
         grubTest["priorityTag"] = soup
         grubTest["date"] = getDate()
         
-        return Grub(grubTest as NSDictionary)
+        return Grub(fid: "", grubTest as NSDictionary, image: UIImage(imageLiteralResourceName: "ExplainTraining"))
     }
 }
 

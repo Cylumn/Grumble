@@ -31,8 +31,8 @@ public struct GrubItem: View {
     fileprivate var grub: Grub
     
     //Initializer
-    public init(fid: String, _ grub: Grub) {
-        self.fid = fid
+    public init(_ grub: Grub) {
+        self.fid = grub.fid
         self.grub = grub
     }
     
@@ -60,7 +60,9 @@ public struct GrubItem: View {
                 ZStack(alignment: .bottom) {
                     Rectangle().fill(gTagColors[self.grub.priorityTag]!)
                     
-                    GTagIcon.icon(tag: self.grub.priorityTag, id: .listBox, size: CGSize(width: 200, height: 150))
+                    self.grub.image()
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
                     
                     HStack(alignment: .bottom) {
                         Text(self.grub.food)
@@ -232,6 +234,6 @@ public struct GrubSearchItem: View {
 
 struct GrubItem_Previews: PreviewProvider {
     static var previews: some View {
-        GrubItem(fid: "", Grub.testGrub())
+        GrubItem(Grub.testGrub())
     }
 }

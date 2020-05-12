@@ -69,10 +69,21 @@ public struct ListView: View {
         }
     }
     
-    private func showAddImage(isPresented: Bool) {
-        self.presentAddImage = isPresented
-        AddImageCookie.aic().isPresented = isPresented
-        AddImageCookie.aic().run(isPresented)
+    private func showAddImage(isPresented: Bool, animate: Bool) {
+        let animatedTask = {
+            self.presentAddImage = isPresented
+            AddImageCookie.aic().isPresented = isPresented
+            AddImageCookie.aic().run(isPresented)
+        }
+        if animate {
+            withAnimation(gAnim(.easeOut)) {
+                animatedTask()
+            }
+        } else {
+            animatedTask()
+        }
+        
+        AddImageCookie.aic().tab = AddImage.Pages.capture
     }
     
     //View Methods
@@ -100,9 +111,7 @@ public struct ListView: View {
             Spacer()
             
             Button(action: {
-                withAnimation(gAnim(.easeOut)) {
-                    self.showAddImage(isPresented: true)
-                }
+                self.showAddImage(isPresented: true, animate: true)
             }, label: {
                 ZStack {
                     Text("+ Add")
@@ -174,7 +183,7 @@ public struct ListView: View {
                     HStack(spacing: 20) {
                         if !self.uc.foodList().isEmpty {
                             ForEach((0 ..< self.uc.foodListByDate().count).reversed(), id: \.self) { index in
-                                GrubItem(fid: self.uc.foodListByDate()[index].0, self.uc.foodListByDate()[index].1)
+                                GrubItem(self.uc.foodListByDate()[index].1)
                             }
                         } else {
                             Text(self.uc.loadingStatus == .loading ? "Loading..." : "List is Empty!")

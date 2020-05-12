@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-private let baseImageFraction: CGFloat = 0.35
+private let baseImageFraction: CGFloat = sWidth() * grubImageAspectRatio / sHeight() //0.35
 private let dragFraction: CGFloat = 0.5
 private let safeImagePadding: CGFloat = 10
 private let minDragFraction: CGFloat = 0
@@ -245,13 +245,17 @@ public struct GrubSheet: View {
     }
     
     private var sheet: some View {
-        ZStack(alignment: .topTrailing) {
+        let minScale: CGFloat = 0.8
+        return ZStack(alignment: .topTrailing) {
             ZStack(alignment: .top) {
                 gTagColors[self.grub!.priorityTag]
                     .edgesIgnoringSafeArea(.all)
                 
-                GTagIcon.icon(tag: self.grub!.priorityTag, id: .grubSheet, size: CGSize(width: sWidth(), height: sHeight() * baseImageFraction + safeAreaInset(.top) + safeImagePadding * 2))
-                    .scaleEffect(x: max(self.imageFraction / baseImageFraction, 0.8), y: max(self.imageFraction / baseImageFraction, 0.8), anchor: UnitPoint.top)
+                self.grub!.image()
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: sWidth() * (1 / minScale))
+                    .scaleEffect(x: max(self.imageFraction / baseImageFraction, minScale), y: max(self.imageFraction / baseImageFraction, minScale), anchor: UnitPoint.top)
                     .offset(y: -safeAreaInset(.top))
             }.frame(width: sWidth())
             
@@ -270,18 +274,18 @@ public struct GrubSheet: View {
                         self.impactOccurred = false
                     }
                 }.onEnded { drag in
-                    if drag.translation.height > sHeight() * 0.4 {
-                        self.hideSheet()
-                    }
                     withAnimation(gAnim(.spring)) {
                         self.imageFraction = baseImageFraction
+                    }
+                    if drag.translation.height > sHeight() * 0.4 {
+                        self.hideSheet()
                     }
                 })
             
             Button(action: self.hideSheet, label: {
                 Image(systemName: "chevron.down.circle.fill")
                     .padding(20)
-                    .foregroundColor(Color.white.opacity(0.5))
+                    .foregroundColor(Color.white.opacity(0.9))
                     .font(.system(size: 30))
             }).disabled(self.imageFraction == minDragFraction)
             

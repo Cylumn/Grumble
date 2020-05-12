@@ -22,7 +22,7 @@ private let libraryBodyHeight: CGFloat = (abs(ImageViewController.buttonOffset) 
 public class AddImageCookie: ObservableObject {
     private static var instance: AddImageCookie? = nil
     public var currentFID: String? = nil
-    @Published fileprivate var tab: AddImage.Pages = AddImage.Pages.capture
+    @Published public var tab: AddImage.Pages = AddImage.Pages.capture
     fileprivate var image: UIImage? = nil
     @Published public var drawnImage: Image? = nil
     @Published public var aspectRatio: CGFloat = 4 / 3
@@ -91,7 +91,7 @@ public struct AddImage: View {
     public static var textColor: Color = Color.white
     
     @ObservedObject private var aic: AddImageCookie = AddImageCookie.aic()
-    private var present: (Bool) -> Void
+    private var present: (Bool, Bool) -> Void
     private var toAddFood: (String?) -> Void
     
     @GestureState(initialValue: CGFloat(0.8), resetTransaction: Transaction(animation: gAnim(.springSlow))) private var holdData
@@ -99,7 +99,7 @@ public struct AddImage: View {
     @State private var presentLoading: Bool = false
     
     //Initializer
-    public init(present: @escaping (Bool) -> Void, toAddFood: @escaping (String?) -> Void) {
+    public init(present: @escaping (Bool, Bool) -> Void, toAddFood: @escaping (String?) -> Void) {
         self.present = present
         self.toAddFood = toAddFood
         
@@ -108,7 +108,7 @@ public struct AddImage: View {
     }
     
     //Page Enums
-    fileprivate enum Pages {
+    public enum Pages {
         case library
         case capture
     }
@@ -170,7 +170,8 @@ public struct AddImage: View {
                                                   height: grubImageSize.height))!
         }
         
-        GTagLabeler.gtl().predict(image: self.aic.image!.cgImage!) { tags in
+        AddFoodCookie.afc().image = UIImage(cgImage: cgImage)
+        GTagLabeler.gtl().predict(image: cgImage) { tags in
             self.toAddFood(nil)
             var newTags = tags
             newTags[food] = 1
@@ -183,11 +184,10 @@ public struct AddImage: View {
         ZStack {
             HStack {
                 Button(action: {
+                    self.present(false, true)
                     withAnimation(gAnim(.easeOut)) {
-                        self.present(false)
                         CropImageCookie.cic().resetOffset()
                     }
-                    self.aic.tab = .capture
                     self.aic.setImage(nil)
                 }, label: {
                     Text("Cancel")
@@ -517,6 +517,6 @@ public struct AddImage: View {
 
 struct AddImage_Previews: PreviewProvider {
     static var previews: some View {
-        AddImage(present: { _ in }, toAddFood: { _ in })
+        AddImage(present: { _, _ in }, toAddFood: { _ in })
     }
 }

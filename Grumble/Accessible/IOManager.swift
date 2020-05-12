@@ -10,6 +10,8 @@ import SwiftUI
 import Firebase
 import Photos
 
+private let imagePath: String = "images/"
+
 private struct DataList: Decodable {
     var foodList: [String: Grub]?
     var ghorblinName: String?
@@ -27,7 +29,7 @@ public enum LoadingStatus {
     case loaded
 }
 
-//Getter Functions
+//MARK: - Getter Functions
 private func dataPath() -> String {
     let docPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
     let dataPListPath = docPath.appendingPathComponent("data.plist")
@@ -49,7 +51,7 @@ private func dataPath() -> String {
     }
 }
 
-//Helper Functions
+//MARK: - Helper Functions
 private func loadPropertyList<T>(_ url: URL?, _ decodable: T.Type) -> T? where T : Decodable {
     guard let url = url else {
         print("error: url is empty")
@@ -67,13 +69,83 @@ private func loadPropertyList<T>(_ url: URL?, _ decodable: T.Type) -> T? where T
     return nil
 }
 
-//Data Functions
+//MARK: - Image Functions
+public func loadGrubImages() {
+    let docPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
+    let fileManager = FileManager.default
+    do {
+        let dirURL = URL(fileURLWithPath: docPath as String).appendingPathComponent(imagePath)
+        if !fileManager.fileExists(atPath: dirURL.path) {
+            try fileManager.createDirectory(at: dirURL, withIntermediateDirectories: true)
+        }
+        let files = try fileManager.contentsOfDirectory(atPath: dirURL.path)
+        for filePath in files {
+            Grub.images[filePath] = Image(uiImage: grubImage(filePath))
+        }
+    } catch {
+        print("error:\(error)")
+    }
+    
+}
+
+public func grubImage(_ filename: String) -> UIImage {
+    let grubImagePath: String = filename.contains(".jpg") ? filename : filename + ".jpg"
+    let docPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
+    let filePath = docPath.appendingPathComponent(imagePath + grubImagePath)
+    let imageURL = URL(fileURLWithPath: filePath)
+    return UIImage(contentsOfFile: imageURL.path)!
+}
+
+public func writeLocalGrubImage(_ filename: String, image: UIImage) {
+    let docPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
+    let docURL = URL(fileURLWithPath: docPath as String)
+    let fileURL = docURL.appendingPathComponent(imagePath + filename + ".jpg")
+    if let data = image.jpegData(compressionQuality:  1.0) {
+        do {
+            // writes the image data to disk
+            try data.write(to: fileURL, options: .atomic)
+        } catch {
+            print("error:\(error)")
+        }
+    }
+}
+
+public func removeLocalGrubImage(_ filename: String) {
+    let docPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
+    let fileManager = FileManager.default
+    do {
+        let filePath = docPath.appendingPathComponent(imagePath + filename + ".jpg")
+        try fileManager.removeItem(atPath: filePath)
+    } catch {
+        print("error:\(error)")
+    }
+}
+
+public func clearLocalGrubImages() {
+    let docPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
+    let fileManager = FileManager.default
+    do {
+        let dirPath = docPath.appendingPathComponent(imagePath)
+        let files = try fileManager.contentsOfDirectory(atPath: dirPath)
+        for filePath in files {
+            try fileManager.removeItem(atPath: dirPath + filePath)
+        }
+    } catch {
+        print("error:\(error)")
+    }
+}
+
+//MARK: - Data Functions
 public func loadLocalData() {
     if let data = loadPropertyList(URL(string: dataPath()), DataList.self) {
-        UserCookie.uc().setFoodList(data.foodList ?? [:] as [String: Grub])
-        UserCookie.uc().sortFoodListByDate()
         UserCookie.uc().setGhorblinName(data.ghorblinName)
         UserCookie.uc().setLinkToken(data.linkToken)
+        
+        DispatchQueue.main.async {
+            loadGrubImages()
+            UserCookie.uc().setFoodList(data.foodList ?? [:] as [String: Grub])
+            UserCookie.uc().sortFoodListByDate()
+        }
     }
 }
 
@@ -106,8 +178,11 @@ public func writeCloudData(_ key: DataListKeys, _ value: Any?) {
     }
 }
 
-//FoodList Functions
-public func appendLocalFood(_ key: String, _ foodItem: NSDictionary) {
+//MARK: - FoodList Functions
+public func appendLocalFood(_ key: String, _ foodItem: NSDictionary, _ image: UIImage? = nil) {
+    if image != nil {
+        writeLocalGrubImage(key, image: image!)
+    }
     if let rootDataDictionary = NSMutableDictionary(contentsOfFile: dataPath()) {
         (rootDataDictionary[DataListKeys.foodList.rawValue] as! NSDictionary).setValue(foodItem, forKey: key)
         rootDataDictionary.write(toFile: dataPath(), atomically: true)
@@ -120,7 +195,22 @@ public func appendCloudFood(_ key: String, _ foodItem: NSDictionary) {
     }
 }
 
+public func appendCloudFood(_ key: String, _ foodItem: NSDictionary, _ image: UIImage) {
+    let storage = Storage.storage().reference()
+    let imageRef = storage.child(imagePath + key + ".jpg")
+    imageRef.putData(image.jpegData(compressionQuality: 1)!, metadata: nil) { (metadata, error) in
+        guard error == nil else {
+            print("error:\(error!)")
+            return
+        }
+        
+        //Upload actual grub
+        appendCloudFood(key, foodItem)
+    }
+}
+
 public func removeLocalFood(_ key: String) {
+    removeLocalGrubImage(key)
     if let rootDataDictionary = NSMutableDictionary(contentsOfFile: dataPath()) {
         (rootDataDictionary[DataListKeys.foodList.rawValue] as! NSMutableDictionary).removeObject(forKey: key)
         rootDataDictionary.write(toFile: dataPath(), atomically: true)
@@ -133,14 +223,26 @@ public func removeCloudFood(_ key: String) {
     }
 }
 
-//Cloud Observers
+//MARK: - Cloud Observers
 public func onCloudFoodAdded(_ snapshot: DataSnapshot) {
-    if let foodItem = snapshot.value as? NSDictionary {
-        UserCookie.uc().appendFoodList(snapshot.key, Grub(foodItem))
-        UserCookie.uc().sortFoodListByDate()
-        appendLocalFood(snapshot.key, foodItem)
+    DispatchQueue.main.async {
+        let storage = Storage.storage().reference()
+        let imageRef = storage.child(imagePath + snapshot.key + ".jpg")
+        imageRef.getData(maxSize: .max) { (metadata, error) in
+            guard error == nil else {
+                print("error:\(error!)")
+                return
+            }
+            
+            if let foodItem = snapshot.value as? NSDictionary {
+                let image = UIImage(data: metadata!)!
+                UserCookie.uc().appendFoodList(snapshot.key, Grub(fid: snapshot.key, foodItem, image: image))
+                UserCookie.uc().sortFoodListByDate()
+                appendLocalFood(snapshot.key, foodItem, image)
+            }
+            UserCookie.uc().loadingStatus = .loaded
+        }
     }
-    UserCookie.uc().loadingStatus = .loaded
 }
 
 public func onCloudDataAdded(_ snapshot: DataSnapshot) {
@@ -181,7 +283,7 @@ public func onCloudDataRemoved(_ snapshot: DataSnapshot) {
 
 public func onCloudFoodChanged(_ snapshot: DataSnapshot) {
     if let foodItem = snapshot.value as? NSDictionary {
-        UserCookie.uc().appendFoodList(snapshot.key, Grub(foodItem))
+        UserCookie.uc().appendFoodList(snapshot.key, Grub(fid: snapshot.key, foodItem))
         UserCookie.uc().sortFoodListByDate()
         appendLocalFood(snapshot.key, foodItem)
     }
@@ -216,7 +318,7 @@ public func setObservers(uid: String) {
     ref.child("users").child(uid).child(DataListKeys.foodList.rawValue).observe(DataEventType.childChanged, with: onCloudFoodChanged)
 }
 
-//User Login/Logout
+//MARK: - User Login/Logout
 public func onLogin() {
     if let uid = Auth.auth().currentUser?.uid {
         setObservers(uid: uid)
@@ -251,6 +353,7 @@ public func onLogout() {
         UserCookie.uc().setGhorblinName(nil)
         UserCookie.uc().loadingStatus = LoadingStatus.loading
         clearLocalData()
+        clearLocalGrubImages()
         
         GFormText.reset()
         KeyboardObserver.reset()
@@ -259,7 +362,7 @@ public func onLogout() {
     }
 }
 
-//Profile Changes
+//MARK: - Profile Changes
 public func createAccount(email: String, pass: String, displayName: String, _ finishedWithError: @escaping (NSError?) -> Void) {
     Auth.auth().createUser(withEmail: email, password: pass) { user, error in
         if let error = error as NSError? {
@@ -318,7 +421,7 @@ public func changePassword(old: String, new: String, _ finishedWithError: @escap
     }
 }
 
-//Images
+//MARK: - Photo Library
 public func loadImages() {
     let authorized: Bool = PHPhotoLibrary.authorizationStatus() == PHAuthorizationStatus.authorized
     AddImageCookie.aic().libraryAuthorized = authorized

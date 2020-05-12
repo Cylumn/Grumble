@@ -17,11 +17,12 @@ public class AddFoodCookie: ObservableObject {
     private static var instance: AddFoodCookie? = nil
     @Published public var currentFID: String? = nil
     @Published public var tags: [GrubTag: Double] = [food: 1]
+    public var image: UIImage? = nil
     
-    public var presentAddImage: (Bool) -> Void
+    public var presentAddImage: (Bool, Bool) -> Void
     
     private init() {
-        self.presentAddImage = { _ in }
+        self.presentAddImage = { _, _ in }
     }
     
     public static func afc() -> AddFoodCookie {
@@ -117,28 +118,31 @@ public struct AddFood: View, GFieldDelegate {
         switch self.afc.currentFID {
         case nil:
             foodItem["date"] = getDate()
-            let foodDictionary = foodItem as NSDictionary
             let date = dateComponent()
-            
             let prefix = String(trim(foodItem["food"] as! String).lowercased().prefix(3))
             let fid = prefix + randomString(length: 4) + String(date.hour!) + "_" + String(date.minute!) + "_" + String(date.second!)
-            self.uc.appendFoodList(fid, Grub(foodDictionary))
-            self.uc.sortFoodListByDate()
-            appendLocalFood(fid, foodDictionary)
-            appendCloudFood(fid, foodDictionary)
-        default:
-            foodItem["date"] = UserCookie.uc().foodList()[self.afc.currentFID!]!.date
+            foodItem["fid"] = fid
             let foodDictionary = foodItem as NSDictionary
             
-            self.uc.appendFoodList(self.afc.currentFID!, Grub(foodDictionary))
+            self.uc.appendFoodList(fid, Grub(fid: fid, foodDictionary, image: self.afc.image!))
+            self.uc.sortFoodListByDate()
+            appendLocalFood(fid, foodDictionary)
+            appendCloudFood(fid, foodDictionary, self.afc.image!)
+        default:
+            foodItem["date"] = UserCookie.uc().foodList()[self.afc.currentFID!]!.date
+            foodItem["fid"] = self.afc.currentFID!
+            let foodDictionary = foodItem as NSDictionary
+            
+            self.uc.appendFoodList(self.afc.currentFID!, Grub(fid: self.afc.currentFID!, foodDictionary))
             self.uc.sortFoodListByDate()
             appendLocalFood(self.afc.currentFID!, foodDictionary)
             appendCloudFood(self.afc.currentFID!, foodDictionary)
         }
-        self.afc.presentAddImage(false)
+        self.afc.presentAddImage(false, false)
         self.toListHome()
         
         AddFood.clearFields()
+        self.afc.image = nil
     }
     
     //Parsing Methods

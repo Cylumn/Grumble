@@ -57,8 +57,6 @@ public struct GTagIcon: View {
     
     public enum UniqueID {
         case tagBox
-        case listBox
-        case grubSheet
     }
     
     public var body: some View {
