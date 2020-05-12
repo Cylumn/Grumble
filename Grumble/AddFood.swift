@@ -16,7 +16,7 @@ private let tagTitleHeight: CGFloat = sHeight() * 0.08
 public class AddFoodCookie: ObservableObject {
     private static var instance: AddFoodCookie? = nil
     @Published public var currentFID: String? = nil
-    @Published public var tags: Set<Int> = [0]
+    @Published public var tags: [GrubTag: Double] = [food: 1]
     
     public var presentAddImage: (Bool) -> Void
     
@@ -93,7 +93,7 @@ public struct AddFood: View, GFieldDelegate {
         GFormText.gft(formID).setText(FieldIndex.price.rawValue, "")
         GFormText.gft(formID).setText(FieldIndex.restaurant.rawValue, "")
         GFormText.gft(formID).setText(FieldIndex.address.rawValue, "")
-        AddFoodCookie.afc().tags = [0]
+        AddFoodCookie.afc().tags = [food : 1]
         AddFoodCookie.afc().currentFID = nil
     }
     
@@ -104,13 +104,16 @@ public struct AddFood: View, GFieldDelegate {
         foodItem["price"] = parsePriceField(self.gft.text(FieldIndex.price.rawValue))
         foodItem["restaurant"] = !self.gft.text(FieldIndex.restaurant.rawValue).isEmpty ? self.gft.text(FieldIndex.restaurant.rawValue) : nil
         foodItem["address"] = !self.gft.text(FieldIndex.address.rawValue).isEmpty ? self.gft.text(FieldIndex.address.rawValue) : nil
-
-        var tagDictionary: [String: Int] = [:]
-        for tag in self.afc.tags.sorted() {
-            tagDictionary[tagTitles[tag]] = tag
+        foodItem["tags"] = self.afc.tags
+        
+        var priorityTag: (String, Double) = (food, 0)
+        for tag in self.afc.tags {
+            if tag.key != food && tag.value > priorityTag.1 {
+                priorityTag.0 = tag.key
+                priorityTag.1 = tag.value
+            }
         }
-        tagDictionary["smallestTag"] = self.afc.tags.filter({ $0 != 0 }).sorted().first ?? 0
-        foodItem["tags"] = tagDictionary
+        foodItem["priorityTag"] = priorityTag.0
         switch self.afc.currentFID {
         case nil:
             foodItem["date"] = getDate()
@@ -275,19 +278,17 @@ public struct AddFood: View, GFieldDelegate {
     }
     
     private struct TagBox: View {
-        private static var instances: [Int: TagBox] = [:]
+        private static var instances: [GrubTag: TagBox] = [:]
         fileprivate static var width: CGFloat = sWidth() * sWidth() * 0.001
         fileprivate static var height: CGFloat = width * 1.0
-        private var name: String
-        private var id: Int
+        private var id: GrubTag
         
         //Initializer
-        private init(id: Int) {
-            self.name = capFirst(tagTitles[id])
+        private init(id: GrubTag) {
             self.id = id
         }
         
-        public static func box(id: Int) -> TagBox {
+        public static func box(id: GrubTag) -> TagBox {
             if TagBox.instances[id] == nil {
                 TagBox.instances[id] = TagBox(id: id)
             }
@@ -295,7 +296,7 @@ public struct AddFood: View, GFieldDelegate {
         }
         
         //Getters
-        public func tag() -> Int {
+        public func tag() -> GrubTag {
             return self.id
         }
         
@@ -304,27 +305,28 @@ public struct AddFood: View, GFieldDelegate {
                 ZStack(alignment: .bottom) {
                     GTagIcon.icon(tag: self.id, id: .tagBox, size: CGSize(width: TagBox.width, height: TagBox.height))
                     
-                    LinearGradient(gradient: Gradient(colors: [tagColors[self.id].opacity(0), tagColors[self.id]]), startPoint: .top, endPoint: .bottom)
+                    LinearGradient(gradient: Gradient(colors: [gTagColors[self.id]!.opacity(0), gTagColors[self.id]!]),
+                                   startPoint: .top, endPoint: .bottom)
                         .frame(height: TagBox.height * 0.5)
                 }.frame(width: TagBox.width, height: TagBox.height)
                 .cornerRadius(20)
-                .shadow(color: tagColors[self.id].opacity(0.5), radius: 8, y: 10)
+                .shadow(color: gTagColors[self.id]!.opacity(0.5), radius: 8, y: 10)
                 
                 ZStack(alignment: .bottom) {
                     Color.clear
                     
-                    Text(self.name)
+                    Text(capFirst(self.id))
                         .font(gFont(.ubuntuBold, .width, 3))
                         .foregroundColor(Color.white)
                         .padding(10)
                 }
                 
-                if self.name != "Food" {
+                if self.id != food {
                     ZStack(alignment: .topTrailing) {
                         Color.clear
                         
                         Button(action: {
-                            AddFoodCookie.afc().tags.remove(self.id)
+                            AddFoodCookie.afc().tags[self.id] = nil
                         }, label: {
                             Image(systemName: "multiply")
                                 .padding(4)
@@ -366,7 +368,9 @@ public struct AddFood: View, GFieldDelegate {
     }
     
     public var body: some View {
-        let sortedTags: [Int] = self.afc.tags.sorted()
+        var sortedTags: [GrubTag] = self.afc.tags.keys.sorted()
+        sortedTags.remove(at: sortedTags.firstIndex(of: food)!)
+        sortedTags.insert(food, at: 0)
         
         return ZStack(alignment: .topLeading) {
             gColor(.blue0)

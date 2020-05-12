@@ -11,6 +11,8 @@ import UIKit
 import Vision
 import CoreML
 
+public let minConfidence: Double = 0.5
+
 public class GTagLabeler {
     private static var instance: GTagLabeler? = nil
     private var model: VNCoreMLModel?
@@ -30,7 +32,7 @@ public class GTagLabeler {
         return GTagLabeler.instance!
     }
     
-    public func predict(image: CGImage, onComplete: @escaping ([Int]) -> Void) {
+    public func predict(image: CGImage, onComplete: @escaping ([GrubTag: Double]) -> Void) {
         let request = VNCoreMLRequest(model: self.model!) { request, error in
             guard error == nil else {
                 print("error:\(error!)")
@@ -39,10 +41,13 @@ public class GTagLabeler {
             //Perform on main thread
             DispatchQueue.main.async {
                 let results: [VNClassificationObservation] = request.results as! [VNClassificationObservation]
-                print("\n\n---------[BEGIN RESULTS]-----------")
+                var returnTags: [GrubTag: Double] = [:]
                 for result in results {
-                    print(result.identifier.lowercased() + ": " + result.confidence.description)
+                    if Double(result.confidence) >= minConfidence {
+                        returnTags[result.identifier.lowercased()] = Double(result.confidence)
+                    }
                 }
+                onComplete(returnTags)
             }
         }
         

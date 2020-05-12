@@ -278,7 +278,7 @@ public struct GrumbleSheet: View {
                                         y: sHeight() * (-0.08 + 0.01 * self.dragData()) + sHeight() * 0.3 * self.chosenGrubData)
                                 .scaleEffect(1 + 2 * self.chosenGrubData)
                             
-                            self.tagIcon(self.grub(index)!.tags["smallestTag"]!, index: index)
+                            self.tagIcon(self.grub(index)!.priorityTag, index: index)
                                 .rotationEffect(self.grubRotation(index))
                                 .offset(x: self.grubOffsetX(index), y: sHeight() * (-0.12 + (isX() ? 0.005 : 0)) + self.grubOffsetY(index) + self.chosenGrubOffsetY())
                                 .scaleEffect(1 + 2 * self.chosenGrubData)
@@ -302,7 +302,7 @@ public struct GrumbleSheet: View {
             Gradient(stops: gradientStops), startPoint: .top, endPoint: .bottom)
     }
     
-    private func tagIcon(_ tag: Int, index: Int) -> some View {
+    private func tagIcon(_ tag: GrubTag, index: Int) -> some View {
         let size = sWidth() * (0.18 + 0.1 * self.dragData())
         return gTagView(tag, CGSize(width: size, height: size), idleData: self.ga.idleData, tossData: self.dragHorizontalData(index))
     }

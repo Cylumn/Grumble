@@ -96,15 +96,12 @@ public struct GrubSheet: View {
     }
     
     private var editButton: some View {
-        var tags = self.grub!.tags
-        tags["smallestTag"] = nil
-        
         return Button(action: {
             GFormText.gft(.addFood).setText(AddFood.FieldIndex.food.rawValue, self.grub!.food)
             GFormText.gft(.addFood).setText(AddFood.FieldIndex.price.rawValue, self.grub!.price == nil ? "" : "$" + String(format:"%.2f", self.grub!.price!))
             GFormText.gft(.addFood).setText(AddFood.FieldIndex.restaurant.rawValue, self.grub!.restaurant ?? "")
             GFormText.gft(.addFood).setText(AddFood.FieldIndex.address.rawValue, self.grub!.address ?? "")
-            AddFoodCookie.afc().tags = Set(tags.values)
+            AddFoodCookie.afc().tags = self.grub!.tags
             
             self.toAddFood(self.selectedFID!)
         }, label: {
@@ -179,21 +176,21 @@ public struct GrubSheet: View {
     }
     
     private var tagBuilder: some View {
-        var tags = self.grub!.tags
-        tags["smallestTag"] = nil
-        let tagIDs = tags.values.sorted()
+        var tags = self.grub!.tags.keys.sorted()
+        tags.remove(at: tags.firstIndex(of: food)!)
+        tags.insert(food, at: 0)
         
         return VStack(alignment: .center, spacing: tagBuilderPadding) {
-            ForEach(0 ... tagIDs.count / 3, id: \.self) { line in
+            ForEach(0 ... tags.count / 3, id: \.self) { line in
                 HStack(spacing: tagBuilderPadding) {
-                    ForEach(line * 3 ..< min((line + 1) * 3, tagIDs.count), id: \.self) { index in
-                            Text(tagTitles[tagIDs[index]])
+                    ForEach(line * 3 ..< min((line + 1) * 3, tags.count), id: \.self) { index in
+                            Text(tags[index])
                             .padding([.leading, .trailing], 15)
                             .padding(5)
                             .frame(height: tagBuilderHeight)
                             .background(Color.white)
                             .font(gFont(.ubuntuMedium, .width, 2))
-                            .foregroundColor(tagColors[tagIDs[index]])
+                            .foregroundColor(gTagColors[tags[index]])
                             .cornerRadius(20)
                     }
                 }
@@ -206,7 +203,7 @@ public struct GrubSheet: View {
             self.editButton
                 .frame(height: editHeight)
                 .background(Color.white)
-                .foregroundColor(tagColors[self.grub!.tags["smallestTag"]!])
+                .foregroundColor(gTagColors[self.grub!.priorityTag])
                 .font(gFont(.ubuntuMedium, .width, 2.5))
                 .cornerRadius(10)
             
@@ -248,14 +245,12 @@ public struct GrubSheet: View {
     }
     
     private var sheet: some View {
-        let smallestTag = self.grub!.tags["smallestTag"]!
-        
-        return ZStack(alignment: .topTrailing) {
+        ZStack(alignment: .topTrailing) {
             ZStack(alignment: .top) {
-                tagColors[smallestTag]
+                gTagColors[self.grub!.priorityTag]
                     .edgesIgnoringSafeArea(.all)
                 
-                GTagIcon.icon(tag: smallestTag, id: .grubSheet, size: CGSize(width: sWidth(), height: sHeight() * baseImageFraction + safeAreaInset(.top) + safeImagePadding * 2))
+                GTagIcon.icon(tag: self.grub!.priorityTag, id: .grubSheet, size: CGSize(width: sWidth(), height: sHeight() * baseImageFraction + safeAreaInset(.top) + safeImagePadding * 2))
                     .scaleEffect(x: max(self.imageFraction / baseImageFraction, 0.8), y: max(self.imageFraction / baseImageFraction, 0.8), anchor: UnitPoint.top)
                     .offset(y: -safeAreaInset(.top))
             }.frame(width: sWidth())
@@ -290,7 +285,7 @@ public struct GrubSheet: View {
                     .font(.system(size: 30))
             }).disabled(self.imageFraction == minDragFraction)
             
-            tagColors[smallestTag]
+            gTagColors[self.grub!.priorityTag]
                 .edgesIgnoringSafeArea(.all)
                 .opacity(1 - Double(min((self.imageFraction - minDragFraction) * 10, 1)))
             

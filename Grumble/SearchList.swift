@@ -29,9 +29,7 @@ public struct SearchList: View, GFieldDelegate {
             return true
         }
         
-        var tags = grub.tags
-        tags["smallestTag"] = nil
-        for tag in tags {
+        for tag in grub.tags {
             if tag.key.contains(text) {
                 return true
             }

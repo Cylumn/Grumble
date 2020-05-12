@@ -141,6 +141,7 @@ public struct AddImage: View {
     }
     
     private func onNext() {
+        self.presentLoading = true
         let uiImage = self.aic.image!
         let targetRatio: CGFloat = max(grubImageSize.width / imageWidth(), grubImageSize.height / imageHeight())
         let targetSize: CGSize = CGSize(width: Int(imageWidth() * targetRatio), height: Int(imageHeight() * targetRatio))
@@ -150,12 +151,6 @@ public struct AddImage: View {
         let scaled = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         var cgImage: CGImage = scaled!.cgImage!
-        
-        print(targetSize.debugDescription + ", "+scaled!.size.debugDescription)
-        print(CGRect(x: (CGFloat(cgImage.width) - grubImageSize.width) * 0.5 * targetRatio,
-        y: ((CGFloat(cgImage.height) - grubImageSize.height) * 0.5 + CropImageCookie.cic().dragOffset) * targetRatio,
-        width: grubImageSize.width,
-        height: grubImageSize.height))
         
         switch self.aic.tab {
         case .capture:
@@ -174,9 +169,14 @@ public struct AddImage: View {
                                                   width: grubImageSize.width,
                                                   height: grubImageSize.height))!
         }
-        /*GTagLabeler.gtl().predict(image: self.aic.image!.cgImage!) { _ in
+        
+        GTagLabeler.gtl().predict(image: self.aic.image!.cgImage!) { tags in
             self.toAddFood(nil)
-        }*/
+            var newTags = tags
+            newTags[food] = 1
+            AddFoodCookie.afc().tags = newTags
+            self.presentLoading = false
+        }
     }
     
     private var header: some View {
@@ -453,6 +453,17 @@ public struct AddImage: View {
                     .background(Color(white: 0.2))
             }
             
+            if self.presentLoading {
+                ZStack {
+                    Color(white: 0.98)
+                    
+                    Text("Processing Image ...")
+                        .font(gFont(.ubuntuLight, .width, 4))
+                        .foregroundColor(Color(white: 0.2))
+                        .position(x: sWidth() * 0.5, y: navBarHeight + 0.5 * (self.aic.tab == .capture ? cameraHeight : sWidth() * grubImageAspectRatio))
+                }
+            }
+            
             ZStack(alignment: .bottom) {
                 Color.clear
                 
@@ -499,16 +510,6 @@ public struct AddImage: View {
                 }).frame(width: ImageViewController.buttonSize, height: ImageViewController.buttonSize)
                 .foregroundColor(AddImage.textColor)
                 .position(x: sWidth() * 0.5, y: sHeight() + ImageViewController.buttonOffset - tabHeight)
-            }
-            
-            if self.presentLoading {
-                ZStack {
-                    Color(white: 0.98)
-                    
-                    Text("Processing Image ...")
-                        .font(gFont(.ubuntuLight, .width, 4))
-                        .foregroundColor(Color(white: 0.2))
-                }
             }
         }
     }

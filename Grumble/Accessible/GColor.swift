@@ -19,11 +19,20 @@ public enum GColor: String {
     case blue3 = "Teal"
     case blue4 = "Turquoise"
     
-    //Rainbow Colors
+    //TagColors in order
+    case pumpkin = "Pumpkin"
     case dandelion = "Dandelion"
-    case neon = "Neon"
-    case magenta = "Magenta"
+    case indigo = "Indigo"
     case coral = "Coral"
+    case yolk = "Yolk"
+    case poppy = "Poppy"
+    case grass = "Grass"
+    case crimson = "Crimson"
+    case cerulean = "Cerulean"
+    case dew = "Dew"
+    case neon = "Neon"
+    case wolfsbane = "Wolfsbane"
+    case magenta = "Magenta"
     
     //TurquoiseFoam? WTF is this
     case lightTurquoise = "TurquoiseFoam"

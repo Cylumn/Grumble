@@ -33,19 +33,19 @@ public protocol GTag: View {
 }
 
 public struct GTagIcon: View {
-    private static var instances: [UniqueID: [Int: GTagIcon]] = [:]
-    private var tag: Int
+    private static var instances: [UniqueID: [GrubTag: GTagIcon]] = [:]
+    private var tag: GrubTag
     private var size: CGSize
     private var iconSize: CGSize
     
-    fileprivate init(tag: Int, size: CGSize) {
+    fileprivate init(tag: GrubTag, size: CGSize) {
         self.tag = tag
         self.size = size
         let dimension = min(size.width, size.height)
         self.iconSize = CGSize(width: 0.65 * dimension, height: 0.65 * dimension)
     }
     
-    public static func icon(tag: Int, id: UniqueID, size: CGSize) -> GTagIcon {
+    public static func icon(tag: GrubTag, id: UniqueID, size: CGSize) -> GTagIcon {
         if GTagIcon.instances[id] == nil {
             GTagIcon.instances[id] = [:]
         }
@@ -63,7 +63,7 @@ public struct GTagIcon: View {
     
     public var body: some View {
         ZStack {
-            tagColors[self.tag]
+            gTagColors[self.tag]
             
             ZStack {
                 Image("GhorblinPlate")
@@ -94,6 +94,6 @@ internal extension String {
 
 struct GTagShape_Previews: PreviewProvider {
     static var previews: some View {
-        GTagIcon(tag: 0, size: CGSize(width: 200, height: 150))
+        GTagIcon(tag: food, size: CGSize(width: 200, height: 150))
     }
 }

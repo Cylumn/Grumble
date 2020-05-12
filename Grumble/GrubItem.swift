@@ -29,13 +29,11 @@ public struct GrubItem: View {
     private var lc: ListCookie = ListCookie.lc()
     fileprivate var fid: String
     fileprivate var grub: Grub
-    private var smallestTag: Int
     
     //Initializer
     public init(fid: String, _ grub: Grub) {
         self.fid = fid
         self.grub = grub
-        self.smallestTag = self.grub.tags["smallestTag"]!
     }
     
     //Getter Methods
@@ -60,9 +58,9 @@ public struct GrubItem: View {
         VStack(alignment: .leading, spacing: 5) {
             Button(action: {}, label: {
                 ZStack(alignment: .bottom) {
-                    Rectangle().fill(tagColors[self.smallestTag])
+                    Rectangle().fill(gTagColors[self.grub.priorityTag]!)
                     
-                    GTagIcon.icon(tag: self.smallestTag, id: .listBox, size: CGSize(width: 200, height: 150))
+                    GTagIcon.icon(tag: self.grub.priorityTag, id: .listBox, size: CGSize(width: 200, height: 150))
                     
                     HStack(alignment: .bottom) {
                         Text(self.grub.food)
@@ -79,7 +77,7 @@ public struct GrubItem: View {
                                 .font(gFont(.ubuntuBold, .width, textSize(self.grub.food)))
                                 .foregroundColor(Color.white)
                         }
-                    }.background(LinearGradient(gradient: Gradient(colors: [tagColors[self.smallestTag].opacity(0), tagColors[self.smallestTag]]), startPoint: .top, endPoint: .bottom))
+                    }.background(LinearGradient(gradient: Gradient(colors: [gTagColors[self.grub.priorityTag]!.opacity(0), gTagColors[self.grub.priorityTag]!]), startPoint: .top, endPoint: .bottom))
                 }.frame(width: 200, height: 150)
                 .cornerRadius(10)
                 .onTapGesture {
@@ -88,7 +86,7 @@ public struct GrubItem: View {
                     self.onClick()
                 }
             }).buttonStyle(PlainButtonStyle())
-            .shadow(color: tagColors[self.grub.tags["smallestTag"]!].opacity(0.2), radius: 10, y: 10)
+                .shadow(color: gTagColors[self.grub.priorityTag]!.opacity(0.2), radius: 10, y: 10)
             
             Text(self.grub.restaurant ?? " ")
                 .padding([.top, .leading], 10)
@@ -115,21 +113,20 @@ public struct GrubSearchItem: View {
     }
     
     //Getter Methods
-    public func shownIDs() -> [Int] {
-        var tags = self.item.grub.tags
-        tags["smallestTag"] = nil
-        var shownIDs: [Int] = []
+    public func shownIDs() -> [GrubTag] {
+        var sorted = self.item.grub.tags.sorted(by: { $0.0 > $1.0 })
+        sorted.remove(at: sorted.firstIndex(where: { $0.0 == food })!)
+        sorted.append((food, 0))
+        var shownIDs: [(GrubTag, Double)] = []
         if GFormText.gft(.filterList).text(0).isEmpty {
-            let sorted = tags.values.sorted()
             for index in (sorted.count < 3 ? 0 : 1) ..< min(sorted.count, 3) {
                 shownIDs.append(sorted[index])
             }
         } else {
             let token = GFormText.gft(.filterList).text(0).lowercased()
-            let sorted = tags.values.sorted()
             //add all that contains search key
             for id in sorted {
-                if tagTitles[id].contains(token) {
+                if id.key.contains(token) {
                     shownIDs.append(id)
                     
                     if shownIDs.count == 2 {
@@ -147,9 +144,9 @@ public struct GrubSearchItem: View {
             case 1:
                 var index = (sorted.count < 3 ? 0 : 1)
                 while index < min(sorted.count, 3) && shownIDs.count < 2 {
-                    if sorted[index] < shownIDs[0] {
+                    if sorted[index].value < shownIDs[0].1 {
                         shownIDs.insert(sorted[index], at: 0)
-                    } else if sorted[index] > shownIDs[0] {
+                    } else if sorted[index].value > shownIDs[0].1 {
                         shownIDs.append(sorted[index])
                     }
                     
@@ -159,7 +156,12 @@ public struct GrubSearchItem: View {
                 break
             }
         }
-        return shownIDs
+        
+        var shownTags: [GrubTag] = []
+        for tag in shownIDs {
+            shownTags.append(tag.0)
+        }
+        return shownTags
     }
     
     private func tokenText(_ text: String) -> some View {
@@ -172,7 +174,7 @@ public struct GrubSearchItem: View {
     }
     
     public var body: some View {
-        let shownIDs: [Int] = self.shownIDs()
+        let shownIDs: [GrubTag] = self.shownIDs()
         
         return HStack(spacing: 20) {
             VStack(alignment: .leading, spacing: 10) {
@@ -181,8 +183,8 @@ public struct GrubSearchItem: View {
                     .lineLimit(1)
                     
                 HStack(spacing: 10) {
-                    ForEach(shownIDs, id: \.self) { index in
-                        self.tokenText(tagTitles[index])
+                    ForEach(shownIDs, id: \.self) { tag in
+                        self.tokenText(tag)
                     }
                 }
             }

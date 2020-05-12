@@ -13,14 +13,14 @@ private let formID: GFormID = GFormID.searchTag
 public struct SearchTag: View, GFieldDelegate {
     @ObservedObject private var gft: GFormText = GFormText.gft(formID)
     @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
-    @State private var available: Set<Int> = Set(1 ..< tagTitles.count)
-    @State private var selected: Set<Int> = []
-    private var added: Set<Int>
+    @State private var available: Set<GrubTag> = Set(gTags.dropFirst())
+    @State private var selected: Set<GrubTag> = []
+    private var added: Set<GrubTag>
     private var isPresented: Binding<Bool>
     
     //Initializer
     public init(_ isPresented: Binding<Bool>) {
-        self.added = AddFoodCookie.afc().tags
+        self.added = Set(AddFoodCookie.afc().tags.keys)
         self.isPresented = isPresented
     }
     
@@ -32,7 +32,7 @@ public struct SearchTag: View, GFieldDelegate {
             }
 
             self.selected.removeAll()
-            self.available = Set(1 ..< tagTitles.count)
+            self.available = Set(gTags.dropFirst())
             self.gft.setText(0, "")
             
             UIApplication.shared.endEditing()
@@ -55,22 +55,22 @@ public struct SearchTag: View, GFieldDelegate {
     public func parseInput(_ index: Int, _ textField: UITextField, _ string: String) -> String {
         let token = textField.text! + string
         if token.count > 0 {
-            var available: Set<Int> = []
-            for title in tagTitles {
-                if title != tagTitles[0] && title.contains(token.lowercased()) {
-                    available.insert(tagIDMap[title]!)
+            var available: Set<GrubTag> = []
+            for title in gTags.dropFirst() {
+                if title.contains(token.lowercased()) {
+                    available.insert(title)
                 }
             }
             self.available = available
         } else {
-            self.available = Set(1 ..< tagTitles.count)
+            self.available = Set(gTags.dropFirst())
         }
         return textField.text! + string
     }
     
     public var body: some View {
         ZStack(alignment: .top) {
-            Color(white: 0.97)
+            Color(white: 0.95)
             
             if self.isPresented.wrappedValue {
                 ScrollView {
@@ -84,7 +84,7 @@ public struct SearchTag: View, GFieldDelegate {
                                 .offset(y: -5)
                         }
                         
-                        ForEach((1 ..< tagTitles.count).filter({
+                        ForEach(gTags.dropFirst().filter({
                             self.available.contains($0) && !self.added.contains($0)
                         }), id: \.self) { tag in
                             Button(action: {
@@ -98,9 +98,9 @@ public struct SearchTag: View, GFieldDelegate {
                                     Color.white
                                     
                                     HStack(spacing: nil) {
-                                        Text(capFirst(tagTitles[tag]))
+                                        Text(capFirst(tag))
                                             .font(gFont(.ubuntuLight, 15))
-                                            .foregroundColor(tagColors[tag])
+                                            .foregroundColor(gTagColors[tag])
                                         
                                         Spacer()
                                         
@@ -111,7 +111,7 @@ public struct SearchTag: View, GFieldDelegate {
                                     .foregroundColor(Color(white: 0.2))
                                 }.frame(height: 45)
                                 .cornerRadius(10)
-                                .shadow(color: Color.black.opacity(0.1), radius: 5)
+                                //.shadow(color: Color.black.opacity(0.1), radius: 5)
                             }).padding([.leading, .trailing], 15)
                         }
                         
@@ -144,15 +144,19 @@ public struct SearchTag: View, GFieldDelegate {
                             .foregroundColor(gColor(.blue0))
                     })
                 }
-            }.frame(height: 60)
-            .padding(.top, 5)
+            }.padding(.top, 5)
+            .frame(height: 60)
             .cornerRadius(5)
             
             ZStack(alignment: .bottomTrailing) {
                 Color.clear
 
                 Button(action: {
-                    AddFoodCookie.afc().tags = AddFoodCookie.afc().tags.union(self.selected)
+                    var tags: [GrubTag: Double] = AddFoodCookie.afc().tags
+                    for tag in self.selected {
+                        tags[tag] = 1
+                    }
+                    AddFoodCookie.afc().tags = tags
                     self.endSearch()
                 }, label:{
                     Text("Add Tags")

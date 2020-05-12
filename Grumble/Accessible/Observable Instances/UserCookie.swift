@@ -10,33 +10,57 @@ import Foundation
 import SwiftUI
 import Firebase
 
-public let tagTitles: [String] = ["food", "burger", "salad", "soup"]
-public let tagColors: [Color] = [gColor(.blue2),
-                                        gColor(.dandelion),
-                                        gColor(.neon),
-                                        gColor(.magenta)]
-public var tagIDMap: [String: Int] {
-    var map = [:] as [String: Int]
-    for index in 0 ..< tagTitles.count {
-        map[tagTitles[index]] = index
-    }
-    return map
-}
-private let gTagIcons: [(CGSize, CGFloat, CGFloat) -> AnyView] =
-    [GFood.genericInit,
-     GBurger.genericInit,
-     GSalad.genericInit,
-     GSoup.genericInit]
-public func gTagView(_ tag: Int, _ boundingSize: CGSize, idleData: CGFloat, tossData: CGFloat) -> AnyView {
-    return (gTagIcons[tag])(boundingSize, idleData, tossData)
-}
+public typealias GrubTag = String
+public let food: GrubTag = "food"
+public let bread: GrubTag = "bread"
+public let burger: GrubTag = "burger"
+public let dairy: GrubTag = "dairy"
+public let dessert: GrubTag = "dessert"
+public let egg: GrubTag = "egg"
+public let fried: GrubTag = "fried"
+public let fruit: GrubTag = "fruit"
+public let grain: GrubTag = "grain"
+public let meat: GrubTag = "meat"
+public let noodles: GrubTag = "noodles"
+public let salad: GrubTag = "salad"
+public let seafood: GrubTag = "seafood"
+public let soup: GrubTag = "soup"
+public let gTags: [GrubTag] = [food, bread, burger, dairy, dessert, egg, fried, fruit, grain, meat, noodles, salad, seafood, soup]
 
-//deprecate in the future
-public enum GrubTags: Int {
-    case food = 0
-    case burger = 1
-    case salad = 2
-    case soup = 3
+public let gTagColors: [GrubTag: Color] =
+    [food: gColor(.blue2),
+     bread: gColor(.pumpkin),
+     burger: gColor(.dandelion),
+     dairy: gColor(.indigo),
+     dessert: gColor(.coral),
+     egg: gColor(.yolk),
+     fried: gColor(.poppy),
+     fruit: gColor(.grass),
+     grain: gColor(.dew),
+     meat: gColor(.crimson),
+     noodles: gColor(.cerulean),
+     salad: gColor(.neon),
+     seafood: gColor(.wolfsbane),
+     soup: gColor(.magenta)]
+
+private let gTagIcons: [GrubTag: (CGSize, CGFloat, CGFloat) -> AnyView] =
+    [food: GFood.genericInit,
+     bread: GFood.genericInit,
+     burger: GBurger.genericInit,
+     dairy: GFood.genericInit,
+     dessert: GFood.genericInit,
+     egg: GFood.genericInit,
+     fried: GFood.genericInit,
+     fruit: GFood.genericInit,
+     grain: GFood.genericInit,
+     meat: GFood.genericInit,
+     noodles: GFood.genericInit,
+     salad: GSalad.genericInit,
+     seafood: GFood.genericInit,
+     soup: GSoup.genericInit]
+
+public func gTagView(_ tag: GrubTag, _ boundingSize: CGSize, idleData: CGFloat, tossData: CGFloat) -> AnyView {
+    return gTagIcons[tag]!(boundingSize, idleData, tossData)
 }
 
 public struct Grub: Decodable {
@@ -44,7 +68,8 @@ public struct Grub: Decodable {
     public var price: Double?
     public var restaurant: String?
     public var address: String?
-    public var tags: [String: Int]
+    public var tags: [GrubTag: Double]
+    public var priorityTag: GrubTag
     public var date: String
     
     //Initializer
@@ -53,7 +78,8 @@ public struct Grub: Decodable {
         self.price = foodItem?.value(forKey: "price") as? Double
         self.restaurant = foodItem?.value(forKey: "restaurant") as? String
         self.address = foodItem?.value(forKey: "address") as? String
-        self.tags = foodItem?.value(forKey: "tags") as! [String: Int]
+        self.tags = foodItem?.value(forKey: "tags") as! [GrubTag: Double]
+        self.priorityTag = foodItem?.value(forKey: "priorityTag") as! GrubTag
         self.date = foodItem?.value(forKey: "date") as! String
     }
     
@@ -88,8 +114,9 @@ public struct Grub: Decodable {
         grubTest["price"] = 10.0
         grubTest["restaurant"] = "Ippudo"
         grubTest["address"] = "Saratoga Avenue"
-        let tags = ["food": 0, "soup": 3, "smallestTag" : 3]
+        let tags = ["food": 1, soup: 1]
         grubTest["tags"] = tags
+        grubTest["priorityTag"] = soup
         grubTest["date"] = getDate()
         
         return Grub(grubTest as NSDictionary)
