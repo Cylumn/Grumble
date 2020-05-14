@@ -380,7 +380,7 @@ public struct AddFood: View, GFieldDelegate {
             
             Color(white: 0.98)
                 .edgesIgnoringSafeArea(.bottom)
-            /*
+            
             VStack(alignment: .leading, spacing: 0) {
                 self.header
                     .padding(10)
@@ -433,7 +433,7 @@ public struct AddFood: View, GFieldDelegate {
             self.searchTag
                 .frame(width: self.presentSearchWidth(), height: self.presentSearchHeight())
                 .cornerRadius(self.presentSearchTag ? 0 : 30)
-                .offset(self.presentSearchOffset())*/
+                .offset(self.presentSearchOffset())
         }.onTapGesture {
             if !self.presentSearchTag {
                 UIApplication.shared.endEditing()
