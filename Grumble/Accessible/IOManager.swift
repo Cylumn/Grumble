@@ -97,15 +97,17 @@ public func grubImage(_ filename: String) -> UIImage {
 }
 
 public func writeLocalGrubImage(_ filename: String, image: UIImage) {
-    let docPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
-    let docURL = URL(fileURLWithPath: docPath as String)
-    let fileURL = docURL.appendingPathComponent(imagePath + filename + ".jpg")
-    if let data = image.jpegData(compressionQuality:  1.0) {
-        do {
-            // writes the image data to disk
-            try data.write(to: fileURL, options: .atomic)
-        } catch {
-            print("error:\(error)")
+    DispatchQueue.global(qos: .utility).async {
+        let docPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
+        let docURL = URL(fileURLWithPath: docPath as String)
+        let fileURL = docURL.appendingPathComponent(imagePath + filename + ".jpg")
+        if let data = image.jpegData(compressionQuality:  1.0) {
+            do {
+                // writes the image data to disk
+                try data.write(to: fileURL, options: .atomic)
+            } catch {
+                print("error:\(error)")
+            }
         }
     }
 }
@@ -173,9 +175,11 @@ public func loadLocalData(_ key: DataListKeys) -> Any? {
 }
 
 public func writeLocalData(_ key: DataListKeys, _ value: Any?) {
-    if let rootDataDictionary = NSMutableDictionary(contentsOfFile: dataPath()) {
-        rootDataDictionary.setValue(value, forKey: key.rawValue)
-        rootDataDictionary.write(toFile: dataPath(), atomically: true)
+    DispatchQueue.global(qos: .utility).async {
+        if let rootDataDictionary = NSMutableDictionary(contentsOfFile: dataPath()) {
+            rootDataDictionary.setValue(value, forKey: key.rawValue)
+            rootDataDictionary.write(toFile: dataPath(), atomically: true)
+        }
     }
 }
 
@@ -206,9 +210,11 @@ public func appendLocalFood(_ key: String, _ foodItem: NSDictionary, _ image: UI
     if image != nil {
         writeLocalGrubImage(key, image: image!)
     }
-    if let rootDataDictionary = NSMutableDictionary(contentsOfFile: dataPath()) {
-        (rootDataDictionary[DataListKeys.foodList.rawValue] as! NSDictionary).setValue(foodItem, forKey: key)
-        rootDataDictionary.write(toFile: dataPath(), atomically: true)
+    DispatchQueue.global(qos: .utility).async {
+        if let rootDataDictionary = NSMutableDictionary(contentsOfFile: dataPath()) {
+            (rootDataDictionary[DataListKeys.foodList.rawValue] as! NSDictionary).setValue(foodItem, forKey: key)
+            rootDataDictionary.write(toFile: dataPath(), atomically: true)
+        }
     }
 }
 
