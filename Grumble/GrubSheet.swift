@@ -239,6 +239,8 @@ public struct GrubSheet: View {
                     Grub.removeFood(self.selectedFID!)
                 })
             }
+            
+            //Spacer()
         }.padding([.leading, .trailing], 20)
         .foregroundColor(Color(white: 0.2))
         .offset(y: self.offsetGrubContent)
@@ -300,8 +302,7 @@ public struct GrubSheet: View {
                     Spacer().frame(height: headerHeight)
                     
                     self.grubContent
-                }.frame(height: sHeight() - safeAreaInset(.top))
-                .shadow(color: Color.black.opacity(0.1), radius: 3)
+                }.shadow(color: Color.black.opacity(0.1), radius: 3)
                 
                 self.header
                     .font(gFont(.ubuntuMedium, .width, 3.5))
@@ -309,7 +310,7 @@ public struct GrubSheet: View {
                     .frame(height: headerHeight)
                     .background(Color.white)
                     .shadow(color: Color.black.opacity(0.1), radius: 5, y: 2)
-            }.frame(alignment: .top)
+            }.frame(maxHeight: sHeight() - safeAreaInset(.top), alignment: .top)
             .foregroundColor(Color.black)
             .offset(y: sHeight() * self.imageFraction)
         }.frame(width: sWidth())

@@ -254,7 +254,7 @@ public func removeCloudFood(_ key: String) {
 
 //MARK: - Cloud Observers
 public func onCloudFoodAdded(_ snapshot: DataSnapshot) {
-    DispatchQueue.main.async {
+    DispatchQueue.global(qos: .utility).async {
         let storage = Storage.storage().reference()
         let imageRef = storage.child(imagePath + snapshot.key + ".jpg")
         imageRef.getData(maxSize: .max) { (metadata, error) in
