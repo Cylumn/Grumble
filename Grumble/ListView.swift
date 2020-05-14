@@ -221,14 +221,17 @@ public struct ListView: View {
             
             Color.black.opacity(self.lc.presentGrubSheet ? maxOverlayOpacity : 0)
             
-            GrumbleSheet(self.ghorblinType, show:
-                Binding(get: { self.presentGrumbleSheet }, set: {
-                self.presentGrumbleSheet = $0
-                if !$0 {
-                    self.ghorblinList = []
-                }
-            }), self.ghorblinList)
-                .offset(y: self.presentGrumbleSheet ? 0 : sHeight() * 1.2)
+            if self.presentGrumbleSheet {
+                GrumbleSheet(self.ghorblinType, show:
+                    Binding(get: { self.presentGrumbleSheet }, set: {
+                    self.presentGrumbleSheet = $0
+                    if !$0 {
+                        self.ghorblinList = []
+                    }
+                }), self.ghorblinList)
+                    .transition(.move(edge: .bottom))
+                    .zIndex(1)
+            }
             
             GrubSheet(self.contentView.toAddFood)
             

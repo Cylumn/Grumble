@@ -220,15 +220,18 @@ public class UserCookie: ObservableObject {
     public func setFoodList(_ foodList: [String: Grub]) {
         self.fList = foodList
         GrubItemCookie.gic().reset()
+        GrubItemCookie.gic().calibrateText(self.fList)
     }
     
     public func appendFoodList(_ key: String, _ value: Grub) {
         self.fList[key] = value
+        GrubItemCookie.gic().calibrateText(self.fList)
     }
     
     public func removeFoodList(_ key: String) {
         self.fList[key] = nil
         GrubItemCookie.gic().reset()
+        GrubItemCookie.gic().calibrateText(self.fList)
     }
     
     public func sortFoodListByDate() {

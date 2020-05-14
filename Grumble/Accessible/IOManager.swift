@@ -115,7 +115,9 @@ public func removeLocalGrubImage(_ filename: String) {
     let fileManager = FileManager.default
     do {
         let filePath = docPath.appendingPathComponent(imagePath + filename + ".jpg")
-        try fileManager.removeItem(atPath: filePath)
+        if fileManager.fileExists(atPath: filePath) {
+            try fileManager.removeItem(atPath: filePath)
+        }
     } catch {
         print("error:\(error)")
     }
@@ -334,7 +336,7 @@ public func onLogin() {
             
             UserCookie.uc().setLoggedIn(Auth.auth().currentUser)
             TabRouter.tr().changeTab(.list)
-            KeyboardObserver.reset()
+            KeyboardObserver.reset(.listhome)
         }
     }
 }
@@ -356,7 +358,7 @@ public func onLogout() {
         clearLocalGrubImages()
         
         GFormText.reset()
-        KeyboardObserver.reset()
+        KeyboardObserver.reset(.useraccess)
     } catch {
         print("error:\(error)")
     }
@@ -461,9 +463,9 @@ public func loadImages() {
         }
     }
     
-    AddImageCookie.aic().photoAssets = assets
-    AddImageCookie.aic().photos = photos
-    
+        AddImageCookie.aic().photoAssets = assets
+        AddImageCookie.aic().photos = photos
+        
     if assets.count > 0 {
         let size: CGSize = CGSize(width: assets[0]!.pixelWidth, height: assets[0]!.pixelHeight)
         AddImageCookie.aic().phManager.requestImage(for: assets[0]!, targetSize: size, contentMode: .aspectFill, options: nil, resultHandler: { image, info in
@@ -474,26 +476,30 @@ public func loadImages() {
             }
         })
     }
-    
-    let updatePhotosPerCount: Int = 10
-    var updateCount: Int = 0
-    for index in assets.keys {
-        let asset = assets[index]!
-        let ratio = minThumbnailSize / CGFloat(min(asset.pixelWidth, asset.pixelHeight))
-        let imageSize = CGSize(width: CGFloat(asset.pixelWidth) * ratio,
-                               height: CGFloat(asset.pixelHeight) * ratio)
-        let options = PHImageRequestOptions()
-        options.deliveryMode = .highQualityFormat
         
-        imageManager.requestImage(for: asset, targetSize: imageSize, contentMode: .aspectFill, options: options) { (image, info) in
-            photos[asset] = image!
-            updateCount += 1
+    DispatchQueue.global(qos: .utility).async {
+        let updatePhotosPerCount: Int = Int.max
+        var updateCount: Int = 0
+        for index in assets.keys {
+            let asset = assets[index]!
+            let ratio = minThumbnailSize / CGFloat(min(asset.pixelWidth, asset.pixelHeight))
+            let imageSize = CGSize(width: CGFloat(asset.pixelWidth) * ratio,
+                                   height: CGFloat(asset.pixelHeight) * ratio)
+            let options = PHImageRequestOptions()
+            options.deliveryMode = .highQualityFormat
             
-            if updateCount % updatePhotosPerCount == 0 || updateCount == photos.count {
-                AddImageCookie.aic().photos.merge(photos, uniquingKeysWith: { (_, new) in new })
+            imageManager.requestImage(for: asset, targetSize: imageSize, contentMode: .aspectFill, options: options) { (image, info) in
+                photos[asset] = image!
+                updateCount += 1
+                
+                if updateCount % updatePhotosPerCount == 0 || updateCount == photos.count {
+                    DispatchQueue.main.async {
+                        AddImageCookie.aic().photos.merge(photos, uniquingKeysWith: { (_, new) in new })
+                    }
+                }
             }
         }
+        
+        LibraryObserver.lo().lastFetchResult = collection
     }
-    
-    LibraryObserver.lo().lastFetchResult = collection
 }

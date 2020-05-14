@@ -87,13 +87,7 @@ public struct SearchTag: View, GFieldDelegate {
                         ForEach(gTags.dropFirst().filter({
                             self.available.contains($0) && !self.added.contains($0)
                         }), id: \.self) { tag in
-                            Button(action: {
-                                if self.selected.contains(tag) {
-                                    self.selected.remove(tag)
-                                } else {
-                                    self.selected.insert(tag)
-                                }
-                            }, label: {
+                            Button(action: {}, label: {
                                 ZStack {
                                     Color.white
                                     
@@ -111,7 +105,13 @@ public struct SearchTag: View, GFieldDelegate {
                                     .foregroundColor(Color(white: 0.2))
                                 }.frame(height: 45)
                                 .cornerRadius(10)
-                                //.shadow(color: Color.black.opacity(0.1), radius: 5)
+                                .onTapGesture {
+                                    if self.selected.contains(tag) {
+                                        self.selected.remove(tag)
+                                    } else {
+                                        self.selected.insert(tag)
+                                    }
+                                }
                             }).padding([.leading, .trailing], 15)
                         }
                         

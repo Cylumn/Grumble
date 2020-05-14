@@ -30,12 +30,18 @@ public struct TabView: View {
     private func toSettings() {
         if self.tr.tab() != .settings {
             self.tr.changeTab(.settings)
+            KeyboardObserver.reset(.settings)
         }
     }
     
     private func tabIcon(_ iconName: String, _ tab: Tab, _ onClick: @escaping () -> Void) -> some View {
-        ZStack {
+        VStack(spacing: 5) {
+            Spacer()
             Image(systemName: iconName)
+                .font(.system(size: 20))
+            Text(tab.rawValue)
+                .font(gFont(.ubuntuLight, 10))
+            Spacer()
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
         .foregroundColor(self.tr.tab() == tab ? gColor(.blue2) : Color.black)
         .contentShape(Rectangle())

@@ -348,7 +348,7 @@ public struct AddFood: View, GFieldDelegate {
     private var searchTag: some View {
         ZStack(alignment: .center) {
             SearchTag(self.$presentSearchTag)
-                .clipped()
+                .clipShape(Rectangle())
             
             if !self.presentSearchTag {
                 Color(white: 0.9)

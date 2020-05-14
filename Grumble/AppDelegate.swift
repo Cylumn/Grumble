@@ -10,6 +10,8 @@ import UIKit
 import GoogleSignIn
 import Firebase
 
+public var count: Int = 0
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
     @available(iOS 9.0, *)
@@ -87,10 +89,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
                     UserCookie.uc().loadingStatus = .loaded
                 }
             }
+            
+            KeyboardObserver.reset(.listhome)
+        } else {
+            KeyboardObserver.reset(.useraccess)
         }
         
         loadImages()
         _ = GTagLabeler.gtl()
+        GCamera.initIVC()
         
         return true
     }

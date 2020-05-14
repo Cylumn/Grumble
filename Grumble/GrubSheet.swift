@@ -246,6 +246,7 @@ public struct GrubSheet: View {
     
     private var sheet: some View {
         let minScale: CGFloat = 0.8
+        let scale: CGFloat = max(self.imageFraction / baseImageFraction, minScale) / minScale
         return ZStack(alignment: .topTrailing) {
             ZStack(alignment: .top) {
                 gTagColors[self.grub!.priorityTag]
@@ -254,8 +255,7 @@ public struct GrubSheet: View {
                 self.grub!.image()
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: sWidth() * (1 / minScale))
-                    .scaleEffect(x: max(self.imageFraction / baseImageFraction, minScale), y: max(self.imageFraction / baseImageFraction, minScale), anchor: UnitPoint.top)
+                    .frame(width: sWidth() * scale)
                     .offset(y: -safeAreaInset(.top))
             }.frame(width: sWidth())
             
@@ -287,7 +287,7 @@ public struct GrubSheet: View {
                     .padding(20)
                     .foregroundColor(Color.white.opacity(0.9))
                     .font(.system(size: 30))
-            }).disabled(self.imageFraction == minDragFraction)
+            })
             
             gTagColors[self.grub!.priorityTag]
                 .edgesIgnoringSafeArea(.all)

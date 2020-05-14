@@ -8,9 +8,9 @@
 
 import Foundation
 
-public enum Tab {
-    case list
-    case settings
+public enum Tab: String {
+    case list = "List"
+    case settings = "Settings"
 }
 
 public class TabRouter: ObservableObject {

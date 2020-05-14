@@ -114,8 +114,8 @@ public struct AddImage: View {
     }
     
     //Getter Methods
-    private func presentImagePicker() -> Bool {
-        return self.aic.isPresented && self.aic.emptyImage() && self.aic.tab == .capture
+    private func presentCamera() -> Bool {
+        return self.aic.emptyImage() && self.aic.tab == .capture
     }
     
     private func cropImageScreen() -> Bool {
@@ -264,14 +264,18 @@ public struct AddImage: View {
     
     private var library: some View {
         let rows = 0 ..< Int(ceil(CGFloat(self.aic.photoAssets.count) / CGFloat(libraryColumns)))
-        
         let size: CGFloat = (sWidth() - CGFloat(libraryColumns) + 1) / CGFloat(libraryColumns)
         return ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: 1) {
                 ForEach(rows, id: \.self) { row in
                     HStack(spacing: 1) {
                         ForEach((row * libraryColumns ..< min((row + 1) * libraryColumns, self.aic.photoAssets.count)), id: \.self) { index in
-                            ImageItem(self.aic.photoAssets[index]!, self.aic.photos[self.aic.photoAssets[index]!]!, size: size, index: index)
+                            ZStack {
+                                ImageItem(self.aic.photoAssets[index]!, self.aic.photos[self.aic.photoAssets[index]!]!, size: size, index: index)
+                                
+                                Color.white
+                                    .opacity(index == self.aic.selectedIndex ? 0.6 : 0)
+                            }.frame(width: size, height: size)
                         }
                     }
                 }
@@ -434,9 +438,9 @@ public struct AddImage: View {
     
     private var inputs: some View {
         ZStack {
-            GCamera()
-                .opacity(self.presentImagePicker() ? 1 : 0)
-                .disabled(!self.presentImagePicker())
+            if self.presentCamera() {
+                GCamera()
+            }
             
             CropImage(self)
             
@@ -493,8 +497,8 @@ public struct AddImage: View {
                     .position(x: sWidth() * 0.9, y: navBarHeight + borderHeight + sWidth() * grubImageAspectRatio - sWidth() * 0.1)
                 
                 self.captureButton
-            }.opacity(self.presentImagePicker() ? 1 : 0)
-            .disabled(!self.presentImagePicker())
+            }.opacity(self.presentCamera() ? 1 : 0)
+            .disabled(!self.presentCamera())
             
             self.bodyOverlay
                 .foregroundColor(AddImage.textColor)

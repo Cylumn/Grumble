@@ -19,6 +19,16 @@ public class GrubItemCookie: ObservableObject {
         return GrubItemCookie.instance!
     }
     
+    public func calibrateText(_ foodList: [String: Grub]) {
+        var textSize: CGFloat = 2.5
+        for grub in foodList.values {
+            textSize = max(min(27.0 / CGFloat(grub.food.count), textSize), 2)
+        }
+        if textSize != self.textSize {
+            self.textSize = textSize
+        }
+    }
+    
     public func reset() {
         self.textSize = 2.5
     }
@@ -34,15 +44,6 @@ public struct GrubItem: View {
     public init(_ grub: Grub) {
         self.fid = grub.fid
         self.grub = grub
-    }
-    
-    //Getter Methods
-    private func textSize(_ text: String) -> CGFloat {
-        let size = max(min(27.0 / CGFloat(text.count), self.gic.textSize), 2)
-        if size != self.gic.textSize {
-            self.gic.textSize = size
-        }
-        return self.gic.textSize
     }
     
     //Function Method
@@ -67,7 +68,7 @@ public struct GrubItem: View {
                     HStack(alignment: .bottom) {
                         Text(self.grub.food)
                             .padding(10)
-                            .font(gFont(.ubuntuBold, .width, textSize(self.grub.food)))
+                            .font(gFont(.ubuntuBold, .width, self.gic.textSize))
                             .foregroundColor(Color.white)
                             .lineLimit(1)
                     
@@ -76,7 +77,7 @@ public struct GrubItem: View {
                         if self.grub.price != nil {
                             Text("$" + String(format:"%.2f", self.grub.price!))
                                 .padding(10)
-                                .font(gFont(.ubuntuBold, .width, textSize(self.grub.food)))
+                                .font(gFont(.ubuntuBold, .width, self.gic.textSize))
                                 .foregroundColor(Color.white)
                         }
                     }.background(LinearGradient(gradient: Gradient(colors: [gTagColors[self.grub.priorityTag]!.opacity(0), gTagColors[self.grub.priorityTag]!]), startPoint: .top, endPoint: .bottom))

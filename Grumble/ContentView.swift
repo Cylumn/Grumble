@@ -35,7 +35,7 @@ public struct ContentView: View {
             self.slideIndex = PanelIndex.listHome.rawValue
         }
         UIApplication.shared.endEditing()
-        KeyboardObserver.observe(.filterList, false)
+        KeyboardObserver.reset(.listhome)
         ListCookie.lc().searchFocused = false
     }
     
@@ -48,8 +48,7 @@ public struct ContentView: View {
             self.slideIndex = PanelIndex.addFood.rawValue
         }
         UIApplication.shared.endEditing()
-        KeyboardObserver.ignore(.filterList)
-        KeyboardObserver.ignore(.searchTag)
+        KeyboardObserver.reset(.addfood)
         Timer.scheduledTimer(withTimeInterval: 0.43, repeats: false) { timer in
             GFormRouter.gfr().callFirstResponder(.addFood)
         }
@@ -80,12 +79,10 @@ public struct ContentView: View {
                         AnyView(AddFood(self.toListHome))],
                 padding: 0, unDraggable: [PanelIndex.listHome.rawValue],
                 onSlideChange: self.slideChange)
-                .opacity(self.tr.tab() == .list ? 1 : 0)
-                .disabled(self.tr.tab() != .list)
             
-            SettingsView(self)
-                .opacity(self.tr.tab() == .settings ? 1 : 0)
-                .disabled(self.tr.tab() != .settings)
+            if self.tr.tab() == .settings {
+                SettingsView(self)
+            }
         }.edgesIgnoringSafeArea(.bottom)
     }
 }

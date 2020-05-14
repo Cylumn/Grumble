@@ -116,7 +116,7 @@ public struct SearchList: View, GFieldDelegate {
                         
                         Spacer().frame(maxWidth: .infinity, minHeight: self.ko.height() + sHeight() * 0.1)
                     }
-                }
+                }.transition(.move(edge: .bottom))
             }
         }.padding([.leading, .trailing], 20)
     }

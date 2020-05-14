@@ -175,6 +175,11 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
 }
 
 public struct GCamera: UIViewControllerRepresentable {
+    private static var ivc: ImageViewController? = nil
+    
+    public static func initIVC() {
+        GCamera.ivc = ImageViewController()
+    }
     
     //Implemented UIViewControllerRepresentable Methods
     public func updateUIViewController(_ uiViewController: ImageViewController, context: UIViewControllerRepresentableContext<GCamera>) {
@@ -191,7 +196,10 @@ public struct GCamera: UIViewControllerRepresentable {
     }
     
     public func makeUIViewController(context: UIViewControllerRepresentableContext<GCamera>) -> ImageViewController {
-        return ImageViewController()
+        if GCamera.ivc == nil {
+            GCamera.initIVC()
+        }
+        return GCamera.ivc!
     }
     
 }

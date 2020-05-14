@@ -130,17 +130,26 @@ public struct SettingsView: View {
         ZStack {
             self.settings
                 .offset(x: self.page == nil ? 0 : sWidth() * -0.3)
+                .zIndex(0)
             
             TabView(self.contentView)
             
-            Welcome(startIndex: Welcome.Pages.introduction.rawValue, isPresented: self.isPagePresented(page: .about))
-                .offset(x: self.page == .about ? 0 : sWidth())
-            
-            Welcome(startIndex: Welcome.Pages.assignment.rawValue, endIndex: Welcome.Pages.assignment.rawValue, isPresented: self.isPagePresented(page: .about))
-                .offset(x: self.page == .ghorblin ? 0 : sWidth())
-            
-            SecurityForm(self.isPagePresented(page: .security))
-                .offset(x: self.page == .security ? 0 : sWidth())
+            ZStack {
+                if self.page == . about {
+                    Welcome(startIndex: Welcome.Pages.introduction.rawValue, isPresented: self.isPagePresented(page: .about))
+                        .transition(.move(edge: .trailing))
+                }
+                
+                if self.page == .ghorblin {
+                    Welcome(startIndex: Welcome.Pages.assignment.rawValue, endIndex: Welcome.Pages.assignment.rawValue, isPresented: self.isPagePresented(page: .about))
+                        .transition(.move(edge: .trailing))
+                }
+                
+                if self.page == .security {
+                    SecurityForm(self.isPagePresented(page: .security))
+                        .transition(.move(edge: .trailing))
+                }
+            }.zIndex(1)
         }
     }
 }
