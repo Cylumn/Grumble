@@ -31,6 +31,8 @@ public class TabRouter: ObservableObject {
     
     //Setter Methods
     public func changeTab(_ tab: Tab) {
-        self.currentTab = tab
+        if self.currentTab != tab {
+            self.currentTab = tab
+        }
     }
 }

@@ -63,7 +63,7 @@ public func gTagView(_ tag: GrubTag, _ boundingSize: CGSize, idleData: CGFloat, 
     return gTagIcons[tag]!(boundingSize, idleData, tossData)
 }
 
-public struct Grub: Decodable {
+public struct Grub: Decodable, Equatable {
     public static var images: [String: Image] = [:]
     public var fid: String
     
@@ -152,22 +152,18 @@ public struct Grub: Decodable {
     }
 }
 
-public class UserCookie: ObservableObject {
-    private static var instance: UserCookie?
+public class UserAccessCookie: ObservableObject {
+    private static var instance: UserAccessCookie?
     @Published private var hasCurrentUser: Bool = false
-    @Published private var linkToken: String? = nil
-    @Published private var ghorblinName: String? = nil
-    @Published private var fList: [String: Grub] = [:]
-    @Published private var grubsByDate: [(String, Grub)] = []
-    @Published public var loadingStatus: LoadingStatus = LoadingStatus.loading
+    @Published private var linkToken: String? = loadLocalData(.linkToken) as? String
+    @Published fileprivate var newAccount: Bool = loadLocalData(.ghorblinName) == nil
     
     //Getter Methods
-    public static func uc() -> UserCookie {
-        if UserCookie.instance == nil {
-            UserCookie.instance = UserCookie()
-            loadLocalData()
+    public static func uac() -> UserAccessCookie {
+        if UserAccessCookie.instance == nil {
+            UserAccessCookie.instance = UserAccessCookie()
         }
-        return UserCookie.instance!
+        return UserAccessCookie.instance!
     }
     
     public func loggedIn() -> Bool {
@@ -183,7 +179,40 @@ public class UserCookie: ObservableObject {
     }
     
     public func newUser() -> Bool {
-        return self.ghorblinName == nil
+        return self.newAccount
+    }
+    
+    //Setter Methods
+    public func setLoggedIn(_ user: User?) {
+        if user == nil {
+            self.hasCurrentUser = false
+        } else {
+            self.hasCurrentUser = true
+        }
+    }
+    
+    public func setLinkToken(_ token: String?) {
+        if self.linkToken != token {
+            self.linkToken = token
+        }
+    }
+}
+
+public class UserCookie: ObservableObject {
+    private static var instance: UserCookie?
+    @Published private var ghorblinName: String? = loadLocalData(.ghorblinName) as? String
+    @Published private var fList: [String: Grub] = loadLocalData(.foodList) as! [String: Grub]
+    private var grubsByDate: [(String, Grub)] = []
+    @Published public var loadingStatus: LoadingStatus = LoadingStatus.loading
+    
+    //Getter Methods
+    public static func uc() -> UserCookie {
+        if UserCookie.instance == nil {
+            UserCookie.instance = UserCookie()
+            GrubItemCookie.gic().calibrateText(UserCookie.instance!.fList)
+            UserCookie.instance!.sortFoodListByDate()
+        }
+        return UserCookie.instance!
     }
     
     public func ghorblin() -> String? {
@@ -199,42 +228,38 @@ public class UserCookie: ObservableObject {
     }
     
     //FList Modifier Methods
-    public func setLoggedIn(_ user: User?) {
-        if user == nil {
-            self.hasCurrentUser = false
-        } else {
-            self.hasCurrentUser = true
-        }
-    }
-    
-    public func setLinkToken(_ token: String?) {
-        self.linkToken = token
-    }
-    
     public func setGhorblinName(_ name: String?) {
         if self.ghorblinName != name {
             self.ghorblinName = name
+            UserAccessCookie.uac().newAccount = self.ghorblinName == nil
         }
     }
     
     public func setFoodList(_ foodList: [String: Grub]) {
-        self.fList = foodList
-        GrubItemCookie.gic().reset()
-        GrubItemCookie.gic().calibrateText(self.fList)
+        if self.fList != foodList {
+            self.fList = foodList
+            GrubItemCookie.gic().reset()
+            GrubItemCookie.gic().calibrateText(self.fList)
+            self.sortFoodListByDate()
+        }
     }
     
     public func appendFoodList(_ key: String, _ value: Grub) {
-        self.fList[key] = value
-        GrubItemCookie.gic().calibrateText(self.fList)
+        if self.fList[key] != value {
+            self.fList[key] = value
+            GrubItemCookie.gic().calibrateText(self.fList)
+            self.sortFoodListByDate()
+        }
     }
     
     public func removeFoodList(_ key: String) {
         self.fList[key] = nil
         GrubItemCookie.gic().reset()
         GrubItemCookie.gic().calibrateText(self.fList)
+        self.sortFoodListByDate()
     }
     
-    public func sortFoodListByDate() {
+    private func sortFoodListByDate() {
         self.grubsByDate = Grub.sortByDate(self.fList)
     }
 }

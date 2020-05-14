@@ -125,7 +125,6 @@ public struct AddFood: View, GFieldDelegate {
             let foodDictionary = foodItem as NSDictionary
             
             self.uc.appendFoodList(fid, Grub(fid: fid, foodDictionary, image: self.afc.image!))
-            self.uc.sortFoodListByDate()
             appendLocalFood(fid, foodDictionary)
             appendCloudFood(fid, foodDictionary, self.afc.image!)
         default:
@@ -134,7 +133,6 @@ public struct AddFood: View, GFieldDelegate {
             let foodDictionary = foodItem as NSDictionary
             
             self.uc.appendFoodList(self.afc.currentFID!, Grub(fid: self.afc.currentFID!, foodDictionary))
-            self.uc.sortFoodListByDate()
             appendLocalFood(self.afc.currentFID!, foodDictionary)
             appendCloudFood(self.afc.currentFID!, foodDictionary)
         }

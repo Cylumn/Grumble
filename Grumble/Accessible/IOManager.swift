@@ -138,17 +138,38 @@ public func clearLocalGrubImages() {
 }
 
 //MARK: - Data Functions
+private var data: DataList? = nil
 public func loadLocalData() {
-    if let data = loadPropertyList(URL(string: dataPath()), DataList.self) {
+    if data == nil {
+        data = loadPropertyList(URL(string: dataPath()), DataList.self)
+    }
+    if let data = data {
         UserCookie.uc().setGhorblinName(data.ghorblinName)
-        UserCookie.uc().setLinkToken(data.linkToken)
+        UserAccessCookie.uac().setLinkToken(data.linkToken)
         
         DispatchQueue.main.async {
             loadGrubImages()
             UserCookie.uc().setFoodList(data.foodList ?? [:] as [String: Grub])
-            UserCookie.uc().sortFoodListByDate()
         }
     }
+}
+
+public func loadLocalData(_ key: DataListKeys) -> Any? {
+    if data == nil {
+        data = loadPropertyList(URL(string: dataPath()), DataList.self)
+    }
+    if let data = data {
+        switch key {
+        case .foodList:
+            loadGrubImages()
+            return data.foodList
+        case .ghorblinName:
+            return data.ghorblinName
+        case .linkToken:
+            return data.linkToken
+        }
+    }
+    return nil
 }
 
 public func writeLocalData(_ key: DataListKeys, _ value: Any?) {
@@ -239,10 +260,8 @@ public func onCloudFoodAdded(_ snapshot: DataSnapshot) {
             if let foodItem = snapshot.value as? NSDictionary {
                 let image = UIImage(data: metadata!)!
                 UserCookie.uc().appendFoodList(snapshot.key, Grub(fid: snapshot.key, foodItem, image: image))
-                UserCookie.uc().sortFoodListByDate()
                 appendLocalFood(snapshot.key, foodItem, image)
             }
-            UserCookie.uc().loadingStatus = .loaded
         }
     }
 }
@@ -253,20 +272,17 @@ public func onCloudDataAdded(_ snapshot: DataSnapshot) {
         UserCookie.uc().setGhorblinName(snapshot.value as? String)
         writeLocalData(DataListKeys.ghorblinName, snapshot.value as? String)
     case DataListKeys.linkToken.rawValue:
-        UserCookie.uc().setLinkToken(snapshot.value as? String)
+        UserAccessCookie.uac().setLinkToken(snapshot.value as? String)
         writeLocalData(DataListKeys.linkToken, snapshot.value as? String)
     default:
         return
     }
-    UserCookie.uc().loadingStatus = .loaded
 }
 
 
 public func onCloudFoodRemoved(_ snapshot: DataSnapshot) {
     UserCookie.uc().removeFoodList(snapshot.key)
-    UserCookie.uc().sortFoodListByDate()
     removeLocalFood(snapshot.key)
-    UserCookie.uc().loadingStatus = .loaded
 }
 
 public func onCloudDataRemoved(_ snapshot: DataSnapshot) {
@@ -275,21 +291,18 @@ public func onCloudDataRemoved(_ snapshot: DataSnapshot) {
         UserCookie.uc().setGhorblinName(nil)
         writeLocalData(DataListKeys.ghorblinName, nil)
     case DataListKeys.linkToken.rawValue:
-        UserCookie.uc().setLinkToken(nil)
+        UserAccessCookie.uac().setLinkToken(nil)
         writeLocalData(DataListKeys.linkToken, nil)
     default:
         return
     }
-    UserCookie.uc().loadingStatus = .loaded
 }
 
 public func onCloudFoodChanged(_ snapshot: DataSnapshot) {
     if let foodItem = snapshot.value as? NSDictionary {
         UserCookie.uc().appendFoodList(snapshot.key, Grub(fid: snapshot.key, foodItem))
-        UserCookie.uc().sortFoodListByDate()
         appendLocalFood(snapshot.key, foodItem)
     }
-    UserCookie.uc().loadingStatus = .loaded
 }
 
 public func onCloudDataChanged(_ snapshot: DataSnapshot) {
@@ -298,12 +311,11 @@ public func onCloudDataChanged(_ snapshot: DataSnapshot) {
         UserCookie.uc().setGhorblinName(snapshot.value as? String)
         writeLocalData(DataListKeys.ghorblinName, snapshot.value as? String)
     case DataListKeys.linkToken.rawValue:
-        UserCookie.uc().setLinkToken(snapshot.value as? String)
+        UserAccessCookie.uac().setLinkToken(snapshot.value as? String)
         writeLocalData(DataListKeys.linkToken, snapshot.value as? String)
     default:
         return
     }
-    UserCookie.uc().loadingStatus = .loaded
 }
 
 public func setObservers(uid: String) {
@@ -323,18 +335,22 @@ public func setObservers(uid: String) {
 //MARK: - User Login/Logout
 public func onLogin() {
     if let uid = Auth.auth().currentUser?.uid {
-        setObservers(uid: uid)
-        
         loadCloudData() { data in
             let foodList: NSDictionary? = data?[DataListKeys.foodList.rawValue] as? NSDictionary
-            if foodList == nil || foodList!.count == 0 {
-                UserCookie.uc().loadingStatus = .loaded
+            if foodList != nil && foodList!.count > 0 {
+                var fList: [String: Grub] = [:]
+                for food in foodList! {
+                    fList[food.key as! String] = Grub(fid: food.key as! String, food.value as? NSDictionary)
+                }
+                UserCookie.uc().setFoodList(fList)
             }
+            UserCookie.uc().loadingStatus = .loaded
+            setObservers(uid: uid)
             
             UserCookie.uc().setGhorblinName(data?[DataListKeys.ghorblinName.rawValue] as? String)
-            UserCookie.uc().setLinkToken(data?[DataListKeys.linkToken.rawValue] as? String)
+            UserAccessCookie.uac().setLinkToken(data?[DataListKeys.linkToken.rawValue] as? String)
             
-            UserCookie.uc().setLoggedIn(Auth.auth().currentUser)
+            UserAccessCookie.uac().setLoggedIn(Auth.auth().currentUser)
             TabRouter.tr().changeTab(.list)
             KeyboardObserver.reset(.listhome)
         }
@@ -349,9 +365,9 @@ public func onLogout() {
         }
         
         try Auth.auth().signOut()
-        UserCookie.uc().setLoggedIn(nil)
+        UserAccessCookie.uac().setLoggedIn(nil)
         UserCookie.uc().setFoodList([:] as [String: Grub])
-        UserCookie.uc().setLinkToken(nil)
+        UserAccessCookie.uac().setLinkToken(nil)
         UserCookie.uc().setGhorblinName(nil)
         UserCookie.uc().loadingStatus = LoadingStatus.loading
         clearLocalData()
@@ -378,7 +394,7 @@ public func createAccount(email: String, pass: String, displayName: String, _ fi
                 print("error:\(error)")
                 finishedWithError(error)
             } else {
-                UserCookie.uc().setLinkToken(nil)
+                UserAccessCookie.uac().setLinkToken(nil)
                 writeLocalData(DataListKeys.linkToken, nil)
                 
                 finishedWithError(nil)

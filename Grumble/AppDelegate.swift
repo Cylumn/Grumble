@@ -54,7 +54,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
             
             if !hasEmailProvider {
                 let linkToken: String = randomString(length: 10)
-                UserCookie.uc().setLinkToken(linkToken)
+                UserAccessCookie.uac().setLinkToken(linkToken)
                 writeLocalData(DataListKeys.linkToken, linkToken)
                 writeCloudData(DataListKeys.linkToken, linkToken)
                 createLinkedAccount(pass: linkToken)
@@ -75,22 +75,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
         FirebaseApp.configure()
         GIDSignIn.sharedInstance().clientID = "729013591612-1idpq36eenpo1at67i9dujmkrbuc5j68.apps.googleusercontent.com"
         GIDSignIn.sharedInstance().delegate = self
-        UserCookie.uc().setLoggedIn(Auth.auth().currentUser)
+        UserAccessCookie.uac().setLoggedIn(Auth.auth().currentUser)
         
-        if let uid = Auth.auth().currentUser?.uid {
-            setObservers(uid: uid)
-            
-            loadCloudData() { data in
-                guard let foodList = data?[DataListKeys.foodList.rawValue] as? NSDictionary else {
-                    UserCookie.uc().loadingStatus = .loaded
-                    return
-                }
-                if foodList.count == 0 {
-                    UserCookie.uc().loadingStatus = .loaded
-                }
-            }
-            
-            KeyboardObserver.reset(.listhome)
+        if let _ = Auth.auth().currentUser?.uid {
+            onLogin()
         } else {
             KeyboardObserver.reset(.useraccess)
         }

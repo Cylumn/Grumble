@@ -9,7 +9,7 @@
 import SwiftUI
 
 public struct MainView: View {
-    @ObservedObject private var uc: UserCookie = UserCookie.uc()
+    private var uac: UserAccessCookie = UserAccessCookie.uac()
     
     private var bg: some View {
         ZStack {
@@ -23,12 +23,12 @@ public struct MainView: View {
     
     public var body: some View {
         ZStack {
-            if self.uc.loggedIn() {
+            if self.uac.loggedIn() {
                 self.bg
                 
-                if !self.uc.linkedAccount() {
+                if !self.uac.linkedAccount() {
                     CreateLinkedAccount()
-                } else if self.uc.newUser() {
+                } else if self.uac.newUser() {
                     Welcome()
                 } else {
                     ContentView()

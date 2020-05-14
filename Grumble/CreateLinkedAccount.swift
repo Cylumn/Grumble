@@ -66,14 +66,14 @@ public struct CreateLinkedAccount: View, GFieldDelegate {
                 self.processing = true
             }
             
-            changePassword(old: UserCookie.uc().accountLinkToken()!, new: self.gft.text(FieldIndex.newPass.rawValue)) { error in
+            changePassword(old: UserAccessCookie.uac().accountLinkToken()!, new: self.gft.text(FieldIndex.newPass.rawValue)) { error in
                 if error == AuthErrorCode.weakPassword {
                     self.gft.setError(FieldIndex.newPass.rawValue, "Weak Password")
                     self.processing = false
                     self.gft.setText(FieldIndex.newPass.rawValue, "")
                     self.gft.setText(FieldIndex.confirmPass.rawValue, "")
                 } else {
-                    UserCookie.uc().setLinkToken(nil)
+                    UserAccessCookie.uac().setLinkToken(nil)
                     writeLocalData(DataListKeys.linkToken, nil)
                     writeCloudData(DataListKeys.linkToken, nil)
                     

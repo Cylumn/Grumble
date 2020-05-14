@@ -84,6 +84,7 @@ public struct ListView: View {
         }
         
         AddImageCookie.aic().tab = AddImage.Pages.capture
+        AddImageCookie.aic().setImage(nil)
     }
     
     //View Methods

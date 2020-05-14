@@ -14,7 +14,6 @@ public let tabHeight: CGFloat = sHeight() * 0.085
 public let navBarFont: Font = gFont(.ubuntuBold, 18)
 
 public struct ContentView: View {
-    @ObservedObject private var uc: UserCookie = UserCookie.uc()
     @ObservedObject private var tr: TabRouter = TabRouter.tr()
     @State private var slideIndex: Int = PanelIndex.listHome.rawValue
     @State private var slideOffset: CGFloat = 0
