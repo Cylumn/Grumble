@@ -300,7 +300,8 @@ public struct GrubSheet: View {
                     Spacer().frame(height: headerHeight)
                     
                     self.grubContent
-                }.shadow(color: Color.black.opacity(0.1), radius: 3)
+                }.frame(height: sHeight() - safeAreaInset(.top))
+                .shadow(color: Color.black.opacity(0.1), radius: 3)
                 
                 self.header
                     .font(gFont(.ubuntuMedium, .width, 3.5))

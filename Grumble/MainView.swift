@@ -10,8 +10,6 @@ import SwiftUI
 
 public struct MainView: View {
     private var uac: UserAccessCookie = UserAccessCookie.uac()
-    @State private var count: CGFloat = 0
-    @State private var timer: Timer? = nil
     
     private var bg: some View {
         ZStack {
