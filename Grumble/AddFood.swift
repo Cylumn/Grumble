@@ -13,11 +13,13 @@ private let fieldHeight: CGFloat = sHeight() * 0.02 + 35
 private let formHeight: CGFloat = fieldHeight * CGFloat(size(formID) - 1)
 private let tagTitleHeight: CGFloat = sHeight() * 0.08
 
+//MARK: - Cookies
 public class AddFoodCookie: ObservableObject {
     private static var instance: AddFoodCookie? = nil
     @Published public var currentFID: String? = nil
     @Published public var tags: [GrubTag: Double] = [food: 1]
     public var image: UIImage? = nil
+    public var tagsEdited: Bool = false
     
     public var presentAddImage: (Bool, Bool) -> Void
     
@@ -31,23 +33,227 @@ public class AddFoodCookie: ObservableObject {
         }
         return AddFoodCookie.instance!
     }
+    
+    //MARK: Function Methods
+    public func resetForNewGrub() {
+        self.currentFID = nil
+        self.tags = [food: 1]
+        self.tagsEdited = false
+    }
+    
+    private func parsePriceField(_ text: String) -> Double? {
+        var text = text
+        text.removeAll(where: {$0 == "$" || $0 == "."})
+        if let firstZero = text.firstIndex(where: {$0 != "0"}) {
+            text.removeSubrange(text.startIndex..<firstZero)
+        } else {
+            text = ""
+        }
+        
+        if text.isEmpty {
+            return nil
+        } else {
+            while text.count < 3 {
+                text = "0" + text
+            }
+            text.insert(contentsOf: ".", at: text.index(text.endIndex, offsetBy: -2))
+            return Double(text)
+        }
+    }
+    
+    fileprivate func addItem(){
+        let gft = GFormText.gft(formID)
+        var foodItem = [:] as [String: Any]
+        foodItem["food"] = gft.text(AddFood.FieldIndex.food.rawValue)
+        foodItem["price"] = parsePriceField(gft.text(AddFood.FieldIndex.price.rawValue))
+        foodItem["restaurant"] = !gft.text(AddFood.FieldIndex.restaurant.rawValue).isEmpty ? gft.text(AddFood.FieldIndex.restaurant.rawValue) : nil
+        foodItem["address"] = !gft.text(AddFood.FieldIndex.address.rawValue).isEmpty ? gft.text(AddFood.FieldIndex.address.rawValue) : nil
+        foodItem["tags"] = self.tags
+        
+        var priorityTag: (String, Double) = (food, 0)
+        for tag in self.tags {
+            if tag.key != food && tag.value > priorityTag.1 {
+                priorityTag.0 = tag.key
+                priorityTag.1 = tag.value
+            }
+        }
+        foodItem["priorityTag"] = priorityTag.0
+        switch self.currentFID {
+        case nil:
+            foodItem["date"] = getDate()
+            let date = dateComponent()
+            let prefix = String(trim(foodItem["food"] as! String).lowercased().prefix(3))
+            let fid = prefix + randomString(length: 4) + String(date.hour!) + "_" + String(date.minute!) + "_" + String(date.second!)
+            foodItem["fid"] = fid
+            let foodDictionary = foodItem as NSDictionary
+            
+            UserCookie.uc().appendFoodList(fid, Grub(fid: fid, foodDictionary, image: self.image!))
+            appendLocalFood(fid, foodDictionary)
+            appendCloudFood(fid, foodDictionary, self.image!)
+            
+            if self.tagsEdited {
+                queueImageTraining(fid, self.tags)
+            }
+        default:
+            foodItem["date"] = UserCookie.uc().foodList()[self.currentFID!]!.date
+            foodItem["fid"] = self.currentFID!
+            let foodDictionary = foodItem as NSDictionary
+            
+            UserCookie.uc().appendFoodList(self.currentFID!, Grub(fid: self.currentFID!, foodDictionary))
+            appendLocalFood(self.currentFID!, foodDictionary)
+            appendCloudFood(self.currentFID!, foodDictionary)
+            
+            if self.tagsEdited {
+                queueImageTraining(self.currentFID!, self.tags)
+            }
+        }
+        
+        self.presentAddImage(false, false)
+        ContentCookie.cc().toListHome()
+        
+        AddFood.clearFields()
+        self.image = nil
+    }
+}
+
+public class SearchTagButtonCookie: ObservableObject {
+    private static var instance: SearchTagButtonCookie? = nil
+    @Published public var isPresented: Bool = false
+    
+    public static func stbc() -> SearchTagButtonCookie {
+        if SearchTagButtonCookie.instance == nil {
+            SearchTagButtonCookie.instance = SearchTagButtonCookie()
+        }
+        return SearchTagButtonCookie.instance!
+    }
+}
+
+//MARK: - Views
+fileprivate struct SearchTagButton: View {
+    @ObservedObject private var stbc: SearchTagButtonCookie = SearchTagButtonCookie.stbc()
+    private var searchTag: SearchTag
+    private var buttonIcon: AnyView
+    
+    fileprivate init() {
+        self.searchTag = SearchTag()
+        self.buttonIcon = AnyView(Image(systemName: "plus")
+        .padding(15)
+        .foregroundColor(Color(white: 0.2))
+        .font(.system(size: 15, weight: .black)))
+    }
+    
+    //MARK: Getter Methods
+    private func width() -> CGFloat {
+        return sWidth() * (self.stbc.isPresented ? 1 : 0.1)
+    }
+    
+    private func height() -> CGFloat? {
+        let small: CGFloat = sWidth() * 0.08
+        let big: CGFloat? = nil
+        return self.stbc.isPresented ? big : small
+    }
+    
+    private func offset() -> CGSize {
+        let width: CGFloat = self.stbc.isPresented ? 0 : sWidth() * 0.23
+        let height: CGFloat = self.stbc.isPresented ? 0 : navBarHeight + formHeight + tagTitleHeight * 0.5 - sWidth() * 0.03
+        return CGSize(width: width, height: height)
+    }
+    
+    public var body: some View {
+        return ZStack(alignment: .center) {
+            self.searchTag
+            
+            if !self.stbc.isPresented {
+                Color(white: 0.9)
+                
+                Button(action: {
+                    withAnimation(gAnim(.easeOut)) {
+                        self.stbc.isPresented = true
+                    }
+                    GFormRouter.gfr().callFirstResponder(.searchTag)
+                    
+                    KeyboardObserver.ignore(formID)
+                    KeyboardObserver.observe(.searchTag, true)
+                }, label: {
+                    self.buttonIcon
+                })
+            }
+        }.frame(width: self.width(), height: self.height())
+        .cornerRadius(self.stbc.isPresented ? 0 : 30)
+        .offset(self.offset())
+    }
+}
+
+fileprivate struct ConfirmButton: View {
+    @ObservedObject private var gft: GFormText = GFormText.gft(formID)
+    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
+    private var button: Button<AnyView>
+    
+    fileprivate init() {
+        self.button = Button(action: AddFoodCookie.afc().addItem, label:{
+            AnyView(Text("Confirm")
+                .font(gFont(.ubuntuMedium, .width, 2.5))
+                .padding(sWidth() * 0.04)
+                .frame(width: sWidth() * 0.4)
+                .foregroundColor(Color.white))
+        })
+    }
+    
+    //MARK: Getter Methods
+    private func canSubmit() -> Bool {
+        return !self.gft.text(AddFood.FieldIndex.food.rawValue).isEmpty
+    }
+    
+    public var body: some View {
+        HStack(spacing: nil) {
+            Spacer()
+            
+            self.button
+                .background(self.canSubmit() ? gColor(.blue0) : Color(white: 0.9))
+                .cornerRadius(100)
+                .disabled(!self.canSubmit())
+                .animation(gAnim(.easeOut))
+        }.padding(20)
+        .frame(width: sWidth())
+        .shadow(color: Color.black.opacity(0.2), radius: 12, y: 15)
+        .offset(y: min(-self.ko.height(), -40))
+    }
 }
 
 public struct AddFood: View, GFieldDelegate {
     private var uc: UserCookie = UserCookie.uc()
     private var toListHome: () -> Void
     
+    private var symbols: [AnyView]
+    private var backButton: AnyView
+    private var searchTagButton: SearchTagButton
+    private var confirmButton: ConfirmButton
+    
     @ObservedObject private var gft: GFormText = GFormText.gft(formID)
     @ObservedObject private var afc: AddFoodCookie = AddFoodCookie.afc()
-    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
-    @State private var presentSearchTag: Bool = false
     
-    //Initializer
+    //MARK: Initializers
     public init(){
         self.toListHome = ContentCookie.cc().toListHome
         
+        //MARK: Subviews
+        let gftSymbols = ["flame.fill", "rosette", "mappin.and.ellipse", ""]
+        var tempSymbols: [AnyView?] = Array(repeating: nil, count: gftSymbols.count)
+        for index in 0 ..< gftSymbols.count {
+            tempSymbols[index] = AnyView(Image(systemName: gftSymbols[index]).font(.system(size: 25)))
+        }
+        self.symbols = tempSymbols as! [AnyView]
+        self.backButton = AnyView(Button(action: self.toListHome, label: {
+            Image(systemName: "chevron.left")
+                .foregroundColor(Color.white)
+                .padding(.leading, 5)
+        }).frame(width: 50, height: navBarHeight))
+        self.searchTagButton = SearchTagButton()
+        self.confirmButton = ConfirmButton()
+        
+        //MARK: GFT Initialization
         self.gft.setNames(["Food", "Restaurant", "Address", "Price"])
-        self.gft.setSymbols(["flame.fill", "rosette", "mappin.and.ellipse", ""])
+        self.gft.setSymbols(gftSymbols)
         self.gft.setError(FieldIndex.restaurant.rawValue, "(Optional)")
         self.gft.setError(FieldIndex.address.rawValue, "(Optional)")
         self.gft.setError(FieldIndex.price.rawValue, "(Optional)")
@@ -67,101 +273,13 @@ public struct AddFood: View, GFieldDelegate {
         case edit
     }
     
-    //Getter Methods
-    private func canSubmit() -> Bool {
-        return !self.gft.text(FieldIndex.food.rawValue).isEmpty
-    }
-    
-    private func presentSearchWidth() -> CGFloat {
-        return sWidth() * (self.presentSearchTag ? 1 : 0.1)
-    }
-    
-    private func presentSearchHeight() -> CGFloat? {
-        let small: CGFloat = sWidth() * 0.08
-        let big: CGFloat? = nil
-        return self.presentSearchTag ? big : small
-    }
-    
-    private func presentSearchOffset() -> CGSize {
-        let width: CGFloat = self.presentSearchTag ? 0 : sWidth() * 0.23
-        let height: CGFloat = self.presentSearchTag ? 0 : navBarHeight + formHeight + tagTitleHeight * 0.5 - sWidth() * 0.03
-        return CGSize(width: width, height: height)
-    }
-    
     //Setter Methods
     public static func clearFields() {
         GFormText.gft(formID).setText(FieldIndex.food.rawValue, "")
         GFormText.gft(formID).setText(FieldIndex.price.rawValue, "")
         GFormText.gft(formID).setText(FieldIndex.restaurant.rawValue, "")
         GFormText.gft(formID).setText(FieldIndex.address.rawValue, "")
-        AddFoodCookie.afc().tags = [food : 1]
-        AddFoodCookie.afc().currentFID = nil
-    }
-    
-    //Proceed Methods
-    private func addItem(){
-        var foodItem = [:] as [String: Any]
-        foodItem["food"] = self.gft.text(FieldIndex.food.rawValue)
-        foodItem["price"] = parsePriceField(self.gft.text(FieldIndex.price.rawValue))
-        foodItem["restaurant"] = !self.gft.text(FieldIndex.restaurant.rawValue).isEmpty ? self.gft.text(FieldIndex.restaurant.rawValue) : nil
-        foodItem["address"] = !self.gft.text(FieldIndex.address.rawValue).isEmpty ? self.gft.text(FieldIndex.address.rawValue) : nil
-        foodItem["tags"] = self.afc.tags
-        
-        var priorityTag: (String, Double) = (food, 0)
-        for tag in self.afc.tags {
-            if tag.key != food && tag.value > priorityTag.1 {
-                priorityTag.0 = tag.key
-                priorityTag.1 = tag.value
-            }
-        }
-        foodItem["priorityTag"] = priorityTag.0
-        switch self.afc.currentFID {
-        case nil:
-            foodItem["date"] = getDate()
-            let date = dateComponent()
-            let prefix = String(trim(foodItem["food"] as! String).lowercased().prefix(3))
-            let fid = prefix + randomString(length: 4) + String(date.hour!) + "_" + String(date.minute!) + "_" + String(date.second!)
-            foodItem["fid"] = fid
-            let foodDictionary = foodItem as NSDictionary
-            
-            self.uc.appendFoodList(fid, Grub(fid: fid, foodDictionary, image: self.afc.image!))
-            appendLocalFood(fid, foodDictionary)
-            appendCloudFood(fid, foodDictionary, self.afc.image!)
-        default:
-            foodItem["date"] = UserCookie.uc().foodList()[self.afc.currentFID!]!.date
-            foodItem["fid"] = self.afc.currentFID!
-            let foodDictionary = foodItem as NSDictionary
-            
-            self.uc.appendFoodList(self.afc.currentFID!, Grub(fid: self.afc.currentFID!, foodDictionary))
-            appendLocalFood(self.afc.currentFID!, foodDictionary)
-            appendCloudFood(self.afc.currentFID!, foodDictionary)
-        }
-        self.afc.presentAddImage(false, false)
-        self.toListHome()
-        
-        AddFood.clearFields()
-        self.afc.image = nil
-    }
-    
-    //Parsing Methods
-    private func parsePriceField(_ text: String) -> Double? {
-        var text = text
-        text.removeAll(where: {$0 == "$" || $0 == "."})
-        if let firstZero = text.firstIndex(where: {$0 != "0"}) {
-            text.removeSubrange(text.startIndex..<firstZero)
-        } else {
-            text = ""
-        }
-        
-        if text.isEmpty {
-            return nil
-        } else {
-            while text.count < 3 {
-                text = "0" + text
-            }
-            text.insert(contentsOf: ".", at: text.index(text.endIndex, offsetBy: -2))
-            return Double(text)
-        }
+        AddFoodCookie.afc().resetForNewGrub()
     }
     
     //Implemented GFieldDelegate Methods
@@ -214,11 +332,7 @@ public struct AddFood: View, GFieldDelegate {
     private var header: some View {
         ZStack {
             HStack(spacing: nil) {
-                Button(action: self.toListHome, label: {
-                    Image(systemName: "chevron.left")
-                        .foregroundColor(Color.white)
-                        .padding(.leading, 5)
-                }).frame(width: 50, height: navBarHeight)
+                self.backButton
                 
                 Spacer()
             }
@@ -257,8 +371,7 @@ public struct AddFood: View, GFieldDelegate {
                 ForEach(0 ..< size(formID)) { index in
                     if !self.gft.symbol(index).isEmpty {
                         ZStack {
-                            Image(systemName: self.gft.symbol(index))
-                                .font(.system(size: 25))
+                            self.symbols[index]
                         }.frame(height: fieldHeight)
                         .foregroundColor(self.gft.text(index).isEmpty ? Color.gray : gColor(.blue0))
                     }
@@ -329,6 +442,7 @@ public struct AddFood: View, GFieldDelegate {
                         
                         Button(action: {
                             AddFoodCookie.afc().tags[self.id] = nil
+                            AddFoodCookie.afc().tagsEdited = true
                         }, label: {
                             Image(systemName: "multiply")
                                 .padding(4)
@@ -340,32 +454,6 @@ public struct AddFood: View, GFieldDelegate {
                     }
                 }
             }.frame(width: TagBox.width, height: TagBox.height)
-        }
-    }
-    
-    private var searchTag: some View {
-        ZStack(alignment: .center) {
-            SearchTag(self.$presentSearchTag)
-                .clipShape(Rectangle())
-            
-            if !self.presentSearchTag {
-                Color(white: 0.9)
-                
-                Button(action: {
-                    withAnimation(gAnim(.easeOut)) {
-                        self.presentSearchTag = true
-                    }
-                    GFormRouter.gfr().callFirstResponder(.searchTag)
-                    
-                    KeyboardObserver.ignore(formID)
-                    KeyboardObserver.observe(.searchTag, true)
-                }, label: {
-                    Image(systemName: "plus")
-                        .padding(15)
-                        .foregroundColor(Color(white: 0.2))
-                        .font(.system(size: 15, weight: .black))
-                })
-            }
         }
     }
     
@@ -411,31 +499,12 @@ public struct AddFood: View, GFieldDelegate {
                 }.frame(width: sWidth())
                 .highPriorityGesture(DragGesture())
                 Spacer()
-                HStack(spacing: nil) {
-                    Spacer()
-                    
-                    Button(action: self.addItem, label:{
-                        Text("Confirm")
-                            .font(gFont(.ubuntuMedium, .width, 2.5))
-                            .padding(sWidth() * 0.04)
-                            .frame(width: sWidth() * 0.4)
-                            .foregroundColor(Color.white)
-                    }).background(self.canSubmit() ? gColor(.blue0) : Color(white: 0.9))
-                    .cornerRadius(100)
-                    .disabled(!self.canSubmit())
-                    .animation(gAnim(.easeOut))
-                }.padding(20)
-                .frame(width: sWidth())
-                .shadow(color: Color.black.opacity(0.2), radius: 12, y: 15)
-                .offset(y: min(-self.ko.height(), -40))
+                self.confirmButton
             }
             
-            self.searchTag
-                .frame(width: self.presentSearchWidth(), height: self.presentSearchHeight())
-                .cornerRadius(self.presentSearchTag ? 0 : 30)
-                .offset(self.presentSearchOffset())
+            self.searchTagButton
         }.onTapGesture {
-            if !self.presentSearchTag {
+            if !SearchTagButtonCookie.stbc().isPresented {
                 UIApplication.shared.endEditing()
             }
         }

@@ -50,9 +50,8 @@ public struct GrubItem: View {
     
     //MARK: Function Methods
     fileprivate func onClick() {
-        self.lc.selectedFID = self.fid
         withAnimation(gAnim(.easeOut)) {
-            self.lc.presentGrubSheet = true
+            self.lc.selectedFID = self.fid
         }
         UIApplication.shared.endEditing()
     }

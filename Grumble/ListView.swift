@@ -21,16 +21,17 @@ private let maxOverlayOpacity: Double = 0.5
 public class ListCookie: ObservableObject {
     private static var instance: ListCookie? = nil
     @Published public var selectedFID: String? = nil
-    
     @Published public var searchFocused: Bool = false
-    
-    @Published public var presentGrubSheet: Bool = false
     
     public static func lc() -> ListCookie {
         if ListCookie.instance == nil {
             ListCookie.instance = ListCookie()
         }
         return ListCookie.instance!
+    }
+    
+    public func presentGrubSheet() -> Bool {
+        return self.selectedFID != nil && UserCookie.uc().foodList()[self.selectedFID!] != nil
     }
 }
 
@@ -216,7 +217,7 @@ public struct ListView: View {
                     .frame(width: sWidth(), height: safeAreaInset(.top))
             }.edgesIgnoringSafeArea(.all)
             
-            Color.black.opacity(self.lc.presentGrubSheet ? maxOverlayOpacity : 0)
+            Color.black.opacity(self.lc.presentGrubSheet() ? maxOverlayOpacity : 0)
             
             if self.presentGrumbleSheet {
                 GrumbleSheet(self.ghorblinType, show:
@@ -230,8 +231,8 @@ public struct ListView: View {
                     .zIndex(1)
             }
             
-            if self.lc.presentGrubSheet {
-                GrubSheet()
+            if self.lc.presentGrubSheet() {
+                GrubSheet(self.lc.selectedFID!, self.uc.foodList()[self.lc.selectedFID!]!)
                     .transition(.move(edge: .bottom))
                     .zIndex(1)
             }

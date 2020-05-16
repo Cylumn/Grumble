@@ -11,6 +11,8 @@ import SwiftUI
 //MARK: - Views
 public struct MainView: View {
     @ObservedObject private var uac: UserAccessCookie = UserAccessCookie.uac()
+    @State private var lagTest: CGFloat = 0
+    @State private var timer: Timer? = nil
     
     private var bg: some View {
         ZStack {
@@ -37,6 +39,25 @@ public struct MainView: View {
             } else {
                 LoginView().transition(.move(edge: .bottom))
             }
+            
+            /*Rectangle()
+                .fill(Color.red.opacity(0.3 + Double(0.7 * self.lagTest / sWidth())))
+                .frame(width: lagTest, height: 10)
+                .position(x: sWidth() * 0.5, y: sHeight() - tabHeight)
+                .onAppear() {
+                    if self.timer == nil {
+                        self.timer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { _ in
+                            withAnimation(.linear(duration: 3)) {
+                                if self.lagTest < sWidth() {
+                                    self.lagTest = sWidth()
+                                } else {
+                                    self.lagTest = 0
+                                }
+                            }
+                        }
+                        self.timer!.fire()
+                    }
+            }*/
         }
     }
 }

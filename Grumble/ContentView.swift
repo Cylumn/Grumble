@@ -57,7 +57,7 @@ public class ContentCookie: ObservableObject {
         }
         UIApplication.shared.endEditing()
         KeyboardObserver.reset(.addfood)
-        Timer.scheduledTimer(withTimeInterval: 0.43, repeats: false) { timer in
+        Timer.scheduledTimer(withTimeInterval: 0.45, repeats: false) { timer in
             GFormRouter.gfr().callFirstResponder(.addFood)
         }
         

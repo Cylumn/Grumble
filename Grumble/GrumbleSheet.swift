@@ -471,9 +471,8 @@ public struct GrumbleSheet: View {
                 
                 if self.fidList.count > 0 {
                     Button(action: {
-                        ListCookie.lc().selectedFID = self.fidList[self.fidIndex]
                         withAnimation(gAnim(.easeOut)) {
-                            ListCookie.lc().presentGrubSheet = true
+                            ListCookie.lc().selectedFID = self.fidList[self.fidIndex]
                         }
                     }, label: {
                         Text("View")

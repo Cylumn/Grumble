@@ -38,21 +38,23 @@ public class GTagLabeler {
                 print("error:\(error!)")
                 return
             }
+
+            let results: [VNClassificationObservation] = request.results as! [VNClassificationObservation]
+            var returnTags: [GrubTag: Double] = [:]
+            for result in results {
+                if Double(result.confidence) >= minConfidence {
+                    returnTags[result.identifier.lowercased()] = Double(result.confidence)
+                }
+            }
+            
             //Perform on main thread
             DispatchQueue.main.async {
-                let results: [VNClassificationObservation] = request.results as! [VNClassificationObservation]
-                var returnTags: [GrubTag: Double] = [:]
-                for result in results {
-                    if Double(result.confidence) >= minConfidence {
-                        returnTags[result.identifier.lowercased()] = Double(result.confidence)
-                    }
-                }
                 onComplete(returnTags)
             }
         }
         
         let handler = VNImageRequestHandler(cgImage: image)
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .utility).async {
             do {
                 try handler.perform([request])
             } catch {

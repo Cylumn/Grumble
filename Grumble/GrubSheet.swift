@@ -8,6 +8,7 @@
 
 import SwiftUI
 
+//MARK: - Constants
 private let baseImageFraction: CGFloat = sWidth() * grubImageAspectRatio / sHeight() //0.35
 private let dragFraction: CGFloat = 0.5
 private let safeImagePadding: CGFloat = 10
@@ -22,88 +23,79 @@ private let tagBuilderHeight: CGFloat = 25
 private let tagBuilderPadding: CGFloat = 10
 private let deleteHeight: CGFloat = 40
 
-public struct GrubSheet: View {
-    @ObservedObject private var lc: ListCookie = ListCookie.lc()
-    private var selectedFID: String?
-    private var grub: Grub?
-    
-    @State private var imageFraction: CGFloat = baseImageFraction
-    @State private var currentImageFraction: CGFloat = baseImageFraction
-    @State private var offsetGrubContent: CGFloat = 0
-    @State private var currentOffsetGrubContent: CGFloat = 0
-    
-    @State private var impactOccurred: Bool = false
-    @State private var presentDeleteAlert: Bool = false
+//MARK: - Views
+fileprivate struct GrubSheetContent: View {
+    private var lc: ListCookie
+    private var selectedFID: String
+    private var grub: Grub
     private var toAddFood: (String?) -> Void
+    @State private var presentDeleteAlert: Bool = false
     
-    //Initializer
-    public init() {
-        self.selectedFID = ListCookie.lc().selectedFID
-        switch self.selectedFID {
-        case nil:
-            self.grub = nil
-        default:
-            self.grub = UserCookie.uc().foodList()[self.selectedFID!]
-        }
+    //MARK: Initializers
+    fileprivate init(_ selectedFID: String, _ grub: Grub) {
+        self.lc = ListCookie.lc()
+        self.selectedFID = selectedFID
+        self.grub = grub
         
         self.toAddFood = ContentCookie.cc().toAddFood
     }
     
-    //Function Methods
-    private func hideSheet() {
-        withAnimation(gAnim(.easeInOut)) {
-            self.lc.presentGrubSheet = false
-        }
-    }
-    
-    private func grubContentHeight() -> CGFloat {
+    //MARK: Getter Methods
+    fileprivate func height() -> CGFloat {
         var height = editHeight + grubContentPadding
         
-        if self.grub!.restaurant != nil {
+        if self.grub.restaurant != nil {
             height += restaurantHeight + grubContentPadding
         }
-        if self.grub!.address != nil {
+        if self.grub.address != nil {
             height += addressHeight + grubContentPadding
         }
         
-        let tagLines = ceil(Double(self.grub!.tags.count - 1) / 3.0)
+        let tagLines = ceil(Double(self.grub.tags.count - 1) / 3.0)
         height += (tagBuilderHeight + tagBuilderPadding) * CGFloat(tagLines) - tagBuilderPadding + grubContentPadding
         height += deleteHeight
         
         return height
     }
     
-    private var header: some View {
+    //MARK: Subviews
+    fileprivate var header: some View {
         HStack(alignment: .bottom, spacing: nil) {
             VStack(alignment: .leading, spacing: nil) {
                 Text("Food")
                     .font(gFont(.ubuntuLight, .width, 2))
                 
-                Text(self.grub!.food)
+                Text(self.grub.food)
             }
             
             Spacer()
             
-            if self.grub!.price != nil {
+            if self.grub.price != nil {
                 VStack(spacing: nil) {
                     Text("Price")
                     .font(gFont(.ubuntuLight, .width, 2))
                     
-                    Text("$" + String(format:"%.2f", self.grub!.price!))
+                    Text("$" + String(format:"%.2f", self.grub.price!))
                 }
             }
         }.padding(10)
+        .padding([.leading, .trailing], 10)
+        .frame(height: headerHeight)
+        .background(Color.white)
+        .font(gFont(.ubuntuMedium, .width, 3.5))
+        .shadow(color: Color.black.opacity(0.1), radius: 5, y: 2)
     }
     
     private var editButton: some View {
         return Button(action: {
-            GFormText.gft(.addFood).setText(AddFood.FieldIndex.food.rawValue, self.grub!.food)
-            GFormText.gft(.addFood).setText(AddFood.FieldIndex.price.rawValue, self.grub!.price == nil ? "" : "$" + String(format:"%.2f", self.grub!.price!))
-            GFormText.gft(.addFood).setText(AddFood.FieldIndex.restaurant.rawValue, self.grub!.restaurant ?? "")
-            GFormText.gft(.addFood).setText(AddFood.FieldIndex.address.rawValue, self.grub!.address ?? "")
-            AddFoodCookie.afc().tags = self.grub!.tags
+            GFormText.gft(.addFood).setText(AddFood.FieldIndex.food.rawValue, self.grub.food)
+            GFormText.gft(.addFood).setText(AddFood.FieldIndex.price.rawValue, self.grub.price == nil ? "" : "$" + String(format:"%.2f", self.grub.price!))
+            GFormText.gft(.addFood).setText(AddFood.FieldIndex.restaurant.rawValue, self.grub.restaurant ?? "")
+            GFormText.gft(.addFood).setText(AddFood.FieldIndex.address.rawValue, self.grub.address ?? "")
+            AddFoodCookie.afc().resetForNewGrub()
+            AddFoodCookie.afc().tags = self.grub.tags
             
-            self.toAddFood(self.selectedFID!)
+            self.toAddFood(self.selectedFID)
         }, label: {
             Text("Edit Grub")
                 .frame(maxWidth: .infinity)
@@ -117,7 +109,7 @@ public struct GrubSheet: View {
                 VStack(alignment: .leading, spacing: 5) {
                     Text("Restaurant")
                         .font(gFont(.ubuntuLight, .width, 1.5))
-                    Text(self.grub!.restaurant!)
+                    Text(self.grub.restaurant!)
                         .font(gFont(.ubuntuBold, .width, 2))
                 }
                 
@@ -152,7 +144,7 @@ public struct GrubSheet: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text("Address")
                     .font(gFont(.ubuntuLight, .width, 1.5))
-                Text(self.grub!.address!)
+                Text(self.grub.address!)
                     .font(gFont(.ubuntuBold, .width, 2))
                     .lineLimit(5)
             }
@@ -176,7 +168,7 @@ public struct GrubSheet: View {
     }
     
     private var tagBuilder: some View {
-        var tags = self.grub!.tags.keys.sorted()
+        var tags = self.grub.tags.keys.sorted()
         tags.remove(at: tags.firstIndex(of: food)!)
         tags.insert(food, at: 0)
         
@@ -198,16 +190,16 @@ public struct GrubSheet: View {
         }.frame(maxWidth: .infinity)
     }
     
-    private var grubContent: some View {
+    public var body: some View {
         VStack(alignment: .leading, spacing: grubContentPadding) {
             self.editButton
                 .frame(height: editHeight)
                 .background(Color.white)
-                .foregroundColor(gTagColors[self.grub!.priorityTag])
+                .foregroundColor(gTagColors[self.grub.priorityTag])
                 .font(gFont(.ubuntuMedium, .width, 2.5))
                 .cornerRadius(10)
             
-            if self.grub!.restaurant != nil {
+            if self.grub.restaurant != nil {
                 self.restaurantInfo
                     .padding(20)
                     .frame(height: restaurantHeight)
@@ -215,7 +207,7 @@ public struct GrubSheet: View {
                     .cornerRadius(20)
             }
             
-            if self.grub!.address != nil {
+            if self.grub.address != nil {
                 self.addressInfo
                     .padding(20)
                     .frame(height: addressHeight)
@@ -235,61 +227,118 @@ public struct GrubSheet: View {
                 .foregroundColor(gColor(.coral))
             }).alert(isPresented: self.$presentDeleteAlert) {
                 Alert(title: Text("Delete Grub?"), primaryButton: Alert.Button.default(Text("Cancel")), secondaryButton: Alert.Button.destructive(Text("Delete")) {
-                    self.lc.presentGrubSheet = false
-                    Grub.removeFood(self.selectedFID!)
+                    self.lc.selectedFID = nil
+                    Grub.removeFood(self.selectedFID)
                 })
             }
         }.padding([.leading, .trailing], 20)
         .foregroundColor(Color(white: 0.2))
-        .offset(y: self.offsetGrubContent)
+        .shadow(color: Color.black.opacity(0.1), radius: 3)
+    }
+}
+
+public struct GrubSheet: View {
+    private var selectedFID: String
+    private var grub: Grub
+    
+    private var hideSheet: () -> Void
+    
+    private var hideSheetButton: Button<AnyView>
+    private var grubContent: GrubSheetContent
+    
+    @State private var imageFraction: CGFloat = baseImageFraction
+    @State private var currentImageFraction: CGFloat = baseImageFraction
+    @State private var offsetGrubContent: CGFloat = 0
+    @State private var currentOffsetGrubContent: CGFloat = 0
+    
+    @State private var impactOccurred: Bool = false
+    
+    //MARK: Initializers
+    public init(_ selectedFID: String, _ grub: Grub) {
+        self.selectedFID = selectedFID
+        self.grub = grub
+        
+        //MARK: Function Methods
+        self.hideSheet = {
+            withAnimation(gAnim(.easeInOut)) {
+                ListCookie.lc().selectedFID = nil
+            }
+        }
+        
+        //MARK: Subviews
+        self.hideSheetButton = Button(action: self.hideSheet, label: {
+            AnyView(Image(systemName: "chevron.down.circle.fill")
+                .padding(20)
+                .foregroundColor(Color.white.opacity(0.9))
+                .font(.system(size: 30)))
+        })
+        self.grubContent = GrubSheetContent(self.selectedFID, self.grub)
     }
     
-    private var sheet: some View {
+    //MARK: Subviews
+    private var imageDragContent: some View {
+        Color.clear
+            .contentShape(Rectangle())
+            .gesture(DragGesture().onChanged { drag in
+                withAnimation(gAnim(.spring)) {
+                    self.imageFraction = max(drag.translation.height, 0) / sHeight() * dragFraction + baseImageFraction
+                }
+                if !self.impactOccurred && drag.translation.height > sHeight() * 0.4 {
+                    self.impactOccurred = true
+                    
+                    let impactLight = UIImpactFeedbackGenerator(style: .light)
+                    impactLight.impactOccurred()
+                } else if drag.translation.height < sHeight() * 0.4 {
+                    self.impactOccurred = false
+                }
+            }.onEnded { drag in
+                withAnimation(gAnim(.spring)) {
+                    self.imageFraction = baseImageFraction
+                }
+                if drag.translation.height > sHeight() * 0.4 {
+                    self.hideSheet()
+                }
+            })
+    }
+    
+    private var contentGesture: some Gesture {
+        DragGesture().onChanged { drag in
+            withAnimation(gAnim(.easeOut)) {
+                if self.offsetGrubContent == 0 {
+                    self.imageFraction = max(min(drag.translation.height / sHeight() + self.currentOffsetGrubContent / sHeight() + self.currentImageFraction, baseImageFraction), minDragFraction)
+                }
+                
+                if self.imageFraction == minDragFraction {
+                    let attemptedOffset = min(drag.translation.height + self.currentImageFraction * sHeight() + safeAreaInset(.top) + self.currentOffsetGrubContent, 0)
+                    self.offsetGrubContent = max(attemptedOffset, min(sHeight() * ( 1 - baseImageFraction) + headerHeight - self.grubContent.height(), 0))
+                }
+            }
+        }.onEnded { drag in
+            self.currentImageFraction = self.imageFraction
+            self.currentOffsetGrubContent = self.offsetGrubContent
+        }
+    }
+    
+    public var body: some View {
         let minScale: CGFloat = 0.8
         let scale: CGFloat = max(self.imageFraction / baseImageFraction, minScale) / minScale
         return ZStack(alignment: .topTrailing) {
             ZStack(alignment: .top) {
-                gTagColors[self.grub!.priorityTag]
+                gTagColors[self.grub.priorityTag]
                     .edgesIgnoringSafeArea(.all)
                 
-                self.grub!.image()?
+                self.grub.image()?
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: sWidth() * scale)
                     .offset(y: -safeAreaInset(.top))
             }.frame(width: sWidth())
             
-            Color.clear
-                .contentShape(Rectangle())
-                .gesture(DragGesture().onChanged { drag in
-                    withAnimation(gAnim(.spring)) {
-                        self.imageFraction = max(drag.translation.height, 0) / sHeight() * dragFraction + baseImageFraction
-                    }
-                    if !self.impactOccurred && drag.translation.height > sHeight() * 0.4 {
-                        self.impactOccurred = true
-                        
-                        let impactLight = UIImpactFeedbackGenerator(style: .light)
-                        impactLight.impactOccurred()
-                    } else if drag.translation.height < sHeight() * 0.4 {
-                        self.impactOccurred = false
-                    }
-                }.onEnded { drag in
-                    withAnimation(gAnim(.spring)) {
-                        self.imageFraction = baseImageFraction
-                    }
-                    if drag.translation.height > sHeight() * 0.4 {
-                        self.hideSheet()
-                    }
-                })
+            self.imageDragContent
             
-            Button(action: self.hideSheet, label: {
-                Image(systemName: "chevron.down.circle.fill")
-                    .padding(20)
-                    .foregroundColor(Color.white.opacity(0.9))
-                    .font(.system(size: 30))
-            })
+            self.hideSheetButton
             
-            gTagColors[self.grub!.priorityTag]
+            gTagColors[self.grub.priorityTag]
                 .edgesIgnoringSafeArea(.all)
                 .opacity(1 - Double(min((self.imageFraction - minDragFraction) * 10, 1)))
             
@@ -300,49 +349,20 @@ public struct GrubSheet: View {
                     Spacer().frame(height: headerHeight)
                     
                     self.grubContent
-                }.shadow(color: Color.black.opacity(0.1), radius: 3)
+                        .offset(y: self.offsetGrubContent)
+                }
                 
-                self.header
-                    .font(gFont(.ubuntuMedium, .width, 3.5))
-                    .padding([.leading, .trailing], 10)
-                    .frame(height: headerHeight)
-                    .background(Color.white)
-                    .shadow(color: Color.black.opacity(0.1), radius: 5, y: 2)
+                self.grubContent.header
             }.frame(maxHeight: sHeight() - safeAreaInset(.top), alignment: .top)
             .foregroundColor(Color.black)
             .offset(y: sHeight() * self.imageFraction)
         }.frame(width: sWidth())
-        .gesture(DragGesture().onChanged { drag in
-            withAnimation(gAnim(.easeOut)) {
-                if self.offsetGrubContent == 0 {
-                    self.imageFraction = max(min(drag.translation.height / sHeight() + self.currentOffsetGrubContent / sHeight() + self.currentImageFraction, baseImageFraction), minDragFraction)
-                }
-                
-                if self.imageFraction == minDragFraction {
-                    let attemptedOffset = min(drag.translation.height + self.currentImageFraction * sHeight() + safeAreaInset(.top) + self.currentOffsetGrubContent, 0)
-                    self.offsetGrubContent = max(attemptedOffset, min(sHeight() * ( 1 - baseImageFraction) + headerHeight - self.grubContentHeight(), 0))
-                }
-            }
-        }.onEnded { drag in
-            self.currentImageFraction = self.imageFraction
-            self.currentOffsetGrubContent = self.offsetGrubContent
-        })
-    }
-    
-    public var body: some View {
-        if self.grub != nil {
-            return AnyView(self.sheet)
-        } else {
-            return AnyView(EmptyView())
-        }
+        .gesture(self.contentGesture)
     }
 }
 
 struct GrubSheet_Previews: PreviewProvider {
     static var previews: some View {
-        ListCookie.lc().selectedFID = "food"
-        ListCookie.lc().presentGrubSheet = true
-        UserCookie.uc().appendFoodList("food", Grub.testGrub())
-        return GrubSheet()
+        return GrubSheet("", Grub.testGrub())
     }
 }

@@ -340,6 +340,15 @@ public func setObservers(uid: String) {
     ref.child("users").child(uid).child(DataListKeys.foodList.rawValue).observe(DataEventType.childChanged, with: onCloudFoodChanged)
 }
 
+//MARK: - Machine Learning Input/Output
+public func queueImageTraining(_ fid: String, _ tags: [GrubTag: Double]) {
+    var modifiedTags = tags
+    modifiedTags[food] = nil
+    if UserAccessCookie.uac().loggedIn() && modifiedTags.count > 0 {
+        Database.database().reference().child("trainingQueue").child(fid).setValue(modifiedTags)
+    }
+}
+
 //MARK: - User Login/Logout
 public func onLogin() {
     if let uid = Auth.auth().currentUser?.uid {
