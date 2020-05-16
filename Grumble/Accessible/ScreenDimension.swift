@@ -9,6 +9,7 @@
 import Foundation
 import SwiftUI
 
+//MARK: - Enumerations
 public enum ScreenDimension {
     case width
     case height
@@ -19,6 +20,7 @@ public enum GAxis {
     case vertical
 }
 
+//MARK: - Dimension Functions
 public func sWidth() -> CGFloat {
     return UIScreen.main.bounds.size.width
 }

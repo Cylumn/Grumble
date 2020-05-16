@@ -37,7 +37,7 @@ public struct GrubSheet: View {
     private var toAddFood: (String?) -> Void
     
     //Initializer
-    public init(_ toAddFood: @escaping (String?) -> Void) {
+    public init() {
         self.selectedFID = ListCookie.lc().selectedFID
         switch self.selectedFID {
         case nil:
@@ -46,7 +46,7 @@ public struct GrubSheet: View {
             self.grub = UserCookie.uc().foodList()[self.selectedFID!]
         }
         
-        self.toAddFood = toAddFood
+        self.toAddFood = ContentCookie.cc().toAddFood
     }
     
     //Function Methods
@@ -239,8 +239,6 @@ public struct GrubSheet: View {
                     Grub.removeFood(self.selectedFID!)
                 })
             }
-            
-            //Spacer()
         }.padding([.leading, .trailing], 20)
         .foregroundColor(Color(white: 0.2))
         .offset(y: self.offsetGrubContent)
@@ -254,7 +252,7 @@ public struct GrubSheet: View {
                 gTagColors[self.grub!.priorityTag]
                     .edgesIgnoringSafeArea(.all)
                 
-                self.grub!.image()
+                self.grub!.image()?
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: sWidth() * scale)
@@ -328,7 +326,7 @@ public struct GrubSheet: View {
         }.onEnded { drag in
             self.currentImageFraction = self.imageFraction
             self.currentOffsetGrubContent = self.offsetGrubContent
-        }).offset(y: self.lc.presentGrubSheet ? 0 : sHeight() * 1.2)
+        })
     }
     
     public var body: some View {
@@ -345,6 +343,6 @@ struct GrubSheet_Previews: PreviewProvider {
         ListCookie.lc().selectedFID = "food"
         ListCookie.lc().presentGrubSheet = true
         UserCookie.uc().appendFoodList("food", Grub.testGrub())
-        return GrubSheet({_ in})
+        return GrubSheet()
     }
 }

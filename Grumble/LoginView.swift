@@ -128,7 +128,7 @@ public struct LoginView: View, GFieldDelegate {
  
     public var body: some View {
         ZStack {
-            gGradient()
+            LinearGradient(gradient: Gradient(colors: [gColor(.blue0), gColor(.blue4)]), startPoint: .top, endPoint: .bottom)
                 .edgesIgnoringSafeArea(.all)
                 .gesture(DragGesture().onChanged() { _ in
                     UIApplication.shared.endEditing()
@@ -185,7 +185,7 @@ public struct LoginView: View, GFieldDelegate {
                             Text(self.gft.error(FieldIndex.email.rawValue))
                                 .padding(3)
                                 .foregroundColor(gColor(.lightTurquoise))
-                                .font(gFont(.tekoSemiBold, .width, 2.5))
+                                .font(gFont(.ubuntuLight, .width, 2.5))
                                 .animation(gAnim(.spring))
                             
                             Spacer()

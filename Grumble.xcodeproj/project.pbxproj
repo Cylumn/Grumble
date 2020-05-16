@@ -34,6 +34,7 @@
 		D541F5EB244CE73200E98EF1 /* GhorblinAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5EA244CE73200E98EF1 /* GhorblinAnimations.swift */; };
 		D541F5F0244FCE2F00E98EF1 /* GBurger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5EF244FCE2F00E98EF1 /* GBurger.swift */; };
 		D541F5F2245013B400E98EF1 /* GTagShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5F1245013B400E98EF1 /* GTagShape.swift */; };
+		D5552CFE246F3029006E05AD /* ImageLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5552CFD246F3029006E05AD /* ImageLibrary.swift */; };
 		D55EEBA024271FBB0079922E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D55EEB9F24271FBB0079922E /* SettingsView.swift */; };
 		D55EEBA2242839310079922E /* AddFood.swift in Sources */ = {isa = PBXBuildFile; fileRef = D55EEBA1242839310079922E /* AddFood.swift */; };
 		D55EEBA4242867710079922E /* TabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D55EEBA3242867710079922E /* TabView.swift */; };
@@ -41,18 +42,11 @@
 		D56BA4BB2450B1910065E3E4 /* GSalad.swift in Sources */ = {isa = PBXBuildFile; fileRef = D56BA4BA2450B1910065E3E4 /* GSalad.swift */; };
 		D56BA4BD245132C50065E3E4 /* GSoup.swift in Sources */ = {isa = PBXBuildFile; fileRef = D56BA4BC245132C50065E3E4 /* GSoup.swift */; };
 		D573A82824386DDC00DB6067 /* GField.swift in Sources */ = {isa = PBXBuildFile; fileRef = D573A82724386DDC00DB6067 /* GField.swift */; };
-		D58C59A4242C07AC00137546 /* Teko-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D58C599F242C07AC00137546 /* Teko-Regular.ttf */; };
-		D58C59A5242C07AC00137546 /* Teko-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D58C59A0242C07AC00137546 /* Teko-Medium.ttf */; };
-		D58C59A6242C07AC00137546 /* Teko-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D58C59A1242C07AC00137546 /* Teko-Light.ttf */; };
-		D58C59A7242C07AC00137546 /* Teko-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D58C59A2242C07AC00137546 /* Teko-Bold.ttf */; };
-		D58C59A8242C07AC00137546 /* Teko-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D58C59A3242C07AC00137546 /* Teko-SemiBold.ttf */; };
 		D5948798242D17E900D25BFD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D5948797242D17E900D25BFD /* GoogleService-Info.plist */; };
 		D5AA593A2425E996000BEC5C /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA59392425E996000BEC5C /* MainView.swift */; };
 		D5AA593E2426C24F000BEC5C /* IOManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA593D2426C24F000BEC5C /* IOManager.swift */; };
 		D5AA594B24271366000BEC5C /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA594A24271366000BEC5C /* ListView.swift */; };
 		D5AA594D24271391000BEC5C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA594C24271391000BEC5C /* ContentView.swift */; };
-		D5AD27612425B06100462F1C /* Caveat-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD27572425B06100462F1C /* Caveat-Regular.ttf */; };
-		D5AD27632425B06100462F1C /* Caveat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD27592425B06100462F1C /* Caveat-Bold.ttf */; };
 		D5AD27732425B0D400462F1C /* Ubuntu-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD27682425B07B00462F1C /* Ubuntu-Bold.ttf */; };
 		D5AD27742425B0D400462F1C /* Ubuntu-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD276E2425B07C00462F1C /* Ubuntu-BoldItalic.ttf */; };
 		D5AD27752425B0D400462F1C /* Ubuntu-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D5AD276F2425B07C00462F1C /* Ubuntu-Italic.ttf */; };
@@ -129,6 +123,7 @@
 		D541F5EA244CE73200E98EF1 /* GhorblinAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhorblinAnimations.swift; sourceTree = "<group>"; };
 		D541F5EF244FCE2F00E98EF1 /* GBurger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GBurger.swift; sourceTree = "<group>"; };
 		D541F5F1245013B400E98EF1 /* GTagShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GTagShape.swift; sourceTree = "<group>"; };
+		D5552CFD246F3029006E05AD /* ImageLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLibrary.swift; sourceTree = "<group>"; };
 		D55EEB9F24271FBB0079922E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D55EEBA1242839310079922E /* AddFood.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFood.swift; sourceTree = "<group>"; };
 		D55EEBA3242867710079922E /* TabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabView.swift; sourceTree = "<group>"; };
@@ -136,18 +131,11 @@
 		D56BA4BA2450B1910065E3E4 /* GSalad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GSalad.swift; sourceTree = "<group>"; };
 		D56BA4BC245132C50065E3E4 /* GSoup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GSoup.swift; sourceTree = "<group>"; };
 		D573A82724386DDC00DB6067 /* GField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GField.swift; sourceTree = "<group>"; };
-		D58C599F242C07AC00137546 /* Teko-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Teko-Regular.ttf"; sourceTree = "<group>"; };
-		D58C59A0242C07AC00137546 /* Teko-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Teko-Medium.ttf"; sourceTree = "<group>"; };
-		D58C59A1242C07AC00137546 /* Teko-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Teko-Light.ttf"; sourceTree = "<group>"; };
-		D58C59A2242C07AC00137546 /* Teko-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Teko-Bold.ttf"; sourceTree = "<group>"; };
-		D58C59A3242C07AC00137546 /* Teko-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Teko-SemiBold.ttf"; sourceTree = "<group>"; };
 		D5948797242D17E900D25BFD /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D5AA59392425E996000BEC5C /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		D5AA593D2426C24F000BEC5C /* IOManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOManager.swift; sourceTree = "<group>"; };
 		D5AA594A24271366000BEC5C /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
 		D5AA594C24271391000BEC5C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		D5AD27572425B06100462F1C /* Caveat-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Caveat-Regular.ttf"; sourceTree = "<group>"; };
-		D5AD27592425B06100462F1C /* Caveat-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Caveat-Bold.ttf"; sourceTree = "<group>"; };
 		D5AD27682425B07B00462F1C /* Ubuntu-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-Bold.ttf"; sourceTree = "<group>"; };
 		D5AD27692425B07B00462F1C /* Ubuntu-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-Medium.ttf"; sourceTree = "<group>"; };
 		D5AD276A2425B07C00462F1C /* Ubuntu-MediumItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-MediumItalic.ttf"; sourceTree = "<group>"; };
@@ -317,6 +305,7 @@
 			isa = PBXGroup;
 			children = (
 				D54006F9246323BC0053B51C /* AddImage.swift */,
+				D5552CFD246F3029006E05AD /* ImageLibrary.swift */,
 				D54006FD2464D1B20053B51C /* ImageItem.swift */,
 			);
 			name = AddImage;
@@ -350,18 +339,6 @@
 				D51509C124525B780005C0E3 /* GFood.swift */,
 			);
 			path = TagShapeViews;
-			sourceTree = "<group>";
-		};
-		D58C599E242C079200137546 /* Teko */ = {
-			isa = PBXGroup;
-			children = (
-				D58C59A2242C07AC00137546 /* Teko-Bold.ttf */,
-				D58C59A1242C07AC00137546 /* Teko-Light.ttf */,
-				D58C59A0242C07AC00137546 /* Teko-Medium.ttf */,
-				D58C599F242C07AC00137546 /* Teko-Regular.ttf */,
-				D58C59A3242C07AC00137546 /* Teko-SemiBold.ttf */,
-			);
-			path = Teko;
 			sourceTree = "<group>";
 		};
 		D5AA593F2426C3BA000BEC5C /* Resources */ = {
@@ -400,20 +377,9 @@
 		D5AD27672425B07000462F1C /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
-				D58C599E242C079200137546 /* Teko */,
-				D5AD27712425B0C500462F1C /* Caveat */,
 				D5AD27722425B0CC00462F1C /* Ubuntu */,
 			);
 			path = Fonts;
-			sourceTree = "<group>";
-		};
-		D5AD27712425B0C500462F1C /* Caveat */ = {
-			isa = PBXGroup;
-			children = (
-				D5AD27572425B06100462F1C /* Caveat-Regular.ttf */,
-				D5AD27592425B06100462F1C /* Caveat-Bold.ttf */,
-			);
-			path = Caveat;
 			sourceTree = "<group>";
 		};
 		D5AD27722425B0CC00462F1C /* Ubuntu */ = {
@@ -645,24 +611,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				D5AD27792425B0D400462F1C /* Ubuntu-MediumItalic.ttf in Resources */,
-				D58C59A7242C07AC00137546 /* Teko-Bold.ttf in Resources */,
 				D5F0898A24257849000D375D /* Podfile in Resources */,
-				D5AD27632425B06100462F1C /* Caveat-Bold.ttf in Resources */,
 				D5AD277A2425B0D400462F1C /* Ubuntu-Regular.ttf in Resources */,
 				D5AD27742425B0D400462F1C /* Ubuntu-BoldItalic.ttf in Resources */,
 				D5AD27752425B0D400462F1C /* Ubuntu-Italic.ttf in Resources */,
-				D58C59A8242C07AC00137546 /* Teko-SemiBold.ttf in Resources */,
-				D58C59A5242C07AC00137546 /* Teko-Medium.ttf in Resources */,
 				D5AD27772425B0D400462F1C /* Ubuntu-LightItalic.ttf in Resources */,
 				D5AD27762425B0D400462F1C /* Ubuntu-Light.ttf in Resources */,
-				D58C59A6242C07AC00137546 /* Teko-Light.ttf in Resources */,
 				D5636C4E242EEC3A00476DCB /* data.plist in Resources */,
 				D5F0895A24253AC6000D375D /* LaunchScreen.storyboard in Resources */,
 				D5AD27732425B0D400462F1C /* Ubuntu-Bold.ttf in Resources */,
-				D5AD27612425B06100462F1C /* Caveat-Regular.ttf in Resources */,
 				D5F0895724253AC6000D375D /* Preview Assets.xcassets in Resources */,
 				D5AD27782425B0D400462F1C /* Ubuntu-Medium.ttf in Resources */,
-				D58C59A4242C07AC00137546 /* Teko-Regular.ttf in Resources */,
 				D5F0895424253AC6000D375D /* Assets.xcassets in Resources */,
 				D5948798242D17E900D25BFD /* GoogleService-Info.plist in Resources */,
 			);
@@ -750,6 +709,7 @@
 				D54006FE2464D1B20053B51C /* ImageItem.swift in Sources */,
 				D50292352437AECF008A5BFC /* GColor.swift in Sources */,
 				D51509C224525B780005C0E3 /* GFood.swift in Sources */,
+				D5552CFE246F3029006E05AD /* ImageLibrary.swift in Sources */,
 				D502923A2437F7B3008A5BFC /* GForm.swift in Sources */,
 				D5DFD721245A2BAF00B78451 /* Welcome.swift in Sources */,
 				D5AA593E2426C24F000BEC5C /* IOManager.swift in Sources */,

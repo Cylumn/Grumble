@@ -10,12 +10,10 @@ import SwiftUI
 
 public struct TabView: View {
     @ObservedObject private var tr: TabRouter = TabRouter.tr()
-    private var contentView: ContentView
     private var iconHeight: CGFloat
     
     //Initializer
-    public init(_ contentView: ContentView) {
-        self.contentView = contentView
+    public init() {
         self.iconHeight = 25
     }
     
@@ -23,7 +21,7 @@ public struct TabView: View {
     private func toList() {
         if self.tr.tab() != .list {
             self.tr.changeTab(.list)
-            self.contentView.toListHome(false)
+            ContentCookie.cc().toListHome(false)
         }
     }
     

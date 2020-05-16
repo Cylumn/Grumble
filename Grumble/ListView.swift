@@ -8,6 +8,7 @@
 
 import SwiftUI
 
+//MARK: - Constants
 private let formID: GFormID = GFormID.filterList
 private let titleHeight: CGFloat = 40
 public let searchHeight: CGFloat = sWidth() * 0.1
@@ -16,6 +17,7 @@ private let myListTitleHeight: CGFloat = 30
 
 private let maxOverlayOpacity: Double = 0.5
 
+//MARK: - Cookies
 public class ListCookie: ObservableObject {
     private static var instance: ListCookie? = nil
     @Published public var selectedFID: String? = nil
@@ -32,10 +34,10 @@ public class ListCookie: ObservableObject {
     }
 }
 
+//MARK: - Views
 public struct ListView: View {
     @ObservedObject private var uc: UserCookie = UserCookie.uc()
     @ObservedObject private var lc: ListCookie = ListCookie.lc()
-    private var contentView: ContentView
     
     @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
     
@@ -45,17 +47,12 @@ public struct ListView: View {
     
     @State private var presentAddImage: Bool = false
     
-    //Initializer
-    public init(_ contentView: ContentView) {
-        self.contentView = contentView
-    }
-    
-    //Getter Methods
+    //MARK: Getter Methods
     private func searchListExpanded() -> Bool {
         return self.lc.searchFocused || self.ko.visible()
     }
     
-    //Function Methods
+    //MARK: Function Methods
     private func showGrumbleSheet(_ ghorblinType: GrumbleSheet.GhorblinType) {
         withAnimation(gAnim(.easeOut)) {
             self.presentGrumbleSheet = true
@@ -72,7 +69,6 @@ public struct ListView: View {
     private func showAddImage(isPresented: Bool, animate: Bool) {
         let animatedTask = {
             self.presentAddImage = isPresented
-            AddImageCookie.aic().isPresented = isPresented
             AddImageCookie.aic().run(isPresented)
         }
         if animate {
@@ -87,9 +83,9 @@ public struct ListView: View {
         AddImageCookie.aic().setImage(nil)
     }
     
-    //View Methods
-    private func grumbleButton(_ title: String, _ color: Color, action: @escaping () -> Void) -> AnyView {
-        return AnyView(Button(action: action, label: {
+    //MARK: Subviews
+    private func grumbleButton(_ title: String, _ color: Color, action: @escaping () -> Void) -> some View {
+        return Button(action: action, label: {
             ZStack(alignment: .leading) {
                 color
                 
@@ -100,7 +96,7 @@ public struct ListView: View {
             .foregroundColor(Color.white)
             .cornerRadius(8)
             .shadow(color: color.opacity(0.3), radius: 5)
-        }))
+        })
     }
     
     private var listHeader: some View {
@@ -120,7 +116,7 @@ public struct ListView: View {
                         .font(gFont(.ubuntuBold, .width, 1.5))
                         .foregroundColor(gColor(.blue0))
                         .overlay(RoundedRectangle(cornerRadius: 8)
-                            .stroke(gColor(.blue0), lineWidth: 2))
+                        .stroke(gColor(.blue0), lineWidth: 2))
                 }
             })
         }
@@ -167,7 +163,6 @@ public struct ListView: View {
                         .frame(height: myListTitleHeight)
                         .foregroundColor(Color(white: 0.2))
                 }.padding([.leading, .trailing], 20)
-                .opacity(self.searchListExpanded() ? 0 : 1)
                 
                 VStack(alignment: .leading, spacing: 20) {
                     if !self.searchListExpanded() {
@@ -175,7 +170,8 @@ public struct ListView: View {
                             .frame(height: titleHeight)
                     }
                     
-                    SearchList(expanded: self.searchListExpanded)
+                    SearchList(expanded: self.searchListExpanded())
+                        .background(Color(white: 0.98))
                 }
             }.padding(.top, 20)
             
@@ -210,7 +206,7 @@ public struct ListView: View {
             Group {
                 self.listContent
                 
-                TabView(self.contentView)
+                TabView()
             }.offset(x: self.presentAddImage ? sWidth() * -0.3 : 0)
             
             ZStack(alignment: .top) {
@@ -234,9 +230,13 @@ public struct ListView: View {
                     .zIndex(1)
             }
             
-            GrubSheet(self.contentView.toAddFood)
+            if self.lc.presentGrubSheet {
+                GrubSheet()
+                    .transition(.move(edge: .bottom))
+                    .zIndex(1)
+            }
             
-            AddImage(present: self.showAddImage, toAddFood: self.contentView.toAddFood)
+            AddImage(present: self.showAddImage)
                 .offset(x: self.presentAddImage ? 0 : sWidth())
         }
     }

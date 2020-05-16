@@ -9,11 +9,13 @@
 import Foundation
 import SwiftUI
 
+//MARK: - Constants
 private let dampingFraction: Double = 0.8
 private let dampingFractionSlow: Double = 1.5
 private let duration: Double = 0.3
 private let durationSlow: Double = 1
 
+//MARK: - Enumerations
 public enum GAnimation {
     case spring
     case springSlow
@@ -22,6 +24,7 @@ public enum GAnimation {
     case easeInOut
 }
 
+//MARK: - Animation Getter Functions
 public func gAnim(_ animation: GAnimation) -> Animation {
     switch animation {
     case .spring:

@@ -43,8 +43,8 @@ public struct AddFood: View, GFieldDelegate {
     @State private var presentSearchTag: Bool = false
     
     //Initializer
-    public init(_ toListHome: @escaping () -> Void){
-        self.toListHome = toListHome
+    public init(){
+        self.toListHome = ContentCookie.cc().toListHome
         
         self.gft.setNames(["Food", "Restaurant", "Address", "Price"])
         self.gft.setSymbols(["flame.fill", "rosette", "mappin.and.ellipse", ""])
@@ -446,11 +446,11 @@ public struct AddFood: View, GFieldDelegate {
 struct AddToListView_Previews: PreviewProvider {
    static var previews: some View {
       Group {
-         AddFood({})
+         AddFood()
             .previewDevice(PreviewDevice(rawValue: "iPhone SE"))
             .previewDisplayName("iPhone SE")
 
-         AddFood({})
+         AddFood()
             .previewDevice(PreviewDevice(rawValue: "iPhone XS Max"))
             .previewDisplayName("iPhone XS Max")
       }

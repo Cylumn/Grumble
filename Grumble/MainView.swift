@@ -8,8 +8,9 @@
 
 import SwiftUI
 
+//MARK: - Views
 public struct MainView: View {
-    private var uac: UserAccessCookie = UserAccessCookie.uac()
+    @ObservedObject private var uac: UserAccessCookie = UserAccessCookie.uac()
     
     private var bg: some View {
         ZStack {
@@ -40,6 +41,7 @@ public struct MainView: View {
     }
 }
 
+//MARK: - Previews
 struct MainView_Previews: PreviewProvider {
     static var previews: some View {
         return MainView()

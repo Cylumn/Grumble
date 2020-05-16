@@ -8,6 +8,7 @@
 
 import Foundation
 
+//MARK: - String Alteration Functions
 public func trim(_ string: String, char: Character = " ", allowSingleChars: Bool = false) -> String {
     if string.isEmpty {
         return string

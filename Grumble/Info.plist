@@ -16,13 +16,6 @@
 		<string>Ubuntu-Medium.ttf</string>
 		<string>Ubuntu-MediumItalic.ttf</string>
 		<string>Ubuntu-Regular.ttf</string>
-		<string>Caveat-Bold.ttf</string>
-		<string>Caveat-Regular.ttf</string>
-		<string>Teko-Bold.ttf</string>
-		<string>Teko-Light.ttf</string>
-		<string>Teko-Medium.ttf</string>
-		<string>Teko-Regular.ttf</string>
-		<string>Teko-SemiBold.ttf</string>
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>

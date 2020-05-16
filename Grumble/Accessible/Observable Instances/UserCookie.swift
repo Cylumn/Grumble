@@ -10,6 +10,7 @@ import Foundation
 import SwiftUI
 import Firebase
 
+//MARK: - GrubTags
 public typealias GrubTag = String
 public let food: GrubTag = "food"
 public let bread: GrubTag = "bread"
@@ -63,6 +64,7 @@ public func gTagView(_ tag: GrubTag, _ boundingSize: CGSize, idleData: CGFloat, 
     return gTagIcons[tag]!(boundingSize, idleData, tossData)
 }
 
+//MARK: - Grub
 public struct Grub: Decodable, Equatable {
     public static var images: [String: Image] = [:]
     public var fid: String
@@ -91,7 +93,7 @@ public struct Grub: Decodable, Equatable {
         self.priorityTag = try values.decode(GrubTag.self, forKey: .priorityTag)
         self.date = try values.decode(String.self, forKey: .date)
         
-        Grub.images[self.fid] = Image(uiImage: grubImage(self.fid))
+        Grub.images[self.fid] = Image(uiImage: grubImage(self.fid)!)
     }
     
     public init(fid: String, _ foodItem: NSDictionary?, image: UIImage? = nil) {
@@ -105,7 +107,13 @@ public struct Grub: Decodable, Equatable {
         self.priorityTag = foodItem?.value(forKey: "priorityTag") as! GrubTag
         self.date = foodItem?.value(forKey: "date") as! String
 
-        Grub.images[self.fid] = image == nil ? Image(uiImage: grubImage(self.fid)) : Image(uiImage: image!)
+        if let image = image {
+            Grub.images[self.fid] = Image(uiImage: image)
+        } else {
+            if let uiImage = grubImage(self.fid) {
+                Grub.images[self.fid] = Image(uiImage: uiImage)
+            }
+        }
     }
     
     //Function Methods
@@ -132,8 +140,8 @@ public struct Grub: Decodable, Equatable {
         removeCloudFood(fid)
     }
     
-    public func image() -> Image {
-        return Grub.images[self.fid]!
+    public func image() -> Image? {
+        return Grub.images[self.fid]
     }
     
     @available(*, deprecated) //remove in future
@@ -152,6 +160,7 @@ public struct Grub: Decodable, Equatable {
     }
 }
 
+//MARK: - User Access Cookie
 public class UserAccessCookie: ObservableObject {
     private static var instance: UserAccessCookie?
     @Published private var hasCurrentUser: Bool = false
@@ -198,6 +207,7 @@ public class UserAccessCookie: ObservableObject {
     }
 }
 
+//MARK: - User Stored Data
 public class UserCookie: ObservableObject {
     private static var instance: UserCookie?
     @Published private var ghorblinName: String? = loadLocalData(.ghorblinName) as? String

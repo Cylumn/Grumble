@@ -9,8 +9,7 @@
 import Foundation
 import SwiftUI
 
-private var bgGradient: LinearGradient? = nil
-
+//MARK: - Enumerations
 public enum GColor: String {
     //Blues
     case blue0 = "Columbia"
@@ -36,15 +35,11 @@ public enum GColor: String {
     
     //TurquoiseFoam? WTF is this
     case lightTurquoise = "TurquoiseFoam"
-    
-    //Input Colors
-    case inputDefault = "inputDefault"
 }
 
+//MARK: - Color Getter Functions
 public func gColor(_ color: GColor) -> UIColor {
     switch color {
-        case .inputDefault:
-            return UIColor(white: 0.98, alpha: 1)
         default:
             return UIColor(named: color.rawValue) ?? UIColor.black
     }
@@ -52,11 +47,4 @@ public func gColor(_ color: GColor) -> UIColor {
 
 public func gColor(_ color: GColor) -> Color {
     return Color(gColor(color))
-}
-
-public func gGradient() -> LinearGradient {
-    if bgGradient == nil {
-        bgGradient = LinearGradient(gradient: Gradient(colors: [gColor(.blue0), gColor(.blue4)]), startPoint: .top, endPoint: .bottom)
-    }
-    return bgGradient!
 }

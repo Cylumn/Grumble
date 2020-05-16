@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SwiftUI
 import GoogleSignIn
 import Firebase
 
@@ -85,7 +86,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
         
         loadImages()
         _ = GTagLabeler.gtl()
-        GCamera.initIVC()
+        _ = ImageLibrary.library()
+        _ = GCamera.camera()
         
         return true
     }

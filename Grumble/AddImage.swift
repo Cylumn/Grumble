@@ -16,19 +16,15 @@ private let cameraHeight: CGFloat = sHeight() + ImageViewController.buttonOffset
 private let borderHeight: CGFloat = (cameraHeight - sWidth() * grubImageAspectRatio) * 0.5
 private let cameraBodyHeight: CGFloat = abs(ImageViewController.buttonOffset * 2)
 
-private let libraryColumns: Int = 4
 private let libraryBodyHeight: CGFloat = (abs(ImageViewController.buttonOffset) + borderHeight) * 2 - tabHeight
 
 public class AddImageCookie: ObservableObject {
     private static var instance: AddImageCookie? = nil
     public var currentFID: String? = nil
-    @Published public var tab: AddImage.Pages = AddImage.Pages.capture
     fileprivate var image: UIImage? = nil
     @Published public var drawnImage: Image? = nil
     @Published public var aspectRatio: CGFloat = 4 / 3
-    @Published public var selectedIndex: Int = 0
-    
-    @Published public var isPresented: Bool = false
+    @Published public var tab: AddImage.Pages = AddImage.Pages.capture
     @Published public var libraryAuthorized: Bool = true
     @Published public var cameraAuthorized: Bool = true
     
@@ -37,11 +33,12 @@ public class AddImageCookie: ObservableObject {
     @Published public var photos: [PHAsset: UIImage] = [:]
     @Published public var defaultLibraryPhotoAspectRatio: CGFloat = 4 / 3
     @Published public var defaultLibraryPhoto: UIImage? = nil
+    @Published public var selectedIndex: Int = 0
     
     @Published public var flash: Bool = false
     
     public var attemptResetDefaultPhoto: () -> Void = { }
-    public var toggleFlash: (Bool) -> Void = { _ in }
+    public var enableFlash: (Bool) -> Void = { _ in }
     public var capture: () -> Void = { }
     public var run: (Bool) -> Void = { _ in }
     
@@ -52,7 +49,7 @@ public class AddImageCookie: ObservableObject {
         return AddImageCookie.instance!
     }
     
-    //Getter Methods
+    //MARK: Getter Methods
     public func emptyImage() -> Bool {
         return self.image == nil
     }
@@ -61,6 +58,7 @@ public class AddImageCookie: ObservableObject {
         return self.image
     }
     
+    //MARK: Setter Methods
     public func setImage(_ image: UIImage?) {
         self.image = image
         self.drawnImage = image == nil ? nil : Image(uiImage: image!)
@@ -70,7 +68,7 @@ public class AddImageCookie: ObservableObject {
 public class CropImageCookie: ObservableObject {
     private static var instance: CropImageCookie? = nil
     @Published public var dragOffset: CGFloat = 0
-    @Published public var currentOffset: CGFloat = 0
+    public var currentOffset: CGFloat = 0
     
     public static func cic() -> CropImageCookie {
         if CropImageCookie.instance == nil {
@@ -79,6 +77,7 @@ public class CropImageCookie: ObservableObject {
         return CropImageCookie.instance!
     }
     
+    //MARK: Setter Methods
     public func resetOffset() {
         self.dragOffset = 0
         self.currentOffset = 0
@@ -99,9 +98,9 @@ public struct AddImage: View {
     @State private var presentLoading: Bool = false
     
     //Initializer
-    public init(present: @escaping (Bool, Bool) -> Void, toAddFood: @escaping (String?) -> Void) {
+    public init(present: @escaping (Bool, Bool) -> Void) {
         self.present = present
-        self.toAddFood = toAddFood
+        self.toAddFood = ContentCookie.cc().toAddFood
         
         AddFoodCookie.afc().presentAddImage = self.present
         AddImageCookie.aic().attemptResetDefaultPhoto = self.attemptResetDefaultPhoto
@@ -262,30 +261,9 @@ public struct AddImage: View {
         }
     }
     
-    private var library: some View {
-        let rows = 0 ..< Int(ceil(CGFloat(self.aic.photoAssets.count) / CGFloat(libraryColumns)))
-        let size: CGFloat = (sWidth() - CGFloat(libraryColumns) + 1) / CGFloat(libraryColumns)
-        return ScrollView(.vertical) {
-            VStack(alignment: .leading, spacing: 1) {
-                ForEach(rows, id: \.self) { row in
-                    HStack(spacing: 1) {
-                        ForEach((row * libraryColumns ..< min((row + 1) * libraryColumns, self.aic.photoAssets.count)), id: \.self) { index in
-                            ZStack {
-                                ImageItem(self.aic.photoAssets[index]!, self.aic.photos[self.aic.photoAssets[index]!]!, size: size, index: index)
-                                
-                                Color.white
-                                    .opacity(index == self.aic.selectedIndex ? 0.6 : 0)
-                            }.frame(width: size, height: size)
-                        }
-                    }
-                }
-            }.offset(y: 1)
-        }
-    }
-    
     private var flashButton: some View {
         Button(action: {
-            self.aic.toggleFlash(!self.aic.flash)
+            self.aic.enableFlash(!self.aic.flash)
         }, label: {
             Image(systemName: self.aic.flash ? "bolt.fill" : "bolt")
                 .resizable()
@@ -439,7 +417,7 @@ public struct AddImage: View {
     private var inputs: some View {
         ZStack {
             if self.presentCamera() {
-                GCamera()
+                GCamera.camera()
             }
             
             CropImage(self)
@@ -475,7 +453,7 @@ public struct AddImage: View {
                     .fill(AddImage.bgColor)
                     .frame(height: self.aic.tab == .capture ? cameraBodyHeight : libraryBodyHeight)
                 
-                self.library
+                ImageLibrary.library()
                     .frame(height: libraryBodyHeight)
                     .background(Color.white)
                     .offset(y: -tabHeight)
@@ -521,6 +499,6 @@ public struct AddImage: View {
 
 struct AddImage_Previews: PreviewProvider {
     static var previews: some View {
-        AddImage(present: { _, _ in }, toAddFood: { _ in })
+        AddImage(present: { _, _ in })
     }
 }

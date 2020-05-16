@@ -63,9 +63,8 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
         
         super.init(nibName: nil, bundle: nil)
         
-        AddImageCookie.aic().toggleFlash = self.toggleFlash
+        AddImageCookie.aic().enableFlash = self.enableFlash
         AddImageCookie.aic().capture = self.capture
-        AddImageCookie.aic().run = self.run
     }
     
     public required init?(coder decoder: NSCoder) {
@@ -74,8 +73,8 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
         super.init(coder: decoder)
     }
     
-    //Function Methods
-    private func toggleFlash(_ on: Bool) {
+    //MARK: Function Methods
+    private func enableFlash(_ on: Bool) {
         self.captureSettings?.flashMode = on ? .on : .off
         AddImageCookie.aic().flash = on
     }
@@ -175,10 +174,18 @@ public class ImageViewController: UIViewController, AVCapturePhotoCaptureDelegat
 }
 
 public struct GCamera: UIViewControllerRepresentable {
-    private static var ivc: ImageViewController? = nil
+    private static var instance: GCamera? = nil
+    private var ivc: ImageViewController
     
-    public static func initIVC() {
-        GCamera.ivc = ImageViewController()
+    private init() {
+        self.ivc = ImageViewController()
+    }
+    
+    public static func camera() -> GCamera {
+        if GCamera.instance == nil {
+            GCamera.instance = GCamera()
+        }
+        return GCamera.instance!
     }
     
     //Implemented UIViewControllerRepresentable Methods
@@ -196,10 +203,7 @@ public struct GCamera: UIViewControllerRepresentable {
     }
     
     public func makeUIViewController(context: UIViewControllerRepresentableContext<GCamera>) -> ImageViewController {
-        if GCamera.ivc == nil {
-            GCamera.initIVC()
-        }
-        return GCamera.ivc!
+        return self.ivc
     }
     
 }

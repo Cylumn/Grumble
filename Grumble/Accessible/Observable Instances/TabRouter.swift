@@ -8,16 +8,18 @@
 
 import Foundation
 
+//MARK: - Enumerations
 public enum Tab: String {
     case list = "List"
     case settings = "Settings"
 }
 
+//MARK: - Views
 public class TabRouter: ObservableObject {
     private static var instance: TabRouter?
     @Published private var currentTab: Tab = .list
 
-    //Getter Methods
+    //MARK: Getter Methods
     public static func tr() -> TabRouter {
         if TabRouter.instance == nil {
             TabRouter.instance = TabRouter()
@@ -29,7 +31,7 @@ public class TabRouter: ObservableObject {
         return self.currentTab
     }
     
-    //Setter Methods
+    //MARK: Setter Methods
     public func changeTab(_ tab: Tab) {
         if self.currentTab != tab {
             self.currentTab = tab

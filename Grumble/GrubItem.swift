@@ -8,6 +8,7 @@
 
 import SwiftUI
 
+//MARK: - Cookies
 public class GrubItemCookie: ObservableObject {
     private static var instance: GrubItemCookie?
     @Published public var textSize: CGFloat = 2.5
@@ -34,19 +35,20 @@ public class GrubItemCookie: ObservableObject {
     }
 }
 
+//MARK: - Views
 public struct GrubItem: View {
     @ObservedObject private var gic: GrubItemCookie = GrubItemCookie.gic()
     private var lc: ListCookie = ListCookie.lc()
     fileprivate var fid: String
     fileprivate var grub: Grub
     
-    //Initializer
+    //MARK: Initializer
     public init(_ grub: Grub) {
         self.fid = grub.fid
         self.grub = grub
     }
     
-    //Function Method
+    //MARK: Function Methods
     fileprivate func onClick() {
         self.lc.selectedFID = self.fid
         withAnimation(gAnim(.easeOut)) {
@@ -61,7 +63,7 @@ public struct GrubItem: View {
                 ZStack(alignment: .bottom) {
                     Rectangle().fill(gTagColors[self.grub.priorityTag]!)
                     
-                    self.grub.image()
+                    self.grub.image()?
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                     
@@ -110,12 +112,12 @@ public struct GrubSearchItem: View {
     private var item: GrubItem
     @State private var presentDeleteAlert: Bool = false
     
-    //Initializer
+    //MARK: Initializer
     public init(_ item : GrubItem) {
         self.item = item
     }
     
-    //Getter Methods
+    //MARK: Getter Methods
     public func shownIDs() -> [GrubTag] {
         var sorted = self.item.grub.tags.sorted(by: { $0.0 > $1.0 })
         sorted.remove(at: sorted.firstIndex(where: { $0.0 == food })!)
@@ -233,6 +235,7 @@ public struct GrubSearchItem: View {
     }
 }
 
+//MARK: - Previews
 struct GrubItem_Previews: PreviewProvider {
     static var previews: some View {
         GrubItem(Grub.testGrub())

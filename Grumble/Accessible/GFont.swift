@@ -9,10 +9,11 @@
 import Foundation
 import SwiftUI
 
+//MARK: - Constants
 private let fontMultiplier: CGFloat = 50
 
+//MARK: - Enumerations
 public enum GFont: String {
-    //Ubuntu
     case ubuntu = "Ubuntu-Regular"
     case ubuntuBold = "Ubuntu-Bold"
     case ubuntuBoldItalic = "Ubuntu-BoldItalic"
@@ -21,19 +22,9 @@ public enum GFont: String {
     case ubuntuLightItalic = "Ubuntu-LightItalic"
     case ubuntuMedium = "Ubuntu-Medium"
     case ubuntuMediumItalic = "Ubuntu-MediumItalic"
-    
-    //Caveat -- UNUSED
-    case caveat = "Caveat-Regular"
-    case caveatBold = "Caveat-Bold"
-    
-    //Teko
-    case teko = "Teko-Regular"
-    case tekoBold = "Teko-Bold"
-    case tekoSemiBold = "Teko-SemiBold"
-    case tekoLight = "Teko-Light"
-    case tekoMedium = "Teko-Medium"
 }
 
+//MARK: - Font Getter Functions
 public func gFont(_ name: GFont, _ size: CGFloat) -> Font {
     return Font.custom(name.rawValue, size: size)
 }

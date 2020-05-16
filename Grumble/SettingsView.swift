@@ -132,7 +132,7 @@ public struct SettingsView: View {
                 .offset(x: self.page == nil ? 0 : sWidth() * -0.3)
                 .zIndex(0)
             
-            TabView(self.contentView)
+            TabView()
             
             ZStack {
                 if self.page == . about {

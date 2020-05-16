@@ -10,14 +10,17 @@ import SwiftUI
 import Firebase
 import Photos
 
+//MARK: - Constants
 private let imagePath: String = "images/"
 
+//MARK: - Decodable Structures
 private struct DataList: Decodable {
     var foodList: [String: Grub]?
     var ghorblinName: String?
     var linkToken: String?
 }
 
+//MARK: - Enumerations
 public enum DataListKeys: String {
     case foodList = "foodList"
     case ghorblinName = "ghorblinName"
@@ -29,7 +32,7 @@ public enum LoadingStatus {
     case loaded
 }
 
-//MARK: - Getter Functions
+//MARK: - Helper Functions
 private func dataPath() -> String {
     let docPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
     let dataPListPath = docPath.appendingPathComponent("data.plist")
@@ -51,7 +54,6 @@ private func dataPath() -> String {
     }
 }
 
-//MARK: - Helper Functions
 private func loadPropertyList<T>(_ url: URL?, _ decodable: T.Type) -> T? where T : Decodable {
     guard let url = url else {
         print("error: url is empty")
@@ -69,7 +71,7 @@ private func loadPropertyList<T>(_ url: URL?, _ decodable: T.Type) -> T? where T
     return nil
 }
 
-//MARK: - Image Functions
+//MARK: - Grub Image Functions
 public func loadGrubImages() {
     let docPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
     let fileManager = FileManager.default
@@ -80,7 +82,7 @@ public func loadGrubImages() {
         }
         let files = try fileManager.contentsOfDirectory(atPath: dirURL.path)
         for filePath in files {
-            Grub.images[filePath] = Image(uiImage: grubImage(filePath))
+            Grub.images[filePath] = Image(uiImage: grubImage(filePath)!)
         }
     } catch {
         print("error:\(error)")
@@ -88,12 +90,12 @@ public func loadGrubImages() {
     
 }
 
-public func grubImage(_ filename: String) -> UIImage {
+public func grubImage(_ filename: String) -> UIImage? {
     let grubImagePath: String = filename.contains(".jpg") ? filename : filename + ".jpg"
     let docPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
     let filePath = docPath.appendingPathComponent(imagePath + grubImagePath)
     let imageURL = URL(fileURLWithPath: filePath)
-    return UIImage(contentsOfFile: imageURL.path)!
+    return UIImage(contentsOfFile: imageURL.path)
 }
 
 public func writeLocalGrubImage(_ filename: String, image: UIImage) {
@@ -129,10 +131,10 @@ public func clearLocalGrubImages() {
     let docPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
     let fileManager = FileManager.default
     do {
-        let dirPath = docPath.appendingPathComponent(imagePath)
-        let files = try fileManager.contentsOfDirectory(atPath: dirPath)
+        let dirURL = URL(fileURLWithPath: docPath.appendingPathComponent(imagePath))
+        let files = try fileManager.contentsOfDirectory(atPath: dirURL.path)
         for filePath in files {
-            try fileManager.removeItem(atPath: dirPath + filePath)
+            try fileManager.removeItem(atPath: dirURL.appendingPathComponent(filePath).path)
         }
     } catch {
         print("error:\(error)")
@@ -475,7 +477,7 @@ public func loadImages() {
         let imageSize = CGSize(width: CGFloat(asset.pixelWidth) * ratio,
                                height: CGFloat(asset.pixelHeight) * ratio)
 
-        /* For faster performance, and maybe degraded image */
+        // For faster performance, and maybe degraded image
         let options = PHImageRequestOptions()
         options.deliveryMode = .fastFormat
         options.isSynchronous = true
@@ -485,8 +487,8 @@ public func loadImages() {
         }
     }
     
-        AddImageCookie.aic().photoAssets = assets
-        AddImageCookie.aic().photos = photos
+    AddImageCookie.aic().photoAssets = assets
+    AddImageCookie.aic().photos = photos
         
     if assets.count > 0 {
         let size: CGSize = CGSize(width: assets[0]!.pixelWidth, height: assets[0]!.pixelHeight)

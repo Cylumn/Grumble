@@ -8,30 +8,39 @@
 
 import SwiftUI
 
+//MARK: Constants
 public let navBarHeight: CGFloat = sWidth() * 0.12
 public let tabHeight: CGFloat = sHeight() * 0.085
 
 public let navBarFont: Font = gFont(.ubuntuBold, 18)
 
-public struct ContentView: View {
-    @ObservedObject private var tr: TabRouter = TabRouter.tr()
-    @State private var slideIndex: Int = PanelIndex.listHome.rawValue
-    @State private var slideOffset: CGFloat = 0
+//MARK: - Cookies
+public class ContentCookie: ObservableObject {
+    private static var instance: ContentCookie? = nil
+    @Published fileprivate var panelIndex: Int = PanelIndex.listHome.rawValue
     
-    //Panel Enums
-    private enum PanelIndex: Int {
+    //MARK: Initializer
+    public static func cc() -> ContentCookie {
+        if ContentCookie.instance == nil {
+            ContentCookie.instance = ContentCookie()
+        }
+        return ContentCookie.instance!
+    }
+    
+    //MARK: Enumerations
+    fileprivate enum PanelIndex: Int {
         case listHome = 0
         case addFood = 1
     }
     
-    //Slide changes
-    public func toListHome(_ withAnim: Bool = true) {
-        if withAnim {
+    //MARK: Slide Change Functions
+    public func toListHome(_ animated: Bool) {
+        if animated {
             withAnimation(gAnim(.easeOut)){
-                self.slideIndex = PanelIndex.listHome.rawValue
+                self.panelIndex = PanelIndex.listHome.rawValue
             }
         } else {
-            self.slideIndex = PanelIndex.listHome.rawValue
+            self.panelIndex = PanelIndex.listHome.rawValue
         }
         UIApplication.shared.endEditing()
         KeyboardObserver.reset(.listhome)
@@ -44,7 +53,7 @@ public struct ContentView: View {
     
     public func toAddFood(_ currentFID: String? = nil) {
         withAnimation(gAnim(.easeOut)) {
-            self.slideIndex = PanelIndex.addFood.rawValue
+            self.panelIndex = PanelIndex.addFood.rawValue
         }
         UIApplication.shared.endEditing()
         KeyboardObserver.reset(.addfood)
@@ -60,24 +69,30 @@ public struct ContentView: View {
         }
     }
     
-    private func slideChange(_ index: Int) {
+    fileprivate func slideChange(_ index: Int) {
         switch index {
         case PanelIndex.listHome.rawValue:
-            toListHome()
+            self.toListHome()
         case PanelIndex.addFood.rawValue:
-            toAddFood()
+            self.toAddFood()
         default:
             break
         }
     }
+}
+
+//MARK: - Views
+public struct ContentView: View {
+    @ObservedObject private var cc: ContentCookie = ContentCookie.cc()
+    @ObservedObject private var tr: TabRouter = TabRouter.tr()
     
     public var body: some View {
         ZStack(alignment: .bottom) {
-            SlideView(index: self.$slideIndex, offsetFactor: 0.3,
-                views: [AnyView(ListView(self)),
-                        AnyView(AddFood(self.toListHome))],
-                padding: 0, unDraggable: [PanelIndex.listHome.rawValue],
-                onSlideChange: self.slideChange)
+            SlideView(index: self.$cc.panelIndex, offsetFactor: 0.3,
+                views: [AnyView(ListView()),
+                        AnyView(AddFood())],
+                padding: 0, unDraggable: [ContentCookie.PanelIndex.listHome.rawValue],
+                onSlideChange: self.cc.slideChange)
             
             if self.tr.tab() == .settings {
                 SettingsView(self)
@@ -86,6 +101,7 @@ public struct ContentView: View {
     }
 }
 
+//MARK: - Previews
 #if DEBUG
 struct ContentView_Previews: PreviewProvider {
    static var previews: some View {

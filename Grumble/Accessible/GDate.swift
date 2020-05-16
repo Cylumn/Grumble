@@ -8,9 +8,11 @@
 
 import Foundation
 
+//MARK: - Constants
 private let dateFormatter: DateFormatter = DateFormatter()
 private let format: String = "yyyy-MM-dd HH:mm:ss"
 
+//MARK: - Date Getter Functions
 public func dateComponent() -> DateComponents {
     let date = Date()
     let calender = Calendar.current

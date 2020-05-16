@@ -8,20 +8,22 @@
 
 import SwiftUI
 
+//MARK: - Constants
 private let formID: GFormID = GFormID.filterList
 
+//MARK: - Views
 public struct SearchList: View, GFieldDelegate {
     @ObservedObject private var uc: UserCookie = UserCookie.uc()
     @ObservedObject private var gft: GFormText = GFormText.gft(formID)
     @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
-    private var expanded: () -> Bool
+    private var expanded: Bool
     
-    //Initializer
-    public init(expanded: @escaping () -> Bool) {
+    //MARK: Initializer
+    public init(expanded: Bool) {
         self.expanded = expanded
     }
     
-    //Function Methods
+    //MARK: Function Methods
     private func grubContainsToken(_ grub: Grub) -> Bool {
         let text = self.gft.text(0).lowercased()
         let food = grub.food.lowercased()
@@ -38,7 +40,7 @@ public struct SearchList: View, GFieldDelegate {
         return false
     }
     
-    //GFieldDelegate Method Implementations
+    //MARK: GFieldDelegate Method Implementations
     public func style(_ index: Int, _ textField: GTextField, _ placeholderText: @escaping (String) -> Void) {
         placeholderText("Filter List")
         textField.setInsets(top: 5, left: 45, bottom: 5, right: 10)
@@ -74,7 +76,7 @@ public struct SearchList: View, GFieldDelegate {
                     .cornerRadius(8)
                     .frame(maxWidth: .infinity, maxHeight: searchHeight)
                 
-                if self.expanded() {
+                if self.expanded {
                     Button(action: {
                         withAnimation(gAnim(.spring)) {
                             ListCookie.lc().searchFocused = false
@@ -89,7 +91,7 @@ public struct SearchList: View, GFieldDelegate {
                 }
             }
             
-            if self.expanded() {
+            if self.expanded {
                 ZStack {
                     Color.clear
                         .frame(minHeight: sHeight())
@@ -124,6 +126,6 @@ public struct SearchList: View, GFieldDelegate {
 
 struct SearchList_Previews: PreviewProvider {
     static var previews: some View {
-        SearchList(expanded: { return true })
+        SearchList(expanded: true)
     }
 }
