@@ -44,7 +44,7 @@ public class ContentCookie: ObservableObject {
         }
         UIApplication.shared.endEditing()
         KeyboardObserver.reset(.listhome)
-        ListCookie.lc().searchFocused = false
+        SearchListCookie.slc().focused = false
     }
     
     public func toListHome() {

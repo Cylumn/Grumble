@@ -54,7 +54,7 @@ public class LibraryObserver: NSObject, PHPhotoLibraryChangeObserver {
                 if changes.hasIncrementalChanges {
                     var origAssets: [Int: PHAsset] = AddImageCookie.aic().photoAssets
                     var assets: [PHAsset] = []
-                    var photos: [PHAsset: UIImage] = AddImageCookie.aic().photos
+                    var photos: [PHAsset: UIImage] = AddImageCookie.aic().currentPhotos()
                     
                     //Reverse
                     for index in origAssets.keys.sorted() {
@@ -109,7 +109,7 @@ public class LibraryObserver: NSObject, PHPhotoLibraryChangeObserver {
                     }
                     
                     AddImageCookie.aic().photoAssets = origAssets
-                    AddImageCookie.aic().photos.merge(photos, uniquingKeysWith: { (_, new) in new })
+                    AddImageCookie.aic().unionPhotos(photos)
                     
                     if origAssets.count > 0 {
                         let size: CGSize = CGSize(width: origAssets[0]!.pixelWidth, height: origAssets[0]!.pixelHeight)

@@ -73,8 +73,10 @@ public class KeyboardObserver: ObservableObject {
             KeyboardObserver.observedFields.remove(field)
         }
         
-        KeyboardObserver.ko(field).keyboardVisible = false
-        KeyboardObserver.ko(field).keyboardHeight = 0
+        if KeyboardObserver.ko(field).keyboardVisible {
+            KeyboardObserver.ko(field).keyboardVisible = false
+            KeyboardObserver.ko(field).keyboardHeight = 0
+        }
     }
     
     public static func observe(_ field: GFormID, _ beginsVisible: Bool? = nil) {

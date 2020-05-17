@@ -42,13 +42,15 @@ public struct GField: UIViewRepresentable {
     private var formID: GFormID
     private var index: Int
     private var placeholder: String
+    private var shouldFocus: () -> Bool
     private var delegate: GFieldDelegate
     
     //Initializers
-    public init(_ formID: GFormID, _ index: Int, _ placeholder: String = "", _ delegate: GFieldDelegate) {
+    public init(_ formID: GFormID, _ index: Int, _ placeholder: String = "", shouldFocus: @escaping () -> Bool = { true }, _ delegate: GFieldDelegate) {
         self.formID = formID
         self.placeholder = placeholder
         self.index = index
+        self.shouldFocus = shouldFocus
         self.delegate = delegate
     }
     
@@ -103,6 +105,10 @@ public struct GField: UIViewRepresentable {
         }
         
         //Implemented UITextFieldDelegate Methods
+        public func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+            return self.parent.shouldFocus()
+        }
+        
         public func textFieldDidBeginEditing(_ textField: UITextField) {
             GFormRouter.gfr().setIndex(self.parent.formID, self.parent.index)
         }

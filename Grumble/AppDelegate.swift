@@ -61,7 +61,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
                 createLinkedAccount(pass: linkToken)
             }
             
-            onLogin()
+            onLogin(requireCloud: true)
         }
     }
     
@@ -79,7 +79,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
         UserAccessCookie.uac().setLoggedIn(Auth.auth().currentUser)
         
         if let _ = Auth.auth().currentUser?.uid {
-            onLogin()
+            onLogin(requireCloud: false)
         } else {
             KeyboardObserver.reset(.useraccess)
         }

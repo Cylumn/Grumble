@@ -20,13 +20,12 @@ public enum SheetPosition {
 public struct SheetView<Content>: View where Content: View {
     private var currentHeight: Binding<CGFloat>
     private var movingOffset: Binding<CGFloat>
-    @State private var lastDragPosition: DragGesture.Value? = nil
     
     private var maxHeight: CGFloat
     private var backgroundExtension: CGFloat
     private var onDragStateChanged: ((SheetPosition) -> ())
     private var onDragEnd:((SheetPosition) -> ())
-    private var content: () -> Content
+    private var content: Content
     
     @State private var position: SheetPosition = SheetPosition.down
     
@@ -39,7 +38,7 @@ public struct SheetView<Content>: View where Content: View {
         self.backgroundExtension = 0.2
         self.onDragStateChanged = onDragStateChanged
         self.onDragEnd = onDragEnd
-        self.content = content
+        self.content = content()
         
         self.position = currentHeight.wrappedValue > maxHeight * hideFraction ? .down : .up
     }
@@ -56,16 +55,8 @@ public struct SheetView<Content>: View where Content: View {
                 self.onDragStateChanged(.up)
                 self.position = .up
             }
-            self.lastDragPosition = drag
         }.onEnded { drag in
-            var adjustedOffset = self.movingOffset.wrappedValue
-            if let ldp = self.lastDragPosition {
-                let timeDiff = drag.time.timeIntervalSince(ldp.time)
-                let speed = (drag.translation.height - ldp.translation.height) / CGFloat(timeDiff)
-                adjustedOffset = self.movingOffset.wrappedValue + speed * dragSpeedConsidered
-            }
-            
-            if adjustedOffset > self.maxHeight * hideFraction {
+            if drag.predictedEndTranslation.height > self.maxHeight * hideFraction {
                 withAnimation(gAnim(.spring)) {
                     self.movingOffset.wrappedValue = self.maxHeight
                 }
@@ -89,7 +80,7 @@ public struct SheetView<Content>: View where Content: View {
     }
     
     public var body: some View {
-        Group(content: self.content)
+        self.content
             .background(ZStack {
                             Color.white
                                 .frame(height: sHeight() * (1 + self.backgroundExtension))
@@ -99,7 +90,6 @@ public struct SheetView<Content>: View where Content: View {
             .frame(minHeight: 0, maxHeight: sHeight(), alignment: .bottom)
             .offset(y: sHeight() + safeAreaInset(.top) - self.maxHeight + self.movingOffset.wrappedValue)
             .gesture(self.gesture)
-            //.shadow(color: Color.gray.opacity(0.2), radius: 20, x: 0.0, y: -5)
     }
 }
 

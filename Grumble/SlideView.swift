@@ -119,15 +119,15 @@ public struct SlideView: View {
     
     public var body: some View {
         ZStack(alignment: .bottom) {
-            ForEach(0 ..< self.views.count, id: \.self) { i in
+            ForEach((0 ..< self.views.count).filter {
+                return self.offsetValueCumulative($0) > 2 * -sWidth() && self.offsetValueCumulative($0) < 2 * sWidth()
+            }, id: \.self) { i in
                 ZStack {
-                    if self.offsetValueCumulative(i) > 2 * -sWidth() && self.offsetValueCumulative(i) < 2 * sWidth() {
-                        self.views[i]
-                            .padding([.top, .bottom], self.padding)
-                            .background(self.bgColor)
-                            .frame(width: self.viewWidth)
-                            .offset(x: self.viewWidth >= sWidth() ? self.offsetValue(i) : self.offsetValueCumulative(i))
-                    }
+                    self.views[i]
+                        .padding([.top, .bottom], self.padding)
+                        .background(self.bgColor)
+                        .frame(width: self.viewWidth)
+                        .offset(x: self.viewWidth >= sWidth() ? self.offsetValue(i) : self.offsetValueCumulative(i))
                 }
             }
         }.frame(width: sWidth(), height: self.height)

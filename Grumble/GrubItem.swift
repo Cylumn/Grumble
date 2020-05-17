@@ -35,21 +35,39 @@ public class GrubItemCookie: ObservableObject {
     }
 }
 
+public class ObservedImage: ObservableObject {
+    private static var instances: [String: ObservedImage] = [:]
+    @Published public var image: Image? = nil
+    
+    fileprivate static func oi(_ fid: String) -> ObservedImage {
+        if ObservedImage.instances[fid] == nil {
+            ObservedImage.instances[fid] = ObservedImage()
+        }
+        return ObservedImage.instances[fid]!
+    }
+    
+    public static func updateImage(_ grub: Grub) {
+        ObservedImage.oi(grub.fid).image = grub.image()
+    }
+}
+
 //MARK: - Views
 public struct GrubItem: View {
     @ObservedObject private var gic: GrubItemCookie = GrubItemCookie.gic()
     private var lc: ListCookie = ListCookie.lc()
     fileprivate var fid: String
     fileprivate var grub: Grub
+    @ObservedObject private var oi: ObservedImage
     
     //MARK: Initializer
     public init(_ grub: Grub) {
         self.fid = grub.fid
         self.grub = grub
+        self.oi = ObservedImage.oi(self.fid)
     }
     
     //MARK: Function Methods
-    fileprivate func onClick() {
+    private func onClick() {
         withAnimation(gAnim(.easeOut)) {
             self.lc.selectedFID = self.fid
         }
@@ -62,7 +80,7 @@ public struct GrubItem: View {
                 ZStack(alignment: .bottom) {
                     Rectangle().fill(gTagColors[self.grub.priorityTag]!)
                     
-                    self.grub.image()?
+                    self.oi.image?
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                     
@@ -107,27 +125,26 @@ public struct GrubItem: View {
     }
 }
 
-public struct GrubSearchItem: View {
-    private var item: GrubItem
-    @State private var presentDeleteAlert: Bool = false
+private struct GrubSearchItemTags: View {
+    @ObservedObject private var gft: GFormText = GFormText.gft(.filterList)
+    private var grub: Grub
     
-    //MARK: Initializer
-    public init(_ item : GrubItem) {
-        self.item = item
+    public init(_ grub: Grub) {
+        self.grub = grub
     }
     
     //MARK: Getter Methods
     public func shownIDs() -> [GrubTag] {
-        var sorted = self.item.grub.tags.sorted(by: { $0.0 > $1.0 })
+        var sorted = self.grub.tags.sorted(by: { $0.0 > $1.0 })
         sorted.remove(at: sorted.firstIndex(where: { $0.0 == food })!)
         sorted.append((food, 0))
         var shownIDs: [(GrubTag, Double)] = []
-        if GFormText.gft(.filterList).text(0).isEmpty {
+        if self.gft.text(0).isEmpty {
             for index in (sorted.count < 3 ? 0 : 1) ..< min(sorted.count, 3) {
                 shownIDs.append(sorted[index])
             }
         } else {
-            let token = GFormText.gft(.filterList).text(0).lowercased()
+            let token = self.gft.text(0).lowercased()
             //add all that contains search key
             for id in sorted {
                 if id.key.contains(token) {
@@ -180,17 +197,45 @@ public struct GrubSearchItem: View {
     public var body: some View {
         let shownIDs: [GrubTag] = self.shownIDs()
         
-        return HStack(spacing: 20) {
+        return HStack(spacing: 10) {
+            ForEach(shownIDs, id: \.self) { tag in
+                self.tokenText(tag)
+            }
+            
+            Spacer()
+        }
+    }
+}
+
+public struct GrubSearchItem: View {
+    private var fid: String
+    private var grub: Grub
+    private var tags: GrubSearchItemTags
+    @State private var presentDeleteAlert: Bool = false
+    
+    //MARK: Initializer
+    public init(_ grub: Grub) {
+        self.fid = grub.fid
+        self.grub = grub
+        self.tags = GrubSearchItemTags(self.grub)
+    }
+    
+    //MARK: Function Methods
+    private func onClick() {
+        withAnimation(gAnim(.easeOut)) {
+            ListCookie.lc().selectedFID = self.fid
+        }
+        UIApplication.shared.endEditing()
+    }
+    
+    public var body: some View {
+        HStack(spacing: 20) {
             VStack(alignment: .leading, spacing: 10) {
-                Text(self.item.grub.food)
+                Text(self.grub.food)
                     .font(gFont(.ubuntuMedium, .width, 1.8))
                     .lineLimit(1)
                     
-                HStack(spacing: 10) {
-                    ForEach(shownIDs, id: \.self) { tag in
-                        self.tokenText(tag)
-                    }
-                }
+                self.tags
             }
             
             Spacer()
@@ -200,12 +245,12 @@ public struct GrubSearchItem: View {
                 .padding(10)
                 .font(gFont(.ubuntuBold, .width, 1.5))
                 .foregroundColor(gColor(.blue4))
-                .onTapGesture {
-                    ListCookie.lc().searchFocused = true
-                    self.item.onClick()
-                }
                 .overlay(RoundedRectangle(cornerRadius: 8)
                 .stroke(gColor(.blue4), lineWidth: 2))
+                .onTapGesture {
+                    SearchListCookie.slc().focused = true
+                    self.onClick()
+                }
             })
             
             Button(action: {}, label: {
@@ -214,19 +259,19 @@ public struct GrubSearchItem: View {
                 .font(gFont(.ubuntuBold, .width, 1.5))
                 .foregroundColor(gColor(.coral))
                 .onTapGesture {
-                    ListCookie.lc().searchFocused = true
+                    SearchListCookie.slc().focused = true
                     UIApplication.shared.endEditing()
                     self.presentDeleteAlert.toggle()
                 }.overlay(RoundedRectangle(cornerRadius: 8)
                 .stroke(gColor(.coral), lineWidth: 2))
             }).alert(isPresented: self.$presentDeleteAlert) {
                 Alert(title: Text("Delete Grub?"), primaryButton: Alert.Button.default(Text("Cancel")), secondaryButton: Alert.Button.destructive(Text("Delete")) {
-                    Grub.removeFood(self.item.fid)
+                    Grub.removeFood(self.fid)
                 })
             }
         }.padding(10)
         .padding(.trailing, 20)
-        .frame(maxWidth: .infinity)
+        .frame(width: sWidth() - 40, height: 60)
         .background(Color.white)
         .foregroundColor(Color(white: 0.2))
         .cornerRadius(10)

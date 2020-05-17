@@ -199,7 +199,7 @@ public struct SearchTag: View, GFieldDelegate {
                             .padding(10)
                             .foregroundColor(Color(white: 0.2))
                         
-                        GField(formID, 0, self)
+                        GField(formID, 0, shouldFocus: { SearchTagButtonCookie.stbc().isPresented }, self)
                     }.padding([.top, .bottom], 10)
                     .padding(.leading, 20)
                     Button(action: self.stc.endSearch, label: {

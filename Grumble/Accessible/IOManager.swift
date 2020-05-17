@@ -72,30 +72,18 @@ private func loadPropertyList<T>(_ url: URL?, _ decodable: T.Type) -> T? where T
 }
 
 //MARK: - Grub Image Functions
-public func loadGrubImages() {
-    let docPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
-    let fileManager = FileManager.default
-    do {
-        let dirURL = URL(fileURLWithPath: docPath as String).appendingPathComponent(imagePath)
-        if !fileManager.fileExists(atPath: dirURL.path) {
-            try fileManager.createDirectory(at: dirURL, withIntermediateDirectories: true)
-        }
-        let files = try fileManager.contentsOfDirectory(atPath: dirURL.path)
-        for filePath in files {
-            Grub.images[filePath] = Image(uiImage: grubImage(filePath)!)
-        }
-    } catch {
-        print("error:\(error)")
-    }
-    
-}
-
-public func grubImage(_ filename: String) -> UIImage? {
+public func grubImage(_ filename: String) -> (UIImage, Date)? {
     let grubImagePath: String = filename.contains(".jpg") ? filename : filename + ".jpg"
     let docPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
     let filePath = docPath.appendingPathComponent(imagePath + grubImagePath)
     let imageURL = URL(fileURLWithPath: filePath)
-    return UIImage(contentsOfFile: imageURL.path)
+    do {
+        let attributes = try FileManager.default.attributesOfItem(atPath: filePath)
+        return (UIImage(contentsOfFile: imageURL.path)!, attributes[FileAttributeKey.modificationDate] as! Date)
+    } catch {
+        print("error:\(error)")
+        return nil
+    }
 }
 
 public func writeLocalGrubImage(_ filename: String, image: UIImage) {
@@ -152,7 +140,6 @@ public func loadLocalData() {
         UserAccessCookie.uac().setLinkToken(data.linkToken)
         
         DispatchQueue.main.async {
-            loadGrubImages()
             UserCookie.uc().setFoodList(data.foodList ?? [:] as [String: Grub])
         }
     }
@@ -165,7 +152,6 @@ public func loadLocalData(_ key: DataListKeys) -> Any? {
     if let data = data {
         switch key {
         case .foodList:
-            loadGrubImages()
             return data.foodList
         case .ghorblinName:
             return data.ghorblinName
@@ -229,6 +215,7 @@ public func appendCloudFood(_ key: String, _ foodItem: NSDictionary) {
 public func appendCloudFood(_ key: String, _ foodItem: NSDictionary, _ image: UIImage) {
     let storage = Storage.storage().reference()
     let imageRef = storage.child(imagePath + key + ".jpg")
+    print("calling append food")
     imageRef.putData(image.jpegData(compressionQuality: 1)!, metadata: nil) { (metadata, error) in
         guard error == nil else {
             print("error:\(error!)")
@@ -255,8 +242,21 @@ public func removeCloudFood(_ key: String) {
 }
 
 //MARK: - Cloud Observers
+/* 1. Check if file exists
+ * 2. -- if exists, download & compare Metadatas
+ * 3. ---- if updated, create food item
+ * 3. ---- if not updated, download & create food item
+ * 2. -- if doesn't exist, download & create food item
+ */
 public func onCloudFoodAdded(_ snapshot: DataSnapshot) {
-    DispatchQueue.global(qos: .utility).async {
+    let createItem: (UIImage?) -> Void = { image in
+        if let foodItem = snapshot.value as? NSDictionary {
+            UserCookie.uc().appendFoodList(snapshot.key, Grub(fid: snapshot.key, foodItem, image: image))
+            appendLocalFood(snapshot.key, foodItem, image)
+        }
+    }
+    
+    let downloadItem: () -> Void = {
         let storage = Storage.storage().reference()
         let imageRef = storage.child(imagePath + snapshot.key + ".jpg")
         imageRef.getData(maxSize: .max) { (metadata, error) in
@@ -270,6 +270,31 @@ public func onCloudFoodAdded(_ snapshot: DataSnapshot) {
                 UserCookie.uc().appendFoodList(snapshot.key, Grub(fid: snapshot.key, foodItem, image: image))
                 appendLocalFood(snapshot.key, foodItem, image)
             }
+        }
+    }
+    
+    DispatchQueue.global(qos: .utility).async {
+        let storage = Storage.storage().reference()
+        let imageRef = storage.child(imagePath + snapshot.key + ".jpg")
+        if let (_, modifyDate) = grubImage(snapshot.key) {
+            //File Exists
+            imageRef.getMetadata { metadata, error in
+                guard error == nil else {
+                    print("error:\(error!)")
+                    return
+                }
+                
+                if metadata!.updated!.advanced(by: 60 * 5) <= modifyDate {
+                    //Updated
+                    createItem(nil)
+                } else {
+                    //Not Updated
+                    downloadItem()
+                }
+            }
+        } else {
+            //File Does Not Exist
+            downloadItem()
         }
     }
 }
@@ -344,14 +369,20 @@ public func setObservers(uid: String) {
 public func queueImageTraining(_ fid: String, _ tags: [GrubTag: Double]) {
     var modifiedTags = tags
     modifiedTags[food] = nil
-    if UserAccessCookie.uac().loggedIn() && modifiedTags.count > 0 {
+    if UserAccessCookie.uac().loggedIn() == .loggedIn && modifiedTags.count > 0 {
         Database.database().reference().child("trainingQueue").child(fid).setValue(modifiedTags)
     }
 }
 
 //MARK: - User Login/Logout
-public func onLogin() {
+public func onLogin(requireCloud: Bool) {
     if let uid = Auth.auth().currentUser?.uid {
+        if requireCloud {
+            UserAccessCookie.uac().setLoggedIn(.inProgress)
+        } else {
+            UserAccessCookie.uac().setLoggedIn(Auth.auth().currentUser)
+        }
+        
         loadCloudData() { data in
             let foodList: NSDictionary? = data?[DataListKeys.foodList.rawValue] as? NSDictionary
             if foodList != nil && foodList!.count > 0 {
@@ -497,7 +528,7 @@ public func loadImages() {
     }
     
     AddImageCookie.aic().photoAssets = assets
-    AddImageCookie.aic().photos = photos
+    AddImageCookie.aic().unionPhotos(photos)
         
     if assets.count > 0 {
         let size: CGSize = CGSize(width: assets[0]!.pixelWidth, height: assets[0]!.pixelHeight)
@@ -527,7 +558,7 @@ public func loadImages() {
                 
                 if updateCount % updatePhotosPerCount == 0 || updateCount == photos.count {
                     DispatchQueue.main.async {
-                        AddImageCookie.aic().photos.merge(photos, uniquingKeysWith: { (_, new) in new })
+                        AddImageCookie.aic().unionPhotos(photos)
                     }
                 }
             }

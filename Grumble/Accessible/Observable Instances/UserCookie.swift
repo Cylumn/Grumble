@@ -66,7 +66,7 @@ public func gTagView(_ tag: GrubTag, _ boundingSize: CGSize, idleData: CGFloat, 
 
 //MARK: - Grub
 public struct Grub: Decodable, Equatable {
-    public static var images: [String: Image] = [:]
+    private static var images: [String: Image] = [:]
     public var fid: String
     
     public var food: String
@@ -81,7 +81,7 @@ public struct Grub: Decodable, Equatable {
         case fid, food, price, restaurant, address, tags, priorityTag, date
     }
     
-    //Initializer
+    //MARK: Initializers
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: GrubKeys.self)
         self.fid = try values.decode(String.self, forKey: .fid)
@@ -93,7 +93,8 @@ public struct Grub: Decodable, Equatable {
         self.priorityTag = try values.decode(GrubTag.self, forKey: .priorityTag)
         self.date = try values.decode(String.self, forKey: .date)
         
-        Grub.images[self.fid] = Image(uiImage: grubImage(self.fid)!)
+        Grub.images[self.fid] = Image(uiImage: grubImage(self.fid)!.0)
+        ObservedImage.updateImage(self)
     }
     
     public init(fid: String, _ foodItem: NSDictionary?, image: UIImage? = nil) {
@@ -109,14 +110,15 @@ public struct Grub: Decodable, Equatable {
 
         if let image = image {
             Grub.images[self.fid] = Image(uiImage: image)
-        } else {
-            if let uiImage = grubImage(self.fid) {
+        } else if Grub.images[self.fid] == nil {
+            if let (uiImage, _) = grubImage(self.fid) {
                 Grub.images[self.fid] = Image(uiImage: uiImage)
             }
         }
+        ObservedImage.updateImage(self)
     }
     
-    //Function Methods
+    //MARK: Class Function Methods
     fileprivate static func sortByDate(_ grubList: [String: Grub]) -> [(String, Grub)] {
         var newGrubs: [(String, Grub)] = []
         newGrubs.reserveCapacity(grubList.capacity)
@@ -140,10 +142,6 @@ public struct Grub: Decodable, Equatable {
         removeCloudFood(fid)
     }
     
-    public func image() -> Image? {
-        return Grub.images[self.fid]
-    }
-    
     @available(*, deprecated) //remove in future
     public static func testGrub() -> Grub {
         var grubTest: [String: Any] = [:]
@@ -158,16 +156,21 @@ public struct Grub: Decodable, Equatable {
         
         return Grub(fid: "", grubTest as NSDictionary, image: UIImage(imageLiteralResourceName: "ExplainTraining"))
     }
+    
+    //MARK: Getter Methods
+    public func image() -> Image? {
+        return Grub.images[self.fid]
+    }
 }
 
 //MARK: - User Access Cookie
 public class UserAccessCookie: ObservableObject {
     private static var instance: UserAccessCookie?
-    @Published private var hasCurrentUser: Bool = false
+    @Published private var loginState: LoginState = Auth.auth().currentUser == nil ? .loggedOut : .loggedIn
     @Published private var linkToken: String? = loadLocalData(.linkToken) as? String
     @Published fileprivate var newAccount: Bool = loadLocalData(.ghorblinName) == nil
     
-    //Getter Methods
+    //MARK: Initializers
     public static func uac() -> UserAccessCookie {
         if UserAccessCookie.instance == nil {
             UserAccessCookie.instance = UserAccessCookie()
@@ -175,8 +178,16 @@ public class UserAccessCookie: ObservableObject {
         return UserAccessCookie.instance!
     }
     
-    public func loggedIn() -> Bool {
-        return self.hasCurrentUser
+    //MARK: Enumerations
+    public enum LoginState {
+        case loggedOut
+        case inProgress
+        case loggedIn
+    }
+    
+    //MARK: Getter Methods
+    public func loggedIn() -> LoginState {
+        return self.loginState
     }
     
     public func linkedAccount() -> Bool {
@@ -194,10 +205,14 @@ public class UserAccessCookie: ObservableObject {
     //Setter Methods
     public func setLoggedIn(_ user: User?) {
         if user == nil {
-            self.hasCurrentUser = false
+            self.loginState = .loggedOut
         } else {
-            self.hasCurrentUser = true
+            self.loginState = .loggedIn
         }
+    }
+    
+    public func setLoggedIn(_ state: LoginState) {
+        self.loginState = state
     }
     
     public func setLinkToken(_ token: String?) {

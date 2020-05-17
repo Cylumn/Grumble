@@ -21,7 +21,6 @@ private let maxOverlayOpacity: Double = 0.5
 public class ListCookie: ObservableObject {
     private static var instance: ListCookie? = nil
     @Published public var selectedFID: String? = nil
-    @Published public var searchFocused: Bool = false
     
     public static func lc() -> ListCookie {
         if ListCookie.instance == nil {
@@ -40,7 +39,7 @@ public struct ListView: View {
     @ObservedObject private var uc: UserCookie = UserCookie.uc()
     @ObservedObject private var lc: ListCookie = ListCookie.lc()
     
-    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
+    private var searchList: SearchList
     
     @State private var presentGrumbleSheet: Bool = false
     @State private var ghorblinType: GrumbleSheet.GhorblinType = .grumble
@@ -48,9 +47,8 @@ public struct ListView: View {
     
     @State private var presentAddImage: Bool = false
     
-    //MARK: Getter Methods
-    private func searchListExpanded() -> Bool {
-        return self.lc.searchFocused || self.ko.visible()
+    public init() {
+        self.searchList = SearchList(titleHeight: titleHeight)
     }
     
     //MARK: Function Methods
@@ -150,53 +148,48 @@ public struct ListView: View {
     private var listContent: some View {
         ScrollView(.vertical) {
             ZStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 20) {
-                    self.listHeader
-                        .frame(height: titleHeight)
+                VStack {
+                    ZStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 20) {
+                            self.listHeader
+                                .frame(height: titleHeight)
+                            
+                            Spacer()
+                                .frame(height: searchHeight)
+                            
+                            self.grumbleButtons
+                            
+                            Text("My List")
+                                .font(gFont(.ubuntuBold, .width, 3))
+                                .frame(height: myListTitleHeight)
+                                .foregroundColor(Color(white: 0.2))
+                        }.padding([.leading, .trailing], 20)
+                    }.padding(.top, 20)
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 20) {
+                            if !self.uc.foodList().isEmpty {
+                                ForEach((0 ..< self.uc.foodListByDate().count).reversed(), id: \.self) { index in
+                                    GrubItem(self.uc.foodListByDate()[index].1)
+                                }
+                            } else {
+                                Text(self.uc.loadingStatus == .loading ? "Loading..." : "List is Empty!")
+                                    .font(gFont(.ubuntu, .width, 2))
+                                    .foregroundColor(Color(white: 0.2))
+                            }
+                            
+                            Spacer()
+                        }.padding(.leading, 20)
+                        .padding(.bottom, 40)
+                        .frame(minWidth: sWidth())
+                    }.frame(width: sWidth())
                     
                     Spacer()
-                        .frame(height: searchHeight)
-                    
-                    self.grumbleButtons
-                    
-                    Text("My List")
-                        .font(gFont(.ubuntuBold, .width, 3))
-                        .frame(height: myListTitleHeight)
-                        .foregroundColor(Color(white: 0.2))
-                }.padding([.leading, .trailing], 20)
-                
-                VStack(alignment: .leading, spacing: 20) {
-                    if !self.searchListExpanded() {
-                        Spacer()
-                            .frame(height: titleHeight)
-                    }
-                    
-                    SearchList(expanded: self.searchListExpanded())
-                        .background(Color(white: 0.98))
                 }
-            }.padding(.top, 20)
-            
-            if !self.searchListExpanded() {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 20) {
-                        if !self.uc.foodList().isEmpty {
-                            ForEach((0 ..< self.uc.foodListByDate().count).reversed(), id: \.self) { index in
-                                GrubItem(self.uc.foodListByDate()[index].1)
-                            }
-                        } else {
-                            Text(self.uc.loadingStatus == .loading ? "Loading..." : "List is Empty!")
-                                .font(gFont(.ubuntu, .width, 2))
-                                .foregroundColor(Color(white: 0.2))
-                        }
-                        
-                        Spacer()
-                    }.padding(.leading, 20)
-                    .padding(.bottom, 40)
-                    .frame(minWidth: sWidth())
-                }.frame(width: sWidth())
+                
+                self.searchList
+                    .padding(.top, 20)
             }
-            
-            Spacer()
         }
     }
     

@@ -54,7 +54,7 @@ public class GTagLabeler {
         }
         
         let handler = VNImageRequestHandler(cgImage: image)
-        DispatchQueue.global(qos: .utility).async {
+        DispatchQueue.global(qos: .userInitiated).async {
             do {
                 try handler.perform([request])
             } catch {

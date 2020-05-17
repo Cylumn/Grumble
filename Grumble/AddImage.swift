@@ -30,10 +30,11 @@ public class AddImageCookie: ObservableObject {
     
     public var phManager: PHCachingImageManager = PHCachingImageManager()
     @Published public var photoAssets: [Int: PHAsset] = [:]
-    @Published public var photos: [PHAsset: UIImage] = [:]
+    @Published private var photos: [PHAsset: UIImage] = [:]
+    public var imageItems: [PHAsset: ImageItem] = [:]
     @Published public var defaultLibraryPhotoAspectRatio: CGFloat = 4 / 3
     @Published public var defaultLibraryPhoto: UIImage? = nil
-    @Published public var selectedIndex: Int = 0
+    @Published public var selectedAsset: PHAsset? = nil
     
     @Published public var flash: Bool = false
     
@@ -58,10 +59,28 @@ public class AddImageCookie: ObservableObject {
         return self.image
     }
     
+    public func currentPhotos() -> [PHAsset: UIImage] {
+        return self.photos
+    }
+    
     //MARK: Setter Methods
     public func setImage(_ image: UIImage?) {
         self.image = image
         self.drawnImage = image == nil ? nil : Image(uiImage: image!)
+    }
+    
+    public func unionPhotos(_ newAssets: [PHAsset: UIImage]) {
+        self.photos.merge(photos, uniquingKeysWith: { (_, new) in new })
+        
+        DispatchQueue.global(qos: .utility).async {
+            var imageItems: [PHAsset: ImageItem] = self.imageItems
+            for asset in newAssets {
+                imageItems[asset.key] = ImageItem(asset.key, asset.value, size: ImageLibrary.imageSize)
+            }
+            DispatchQueue.main.async {
+                self.imageItems = imageItems
+            }
+        }
     }
 }
 
@@ -132,7 +151,7 @@ public struct AddImage: View {
     //Function Methods
     private func attemptResetDefaultPhoto() {
         if self.aic.tab == .library {
-            self.aic.selectedIndex = 0
+            self.aic.selectedAsset = self.aic.photoAssets[0]
             self.aic.setImage(self.aic.defaultLibraryPhoto)
             self.aic.aspectRatio = self.aic.defaultLibraryPhotoAspectRatio
             CropImageCookie.cic().resetOffset()

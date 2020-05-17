@@ -162,6 +162,7 @@ fileprivate struct SearchTagButton: View {
     public var body: some View {
         return ZStack(alignment: .center) {
             self.searchTag
+                .allowsHitTesting(self.stbc.isPresented)
             
             if !self.stbc.isPresented {
                 Color(white: 0.9)
@@ -179,6 +180,7 @@ fileprivate struct SearchTagButton: View {
                 })
             }
         }.frame(width: self.width(), height: self.height())
+        .contentShape(Rectangle().inset(by: -15))
         .cornerRadius(self.stbc.isPresented ? 0 : 30)
         .offset(self.offset())
     }

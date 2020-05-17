@@ -80,7 +80,7 @@ public struct LoginView: View, GFieldDelegate {
             }
             
             UIApplication.shared.endEditing()
-            onLogin()
+            onLogin(requireCloud: true)
         }
     }
     
@@ -228,12 +228,12 @@ public struct LoginView: View, GFieldDelegate {
                 switch pos {
                     case .up:
                         KeyboardObserver.ignore(.login)
-                        KeyboardObserver.observe(.signup, true)
+                        KeyboardObserver.observe(.signup)
                         GFormRouter.gfr().callCurrentResponder(.signup)
                     case .down:
                         UIApplication.shared.endEditing()
                         KeyboardObserver.ignore(.signup)
-                        KeyboardObserver.observe(.login, false)
+                        KeyboardObserver.observe(.login)
                 }
             }, login: self.attemptLogin)
         }

@@ -14,6 +14,20 @@ public struct MainView: View {
     @State private var lagTest: CGFloat = 0
     @State private var timer: Timer? = nil
     
+    private var loginView: LoginView
+    private var loadingProfile: LoadingProfile
+    private var createLinkedAccount: CreateLinkedAccount
+    private var welcome: Welcome
+    private var contentView: ContentView
+    
+    public init() {
+        self.loginView = LoginView()
+        self.loadingProfile = LoadingProfile()
+        self.createLinkedAccount = CreateLinkedAccount()
+        self.welcome = Welcome()
+        self.contentView = ContentView()
+    }
+    
     private var bg: some View {
         ZStack {
             gColor(.blue0)
@@ -26,18 +40,20 @@ public struct MainView: View {
     
     public var body: some View {
         ZStack {
-            if self.uac.loggedIn() {
+            if self.uac.loggedIn() == .loggedOut {
+                self.loginView.transition(.move(edge: .bottom))
+            } else if self.uac.loggedIn() == .inProgress {
+                self.loadingProfile.transition(.opacity)
+            } else if self.uac.loggedIn() == .loggedIn {
                 self.bg
                 
                 if !self.uac.linkedAccount() {
-                    CreateLinkedAccount()
+                    self.createLinkedAccount
                 } else if self.uac.newUser() {
-                    Welcome()
+                    self.welcome
                 } else {
-                    ContentView()
+                    self.contentView
                 }
-            } else {
-                LoginView().transition(.move(edge: .bottom))
             }
             
             /*Rectangle()

@@ -11,16 +11,30 @@ import SwiftUI
 //MARK: - Constants
 private let formID: GFormID = GFormID.filterList
 
+//MARK: - Cookies
+public class SearchListCookie: ObservableObject {
+    private static var instance: SearchListCookie? = nil
+    @Published public var focused: Bool = false
+    
+    public static func slc() -> SearchListCookie {
+        if SearchListCookie.instance == nil {
+            SearchListCookie.instance = SearchListCookie()
+        }
+        return SearchListCookie.instance!
+    }
+}
+
 //MARK: - Views
-public struct SearchList: View, GFieldDelegate {
+private struct SearchListContent: View {
     @ObservedObject private var uc: UserCookie = UserCookie.uc()
     @ObservedObject private var gft: GFormText = GFormText.gft(formID)
-    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
-    private var expanded: Bool
+    private var searchItems: [GrubSearchItem]
     
-    //MARK: Initializer
-    public init(expanded: Bool) {
-        self.expanded = expanded
+    public init() {
+        self.searchItems = []
+        for index in (0 ..< self.uc.foodListByDate().count) {
+            self.searchItems.append(GrubSearchItem(self.uc.foodListByDate()[index].1))
+        }
     }
     
     //MARK: Function Methods
@@ -40,6 +54,43 @@ public struct SearchList: View, GFieldDelegate {
         return false
     }
     
+    public var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text(self.gft.text(0).isEmpty ? "Showing all results..." :
+                "Showing results for: \"" + self.gft.text(0) + "\"")
+                .font(gFont(.ubuntuLight, .width, 2))
+                .foregroundColor(Color(white: 0.4))
+            
+            ForEach((0 ..< self.uc.foodListByDate().count).reversed().filter {
+                self.grubContainsToken(self.uc.foodListByDate()[$0].1)
+            }, id: \.self) {
+                index in
+                self.searchItems[index]
+            }
+            
+            Spacer()
+        }
+    }
+}
+
+public struct SearchList: View, GFieldDelegate {
+    private var slc: SearchListCookie = SearchListCookie.slc()
+    @ObservedObject private var gft: GFormText = GFormText.gft(formID)
+    @ObservedObject private var ko: KeyboardObserver = KeyboardObserver.ko(formID)
+    private var titleHeight: CGFloat
+    private var content: SearchListContent
+    
+    //MARK: Initializer
+    public init(titleHeight: CGFloat) {
+        self.titleHeight = titleHeight
+        self.content = SearchListContent()
+    }
+    
+    //MARK: Getter Methods
+    private func expanded() -> Bool {
+        return self.slc.focused || self.ko.visible()
+    }
+    
     //MARK: GFieldDelegate Method Implementations
     public func style(_ index: Int, _ textField: GTextField, _ placeholderText: @escaping (String) -> Void) {
         placeholderText("Filter List")
@@ -49,7 +100,7 @@ public struct SearchList: View, GFieldDelegate {
     }
     
     public func proceedField() -> Bool {
-        ListCookie.lc().searchFocused = false
+        self.slc.focused = false
         self.gft.setText(0, "")
         return true
     }
@@ -70,62 +121,62 @@ public struct SearchList: View, GFieldDelegate {
     
     public var body: some View {
         VStack(spacing: 20) {
-            HStack(spacing: 20) {
-                self.searchBar
-                    .background(Color(white: 0.93))
-                    .cornerRadius(8)
-                    .frame(maxWidth: .infinity, maxHeight: searchHeight)
-                
-                if self.expanded {
-                    Button(action: {
-                        withAnimation(gAnim(.spring)) {
-                            ListCookie.lc().searchFocused = false
-                            self.gft.setText(0, "")
-                            UIApplication.shared.endEditing()
-                        }
-                    }, label: {
-                        Text("Cancel")
-                            .font(gFont(.ubuntuLight, .width, 2))
-                            .foregroundColor(gColor(.blue0))
-                    })
-                }
+            if !self.expanded() {
+                Spacer()
+                    .frame(height: self.titleHeight)
             }
             
-            if self.expanded {
-                ZStack {
+            ZStack {
+                if self.expanded() {
                     Color.clear
-                        .frame(minHeight: sHeight())
+                        .padding(.top, searchHeight)
                         .contentShape(Rectangle())
                         .onTapGesture {
                             withAnimation(gAnim(.spring)) {
-                                ListCookie.lc().searchFocused = false
+                                self.slc.focused = false
                                 self.gft.setText(0, "")
                             }
                         }
-                    
-                    VStack(alignment: .leading, spacing: 20) {
-                        Text(self.gft.text(0).isEmpty ? "Showing all results..." :
-                            "Showing results for: \"" + self.gft.text(0) + "\"")
-                            .font(gFont(.ubuntuLight, .width, 2))
-                            .foregroundColor(Color(white: 0.4))
+                }
+                
+                VStack(spacing: 20) {
+                    HStack(spacing: 0) {
+                        self.searchBar
+                            .background(Color(white: 0.93))
+                            .cornerRadius(8)
+                            .frame(maxWidth: .infinity, maxHeight: searchHeight)
                         
-                        ForEach((0 ..< self.uc.foodListByDate().count).reversed().filter {
-                            self.grubContainsToken(self.uc.foodListByDate()[$0].1)
-                        }, id: \.self) {
-                            index in
-                            GrubSearchItem(GrubItem(self.uc.foodListByDate()[index].1))
+                        if self.expanded() {
+                            Button(action: {
+                                withAnimation(gAnim(.spring)) {
+                                    self.slc.focused = false
+                                    UIApplication.shared.endEditing()
+                                }
+                                self.gft.setText(0, "")
+                            }, label: {
+                                Text("Cancel")
+                                    .font(gFont(.ubuntuLight, .width, 2))
+                                    .foregroundColor(gColor(.blue0))
+                                    .padding([.leading, .trailing], 20)
+                                    .padding([.top, .bottom], 15)
+                            })
                         }
+                    }.padding(.leading, 20)
+                    .padding(.trailing, self.expanded() ? 0 : 20)
+                    
+                    if self.expanded() {
+                        self.content
                         
-                        Spacer().frame(maxWidth: .infinity, minHeight: self.ko.height() + sHeight() * 0.1)
+                        Spacer().frame(minHeight: self.ko.height() + sHeight() * 0.1)
                     }
-                }.transition(.move(edge: .bottom))
-            }
-        }.padding([.leading, .trailing], 20)
+                }
+            }.background(Color(white: 0.98))
+        }
     }
 }
 
 struct SearchList_Previews: PreviewProvider {
     static var previews: some View {
-        SearchList(expanded: true)
+        SearchList(titleHeight: 40)
     }
 }

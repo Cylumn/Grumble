@@ -43,6 +43,7 @@
 		D56BA4BD245132C50065E3E4 /* GSoup.swift in Sources */ = {isa = PBXBuildFile; fileRef = D56BA4BC245132C50065E3E4 /* GSoup.swift */; };
 		D573A82824386DDC00DB6067 /* GField.swift in Sources */ = {isa = PBXBuildFile; fileRef = D573A82724386DDC00DB6067 /* GField.swift */; };
 		D5948798242D17E900D25BFD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D5948797242D17E900D25BFD /* GoogleService-Info.plist */; };
+		D5A4C1C32471C97000452080 /* LoadingProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5A4C1C22471C97000452080 /* LoadingProfile.swift */; };
 		D5AA593A2425E996000BEC5C /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA59392425E996000BEC5C /* MainView.swift */; };
 		D5AA593E2426C24F000BEC5C /* IOManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA593D2426C24F000BEC5C /* IOManager.swift */; };
 		D5AA594B24271366000BEC5C /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA594A24271366000BEC5C /* ListView.swift */; };
@@ -132,6 +133,7 @@
 		D56BA4BC245132C50065E3E4 /* GSoup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GSoup.swift; sourceTree = "<group>"; };
 		D573A82724386DDC00DB6067 /* GField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GField.swift; sourceTree = "<group>"; };
 		D5948797242D17E900D25BFD /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		D5A4C1C22471C97000452080 /* LoadingProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingProfile.swift; sourceTree = "<group>"; };
 		D5AA59392425E996000BEC5C /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		D5AA593D2426C24F000BEC5C /* IOManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOManager.swift; sourceTree = "<group>"; };
 		D5AA594A24271366000BEC5C /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
@@ -231,6 +233,7 @@
 			children = (
 				D5F0895124253AC4000D375D /* LoginView.swift */,
 				D5DFD71D2458F43600B78451 /* SignupSheet.swift */,
+				D5A4C1C22471C97000452080 /* LoadingProfile.swift */,
 			);
 			name = Login;
 			sourceTree = "<group>";
@@ -718,6 +721,7 @@
 				D5014C242441431500C5530B /* GrubSheet.swift in Sources */,
 				D50292332437AE06008A5BFC /* ScreenDimension.swift in Sources */,
 				D5AA594D24271391000BEC5C /* ContentView.swift in Sources */,
+				D5A4C1C32471C97000452080 /* LoadingProfile.swift in Sources */,
 				D5DFD71C24579EC100B78451 /* SecurityForm.swift in Sources */,
 				D54006FA246323BD0053B51C /* AddImage.swift in Sources */,
 				D573A82824386DDC00DB6067 /* GField.swift in Sources */,
