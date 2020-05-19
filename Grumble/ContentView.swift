@@ -17,7 +17,7 @@ public let navBarFont: Font = gFont(.ubuntuBold, 18)
 //MARK: - Cookies
 public class ContentCookie: ObservableObject {
     private static var instance: ContentCookie? = nil
-    @Published fileprivate var panelIndex: Int = PanelIndex.listHome.rawValue
+    @Published public var panelIndex: Int = PanelIndex.listHome.rawValue
     
     //MARK: Initializer
     public static func cc() -> ContentCookie {
@@ -28,7 +28,7 @@ public class ContentCookie: ObservableObject {
     }
     
     //MARK: Enumerations
-    fileprivate enum PanelIndex: Int {
+    public enum PanelIndex: Int {
         case listHome = 0
         case addFood = 1
     }
@@ -86,11 +86,19 @@ public struct ContentView: View {
     @ObservedObject private var cc: ContentCookie = ContentCookie.cc()
     @ObservedObject private var tr: TabRouter = TabRouter.tr()
     
+    private var listView: ListView
+    private var addFood: AddFood
+    
+    public init() {
+        self.listView = ListView()
+        self.addFood = AddFood()
+    }
+    
     public var body: some View {
         ZStack(alignment: .bottom) {
             SlideView(index: self.$cc.panelIndex, offsetFactor: 0.3,
-                views: [AnyView(ListView()),
-                        AnyView(AddFood())],
+                  views: [AnyView(self.listView),
+                          AnyView(self.addFood)],
                 padding: 0, unDraggable: [ContentCookie.PanelIndex.listHome.rawValue],
                 onSlideChange: self.cc.slideChange)
             

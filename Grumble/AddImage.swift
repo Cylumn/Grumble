@@ -189,6 +189,7 @@ public struct AddImage: View {
         }
         
         AddFoodCookie.afc().image = UIImage(cgImage: cgImage)
+        
         GTagLabeler.gtl().predict(image: cgImage) { tags in
             self.toAddFood(nil)
             var newTags = tags

@@ -202,16 +202,21 @@ public struct SearchTag: View, GFieldDelegate {
                         GField(formID, 0, shouldFocus: { SearchTagButtonCookie.stbc().isPresented }, self)
                     }.padding([.top, .bottom], 10)
                     .padding(.leading, 20)
-                    Button(action: self.stc.endSearch, label: {
-                        Text("Cancel")
-                            .frame(maxWidth: sWidth() * 0.2, maxHeight: .infinity)
-                            .font(gFont(.ubuntuLight, .width, 2))
-                            .foregroundColor(gColor(.blue0))
-                    })
+                    Spacer().frame(width: sWidth() * 0.2)
                 }
-            }.padding(.top, 5)
-            .frame(height: 60)
+            }.frame(height: 60)
             .cornerRadius(5)
+            
+            ZStack(alignment: .topTrailing) {
+                Color.clear
+                
+                Button(action: self.stc.endSearch, label: {
+                    Text("Cancel")
+                        .frame(maxWidth: sWidth() * 0.2, maxHeight: 60)
+                        .font(gFont(.ubuntuLight, .width, 2))
+                        .foregroundColor(gColor(.blue0))
+                })
+            }
             
             self.addTagButton
         }

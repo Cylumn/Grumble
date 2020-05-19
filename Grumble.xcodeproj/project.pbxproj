@@ -31,7 +31,6 @@
 		D540148824393502008F8CCF /* FieldParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D540148724393502008F8CCF /* FieldParser.swift */; };
 		D541F5E6244A4B8F00E98EF1 /* GrumbleSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5E5244A4B8F00E98EF1 /* GrumbleSheet.swift */; };
 		D541F5E9244A522200E98EF1 /* GhorblinSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5E8244A522200E98EF1 /* GhorblinSheet.swift */; };
-		D541F5EB244CE73200E98EF1 /* GhorblinAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5EA244CE73200E98EF1 /* GhorblinAnimations.swift */; };
 		D541F5F0244FCE2F00E98EF1 /* GBurger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5EF244FCE2F00E98EF1 /* GBurger.swift */; };
 		D541F5F2245013B400E98EF1 /* GTagShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541F5F1245013B400E98EF1 /* GTagShape.swift */; };
 		D5552CFE246F3029006E05AD /* ImageLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5552CFD246F3029006E05AD /* ImageLibrary.swift */; };
@@ -43,6 +42,7 @@
 		D56BA4BD245132C50065E3E4 /* GSoup.swift in Sources */ = {isa = PBXBuildFile; fileRef = D56BA4BC245132C50065E3E4 /* GSoup.swift */; };
 		D573A82824386DDC00DB6067 /* GField.swift in Sources */ = {isa = PBXBuildFile; fileRef = D573A82724386DDC00DB6067 /* GField.swift */; };
 		D5948798242D17E900D25BFD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D5948797242D17E900D25BFD /* GoogleService-Info.plist */; };
+		D59678DD247352EC00B199FA /* GrumbleGhorblinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D59678DC247352EC00B199FA /* GrumbleGhorblinView.swift */; };
 		D5A4C1C32471C97000452080 /* LoadingProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5A4C1C22471C97000452080 /* LoadingProfile.swift */; };
 		D5AA593A2425E996000BEC5C /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA59392425E996000BEC5C /* MainView.swift */; };
 		D5AA593E2426C24F000BEC5C /* IOManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5AA593D2426C24F000BEC5C /* IOManager.swift */; };
@@ -63,6 +63,9 @@
 		D5DFD71E2458F43600B78451 /* SignupSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DFD71D2458F43600B78451 /* SignupSheet.swift */; };
 		D5DFD721245A2BAF00B78451 /* Welcome.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DFD720245A2BAE00B78451 /* Welcome.swift */; };
 		D5DFD723245BA6E000B78451 /* CreateLinkedAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DFD722245BA6E000B78451 /* CreateLinkedAccount.swift */; };
+		D5EFA65F24723F250064F726 /* GrumbleSheetBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5EFA65E24723F250064F726 /* GrumbleSheetBackground.swift */; };
+		D5EFA661247241E60064F726 /* GrumbleGrubDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5EFA660247241E60064F726 /* GrumbleGrubDisplay.swift */; };
+		D5EFA663247243190064F726 /* GrumbleCookie.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5EFA662247243190064F726 /* GrumbleCookie.swift */; };
 		D5F0894E24253AC4000D375D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F0894D24253AC4000D375D /* AppDelegate.swift */; };
 		D5F0895024253AC4000D375D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F0894F24253AC4000D375D /* SceneDelegate.swift */; };
 		D5F0895224253AC4000D375D /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F0895124253AC4000D375D /* LoginView.swift */; };
@@ -121,7 +124,6 @@
 		D540148724393502008F8CCF /* FieldParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldParser.swift; sourceTree = "<group>"; };
 		D541F5E5244A4B8F00E98EF1 /* GrumbleSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrumbleSheet.swift; sourceTree = "<group>"; };
 		D541F5E8244A522200E98EF1 /* GhorblinSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhorblinSheet.swift; sourceTree = "<group>"; };
-		D541F5EA244CE73200E98EF1 /* GhorblinAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhorblinAnimations.swift; sourceTree = "<group>"; };
 		D541F5EF244FCE2F00E98EF1 /* GBurger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GBurger.swift; sourceTree = "<group>"; };
 		D541F5F1245013B400E98EF1 /* GTagShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GTagShape.swift; sourceTree = "<group>"; };
 		D5552CFD246F3029006E05AD /* ImageLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLibrary.swift; sourceTree = "<group>"; };
@@ -133,6 +135,7 @@
 		D56BA4BC245132C50065E3E4 /* GSoup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GSoup.swift; sourceTree = "<group>"; };
 		D573A82724386DDC00DB6067 /* GField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GField.swift; sourceTree = "<group>"; };
 		D5948797242D17E900D25BFD /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		D59678DC247352EC00B199FA /* GrumbleGhorblinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrumbleGhorblinView.swift; sourceTree = "<group>"; };
 		D5A4C1C22471C97000452080 /* LoadingProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingProfile.swift; sourceTree = "<group>"; };
 		D5AA59392425E996000BEC5C /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		D5AA593D2426C24F000BEC5C /* IOManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOManager.swift; sourceTree = "<group>"; };
@@ -153,6 +156,9 @@
 		D5DFD71D2458F43600B78451 /* SignupSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupSheet.swift; sourceTree = "<group>"; };
 		D5DFD720245A2BAE00B78451 /* Welcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Welcome.swift; sourceTree = "<group>"; };
 		D5DFD722245BA6E000B78451 /* CreateLinkedAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateLinkedAccount.swift; sourceTree = "<group>"; };
+		D5EFA65E24723F250064F726 /* GrumbleSheetBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrumbleSheetBackground.swift; sourceTree = "<group>"; };
+		D5EFA660247241E60064F726 /* GrumbleGrubDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrumbleGrubDisplay.swift; sourceTree = "<group>"; };
+		D5EFA662247243190064F726 /* GrumbleCookie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrumbleCookie.swift; sourceTree = "<group>"; };
 		D5F0894A24253AC4000D375D /* Grumble.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Grumble.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5F0894D24253AC4000D375D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D5F0894F24253AC4000D375D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -210,7 +216,6 @@
 				D502922E2437A9FE008A5BFC /* TabRouter.swift */,
 				D50292392437F7B3008A5BFC /* GForm.swift */,
 				D51FECC8243131FA00BF129C /* KeyboardObserver.swift */,
-				D541F5EA244CE73200E98EF1 /* GhorblinAnimations.swift */,
 				D5400704246683140053B51C /* LibraryObserver.swift */,
 				D5B4CAB62468ED7300619890 /* GTagLabeler.swift */,
 			);
@@ -299,7 +304,7 @@
 			isa = PBXGroup;
 			children = (
 				D5014C232441431500C5530B /* GrubSheet.swift */,
-				D541F5E5244A4B8F00E98EF1 /* GrumbleSheet.swift */,
+				D5EFA65D24723EF60064F726 /* GrumbleSheet */,
 			);
 			name = Sheets;
 			sourceTree = "<group>";
@@ -416,6 +421,18 @@
 				D5DFD720245A2BAE00B78451 /* Welcome.swift */,
 			);
 			name = Welcome;
+			sourceTree = "<group>";
+		};
+		D5EFA65D24723EF60064F726 /* GrumbleSheet */ = {
+			isa = PBXGroup;
+			children = (
+				D5EFA662247243190064F726 /* GrumbleCookie.swift */,
+				D5EFA65E24723F250064F726 /* GrumbleSheetBackground.swift */,
+				D5EFA660247241E60064F726 /* GrumbleGrubDisplay.swift */,
+				D59678DC247352EC00B199FA /* GrumbleGhorblinView.swift */,
+				D541F5E5244A4B8F00E98EF1 /* GrumbleSheet.swift */,
+			);
+			name = GrumbleSheet;
 			sourceTree = "<group>";
 		};
 		D5F0894124253AC4000D375D = {
@@ -707,6 +724,8 @@
 				D5DFD723245BA6E000B78451 /* CreateLinkedAccount.swift in Sources */,
 				D5B4CAB72468ED7300619890 /* GTagLabeler.swift in Sources */,
 				D5FF430E2468DDE100B348C4 /* GTagClassifier.mlmodel in Sources */,
+				D59678DD247352EC00B199FA /* GrumbleGhorblinView.swift in Sources */,
+				D5EFA663247243190064F726 /* GrumbleCookie.swift in Sources */,
 				D56BA4BD245132C50065E3E4 /* GSoup.swift in Sources */,
 				D5F0895024253AC4000D375D /* SceneDelegate.swift in Sources */,
 				D54006FE2464D1B20053B51C /* ImageItem.swift in Sources */,
@@ -725,6 +744,8 @@
 				D5DFD71C24579EC100B78451 /* SecurityForm.swift in Sources */,
 				D54006FA246323BD0053B51C /* AddImage.swift in Sources */,
 				D573A82824386DDC00DB6067 /* GField.swift in Sources */,
+				D5EFA65F24723F250064F726 /* GrumbleSheetBackground.swift in Sources */,
+				D5EFA661247241E60064F726 /* GrumbleGrubDisplay.swift in Sources */,
 				D5AA593A2425E996000BEC5C /* MainView.swift in Sources */,
 				D51FECC9243131FA00BF129C /* KeyboardObserver.swift in Sources */,
 				D51FECDE24370B1500BF129C /* UserCookie.swift in Sources */,
@@ -739,7 +760,6 @@
 				D56BA4BB2450B1910065E3E4 /* GSalad.swift in Sources */,
 				D51509C424539C970005C0E3 /* SearchList.swift in Sources */,
 				D51FECCB24316DC600BF129C /* SheetView.swift in Sources */,
-				D541F5EB244CE73200E98EF1 /* GhorblinAnimations.swift in Sources */,
 				D5C4D0BA243FE8120033EFB0 /* GDate.swift in Sources */,
 				D55EEBA024271FBB0079922E /* SettingsView.swift in Sources */,
 			);

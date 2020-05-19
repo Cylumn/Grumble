@@ -36,8 +36,12 @@ public class AddFoodCookie: ObservableObject {
     
     //MARK: Function Methods
     public func resetForNewGrub() {
-        self.currentFID = nil
-        self.tags = [food: 1]
+        if self.currentFID != nil {
+            self.currentFID = nil
+        }
+        if self.tags != [food: 1] {
+            self.tags = [food: 1]
+        }
         self.tagsEdited = false
     }
     
@@ -161,17 +165,19 @@ fileprivate struct SearchTagButton: View {
     
     public var body: some View {
         return ZStack(alignment: .center) {
-            self.searchTag
-                .allowsHitTesting(self.stbc.isPresented)
-            
-            if !self.stbc.isPresented {
+            if self.stbc.isPresented {
+                self.searchTag
+                    .transition(.scale(scale: 0.99, anchor: .topLeading))
+                    .onAppear {
+                        GFormRouter.gfr().callFirstResponder(.searchTag)
+                    }
+            } else {
                 Color(white: 0.9)
                 
                 Button(action: {
                     withAnimation(gAnim(.easeOut)) {
                         self.stbc.isPresented = true
                     }
-                    GFormRouter.gfr().callFirstResponder(.searchTag)
                     
                     KeyboardObserver.ignore(formID)
                     KeyboardObserver.observe(.searchTag, true)
@@ -493,6 +499,7 @@ public struct AddFood: View, GFieldDelegate {
                             TagBox.box(id: sortedTags[index])
                                 .transition(.opacity)
                                 .animation(gAnim(.spring))
+                                .zIndex(1)
                         }
                         
                         Spacer().frame(width: sWidth() * 0.5)

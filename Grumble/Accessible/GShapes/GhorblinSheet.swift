@@ -346,6 +346,6 @@ public struct GhorblinSheetHighlights: View {
 
 struct GhorblinSheet_Previews: PreviewProvider {
     static var previews: some View {
-        GrumbleSheet(.grumble, show: Binding.constant(true), Array(UserCookie.uc().foodList().keys))
+        GrumbleSheet(.grumble, show: Binding.constant(true))
     }
 }

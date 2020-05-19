@@ -42,8 +42,7 @@ public struct ListView: View {
     private var searchList: SearchList
     
     @State private var presentGrumbleSheet: Bool = false
-    @State private var ghorblinType: GrumbleSheet.GhorblinType = .grumble
-    @State private var ghorblinList: [String] = []
+    @State private var ghorblinType: GhorblinType = .grumble
     
     @State private var presentAddImage: Bool = false
     
@@ -52,16 +51,18 @@ public struct ListView: View {
     }
     
     //MARK: Function Methods
-    private func showGrumbleSheet(_ ghorblinType: GrumbleSheet.GhorblinType) {
+    private func showGrumbleSheet(_ ghorblinType: GhorblinType) {
         withAnimation(gAnim(.easeOut)) {
             self.presentGrumbleSheet = true
         }
         
         self.ghorblinType = ghorblinType
-        self.ghorblinList = self.uc.foodList().keys.shuffled()
-        GhorblinAnimations.ga().startIdleAnimation()
+        GrumbleCookie.gc().fidList = self.uc.foodList().keys.shuffled()
+        GrumbleCookie.gc().startIdleAnimation()
         Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
-            GhorblinAnimations.ga().setDrip(1)
+            withAnimation(gAnim(.springSlow)) {
+                GrumbleCookie.gc().dripData = 1
+            }
         }
     }
     
@@ -213,13 +214,7 @@ public struct ListView: View {
             Color.black.opacity(self.lc.presentGrubSheet() ? maxOverlayOpacity : 0)
             
             if self.presentGrumbleSheet {
-                GrumbleSheet(self.ghorblinType, show:
-                    Binding(get: { self.presentGrumbleSheet }, set: {
-                    self.presentGrumbleSheet = $0
-                    if !$0 {
-                        self.ghorblinList = []
-                    }
-                }), self.ghorblinList)
+                GrumbleSheet(self.ghorblinType, show: self.$presentGrumbleSheet)
                     .transition(.move(edge: .bottom))
                     .zIndex(1)
             }
