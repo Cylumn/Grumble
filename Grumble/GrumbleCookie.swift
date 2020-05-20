@@ -24,6 +24,12 @@ public enum CoverDragState {
     case completed
 }
 
+public enum PresentHideModal {
+    case hidden
+    case inProgress
+    case shown
+}
+
 //MARK: Cookies
 public class GrumbleCookie: ObservableObject {
     private static var instance: GrumbleCookie? = nil
@@ -38,6 +44,8 @@ public class GrumbleCookie: ObservableObject {
     @Published public var idleData: CGFloat = 0
     
     @Published public var coverDragState: CoverDragState = .covered
+    
+    @Published public var presentHideModal: PresentHideModal = .hidden
     
     private var idleTimer: Timer? = nil
     
@@ -101,6 +109,7 @@ public class GrumbleCookie: ObservableObject {
 
 public class GrumbleGrubCookie: ObservableObject {
     private static var instance: GrumbleGrubCookie? = nil
+    @Published public var expandedInfo: Bool = false
     
     //MARK: Drag Translations
     @Published public var grumbleDrag: CGSize = CGSize.zero
@@ -114,5 +123,24 @@ public class GrumbleGrubCookie: ObservableObject {
             GrumbleGrubCookie.instance = GrumbleGrubCookie()
         }
         return GrumbleGrubCookie.instance!
+    }
+    
+    public func choose() {
+        withAnimation(Animation.easeOut(duration: 0.3)) {
+            self.chooseData = 0.3
+            GrumbleCookie.gc().presentHideModal = PresentHideModal.inProgress
+        }
+        
+        Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
+            withAnimation(Animation.easeIn(duration: 0.9)) {
+                self.chooseData = 1
+            }
+        }
+        
+        Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
+            withAnimation(gAnim(.easeOut)) {
+                GrumbleCookie.gc().presentHideModal = PresentHideModal.shown
+            }
+        }
     }
 }

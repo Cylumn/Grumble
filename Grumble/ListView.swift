@@ -217,6 +217,7 @@ public struct ListView: View {
                 GrumbleSheet(self.ghorblinType, show: self.$presentGrumbleSheet)
                     .transition(.move(edge: .bottom))
                     .zIndex(1)
+                    .edgesIgnoringSafeArea(.all)
             }
             
             if self.lc.presentGrubSheet() {

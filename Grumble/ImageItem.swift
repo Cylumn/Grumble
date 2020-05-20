@@ -11,20 +11,21 @@ import Photos
 
 public struct ImageItem: View {
     private var asset: PHAsset
-    private var thumbnail: AnyView
+    private var thumbnail: Image
     private var size: CGFloat
     
     public init(_ asset: PHAsset, _ thumbnail: UIImage, size: CGFloat) {
         self.asset = asset
-        self.thumbnail = AnyView(Image(uiImage: thumbnail).resizable()
-        .aspectRatio(contentMode: .fill)
-        .frame(width: size, height: size))
+        self.thumbnail = Image(uiImage: thumbnail)
         self.size = size
     }
     
     public var body: some View {
         ZStack {
             self.thumbnail
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: size, height: size)
                 .onTapGesture {
                     AddImageCookie.aic().selectedAsset = self.asset
                     

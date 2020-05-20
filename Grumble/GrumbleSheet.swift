@@ -24,8 +24,6 @@ public struct GrumbleSheet: View {
     
     @State private var canDragHorizontal: Bool = true
     
-    @State private var presentHideModal: PresentHideModal = .hidden
-    
     //Initializer
     public init( _ type: GhorblinType, show: Binding<Bool>) {
         self.type = type
@@ -34,20 +32,6 @@ public struct GrumbleSheet: View {
         self.background = GrumbleSheetBackground(type)
         
         self.holdScaleAnchor = UnitPoint.bottom
-    }
-    
-    //States
-    private enum CoverDragState {
-        case cancelled
-        case covered
-        case lifted
-        case completed
-    }
-    
-    private enum PresentHideModal {
-        case hidden
-        case inProgress
-        case shown
     }
     
     //Getter Methods
@@ -69,12 +53,13 @@ public struct GrumbleSheet: View {
         withAnimation(gAnim(.spring)) {
             self.show.wrappedValue = false
             self.gc.dripData = 0
-            self.gc.coverDragState = .covered
+            self.gc.coverDrag = CGSize.zero
+            self.ggc.expandedInfo = false
         }
+        self.gc.coverDragState = .covered
+        self.gc.presentHideModal = .hidden
         self.gc.endIdleAnimation()
-        self.gc.coverDrag = CGSize.zero
         self.ggc.chooseData = 0
-        self.presentHideModal = .hidden
         
         Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
             self.gc.fidIndex = 0
@@ -87,25 +72,6 @@ public struct GrumbleSheet: View {
             Grub.removeFood(self.gc.fidList[self.gc.fidIndex])
         }
         self.hideSheet()
-    }
-    
-    private func onBonAppetit() {
-        withAnimation(Animation.easeOut(duration: 0.3)) {
-            self.ggc.chooseData = 0.3
-            self.presentHideModal = PresentHideModal.inProgress
-        }
-        
-        Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
-            withAnimation(Animation.easeIn(duration: 0.9)) {
-                self.ggc.chooseData = 1
-            }
-        }
-        
-        Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
-            withAnimation(gAnim(.easeOut)) {
-                self.presentHideModal = PresentHideModal.shown
-            }
-        }
     }
     
     private func onToss() {
@@ -123,6 +89,12 @@ public struct GrumbleSheet: View {
                 state = 1
         }.simultaneously(with: DragGesture().onChanged { drag in
             if self.gc.coverDragState == .completed {
+                if self.ggc.expandedInfo {
+                    withAnimation(gAnim(.spring)) {
+                        self.ggc.expandedInfo = false
+                    }
+                }
+                
                 if self.canDragHorizontal && self.gc.fidList.count > 1 {
                     switch self.gc.fidIndex{
                     case 0:
@@ -163,7 +135,7 @@ public struct GrumbleSheet: View {
                     self.gc.coverDragState = .completed
                     
                     if self.gc.fidList.count == 0 {
-                        self.onBonAppetit()
+                        self.ggc.choose()
                     }
                 case .completed:
                     if self.canDragHorizontal {
@@ -196,7 +168,7 @@ public struct GrumbleSheet: View {
     
     private var hideModal: some View {
         ZStack {
-            if self.presentHideModal == PresentHideModal.shown {
+            if self.gc.presentHideModal == PresentHideModal.shown {
                 ZStack(alignment: .bottom) {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.white)
@@ -237,77 +209,37 @@ public struct GrumbleSheet: View {
                     }).padding(.bottom, 20)
                 }.padding([.leading, .trailing], 50)
                 .frame(height: 400)
-            } else if self.presentHideModal == PresentHideModal.hidden {
+            } else if self.gc.presentHideModal == PresentHideModal.hidden {
                 Button(action: self.hideSheet, label: {
                     Image(systemName: "chevron.down.circle.fill")
                         .padding(25)
                         .foregroundColor(self.gc.coverDragState == .covered || self.gc.coverDragState == .cancelled ? Color.black.opacity(0.5) : Color.white.opacity(0.8))
                         .font(.system(size: 30))
-                })
+                }).offset(y: 20)
             }
-        }
-    }
-    
-    private var overlayUI: some View {
-        HStack(spacing: nil) {
-            VStack(spacing: 0) {
-                Spacer()
-                Text(self.gc.grub()?.food ?? "")
-                .font(gFont(.ubuntuBold, .width, 4.5))
-            }
-            
-            Spacer()
-            
-            VStack(alignment: .trailing, spacing: 20) {
-                Spacer()
-                
-                if self.gc.fidList.count > 0 {
-                    Button(action: {
-                        withAnimation(gAnim(.easeOut)) {
-                            ListCookie.lc().selectedFID = self.gc.fidList[self.gc.fidIndex]
-                        }
-                    }, label: {
-                        Text("View")
-                            .padding(10)
-                            .padding([.leading, .trailing], 10)
-                            .background(Color(white: 0.95))
-                            .foregroundColor(Color(white: 0.3))
-                            .cornerRadius(10)
-                    })
-                    
-                    Button(action: {
-                        self.onBonAppetit()
-                    }, label: {
-                        Text("Bon Appetit")
-                            .padding(10)
-                            .padding([.leading, .trailing], 10)
-                            .background(gColor(.blue2))
-                            .foregroundColor(Color(white: 0.3))
-                            .cornerRadius(10)
-                    })
-                }
-            }.font(gFont(.ubuntuLight, .width, 2.5))
         }
     }
     
     public var body: some View {
-        ZStack(alignment: .bottom) {
-            self.background
-                .scaleEffect(1 + 0.1 * self.holdData() + 0.5 * self.coverDragData(), anchor: self.holdScaleAnchor)
-                .edgesIgnoringSafeArea(.all)
+        let bgScale: CGFloat = 1 + 0.1 * self.holdData() + 0.5 * self.coverDragData()
+        let ghorblinScale: CGFloat = 1 + 0.2 * self.holdData() + 0.7 * self.coverDragData()
+        return ZStack(alignment: .bottom) {
+            Group {
+                self.background
+                    .scaleEffect(bgScale, anchor: self.holdScaleAnchor)
+                
+                if self.gc.coverDragState != .completed {
+                    GrumbleGhorblinView(self.type, holdData: self.holdData())
+                        .scaleEffect(ghorblinScale, anchor: self.holdScaleAnchor)
+                }
+            }.drawingGroup()
             
-            if self.gc.coverDragState != .completed {
-                GrumbleGhorblinView(self.type, holdData: self.holdData())
-                    .scaleEffect(1 + 0.2 * self.holdData() + 0.7 * self.coverDragData(), anchor: self.holdScaleAnchor)
-                    .edgesIgnoringSafeArea(.all)
-            }
-            
-            ZStack(alignment: self.presentHideModal == PresentHideModal.shown ? .center : .topTrailing) {
+            ZStack(alignment: self.gc.presentHideModal == PresentHideModal.shown ? .center : .topTrailing) {
                 Color.clear
                     .contentShape(Rectangle())
                     .gesture(self.grumbleGesture)
                 
-                if self.presentHideModal == PresentHideModal.shown {
+                if self.gc.presentHideModal == PresentHideModal.shown {
                     Color.black.opacity(0.4)
                         .edgesIgnoringSafeArea(.all)
                 }
@@ -315,12 +247,9 @@ public struct GrumbleSheet: View {
                 self.hideModal
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
             
-            self.overlayUI
-                .padding(20)
-                .padding(.bottom, 20)
-                .frame(alignment: .bottom)
-                .foregroundColor(Color.white)
-                .offset(y: self.gc.coverDragState == .completed && self.presentHideModal == PresentHideModal.hidden ? 0 : sHeight())
+            if self.gc.coverDragState == .completed {
+                GrumbleGrubImageDisplay()
+            }
         }.frame(width: sWidth())
     }
 }
