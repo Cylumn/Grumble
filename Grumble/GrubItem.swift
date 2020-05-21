@@ -47,7 +47,7 @@ public class ObservedImage: ObservableObject {
     }
     
     public static func updateImage(_ grub: Grub) {
-        ObservedImage.oi(grub.fid).image = grub.image()
+        ObservedImage.oi(grub.img).image = grub.image()
     }
 }
 
@@ -63,7 +63,7 @@ public struct GrubItem: View {
     public init(_ grub: Grub) {
         self.fid = grub.fid
         self.grub = grub
-        self.oi = ObservedImage.oi(self.fid)
+        self.oi = ObservedImage.oi(grub.img)
     }
     
     //MARK: Function Methods

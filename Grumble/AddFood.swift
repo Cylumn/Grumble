@@ -89,10 +89,11 @@ public class AddFoodCookie: ObservableObject {
             let prefix = String(trim(foodItem["food"] as! String).lowercased().prefix(3))
             let fid = prefix + randomString(length: 4) + String(date.hour!) + "_" + String(date.minute!) + "_" + String(date.second!)
             foodItem["fid"] = fid
+            foodItem["img"] = fid
             let foodDictionary = foodItem as NSDictionary
             
             UserCookie.uc().appendFoodList(fid, Grub(fid: fid, foodDictionary, image: self.image!))
-            appendLocalFood(fid, foodDictionary)
+            appendLocalFood(fid, foodDictionary, self.image!)
             appendCloudFood(fid, foodDictionary, self.image!)
             
             if self.tagsEdited {
@@ -101,6 +102,7 @@ public class AddFoodCookie: ObservableObject {
         default:
             foodItem["date"] = UserCookie.uc().foodList()[self.currentFID!]!.date
             foodItem["fid"] = self.currentFID!
+            foodItem["img"] = UserCookie.uc().foodList()[self.currentFID!]!.img
             let foodDictionary = foodItem as NSDictionary
             
             UserCookie.uc().appendFoodList(self.currentFID!, Grub(fid: self.currentFID!, foodDictionary))

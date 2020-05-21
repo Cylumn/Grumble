@@ -196,7 +196,7 @@ public func writeCloudData(_ key: DataListKeys, _ value: Any?) {
 //MARK: - FoodList Functions
 public func appendLocalFood(_ key: String, _ foodItem: NSDictionary, _ image: UIImage? = nil) {
     if image != nil {
-        writeLocalGrubImage(key, image: image!)
+        writeLocalGrubImage(foodItem[Grub.GrubKeys.img.rawValue] as! String, image: image!)
     }
     DispatchQueue.global(qos: .utility).async {
         if let rootDataDictionary = NSMutableDictionary(contentsOfFile: dataPath()) {
@@ -215,7 +215,6 @@ public func appendCloudFood(_ key: String, _ foodItem: NSDictionary) {
 public func appendCloudFood(_ key: String, _ foodItem: NSDictionary, _ image: UIImage) {
     let storage = Storage.storage().reference()
     let imageRef = storage.child(imagePath + key + ".jpg")
-    print("calling append food")
     imageRef.putData(image.jpegData(compressionQuality: 1)!, metadata: nil) { (metadata, error) in
         guard error == nil else {
             print("error:\(error!)")
@@ -274,9 +273,10 @@ public func onCloudFoodAdded(_ snapshot: DataSnapshot) {
     }
     
     DispatchQueue.global(qos: .utility).async {
+        let foodItem = snapshot.value as! NSDictionary
         let storage = Storage.storage().reference()
         let imageRef = storage.child(imagePath + snapshot.key + ".jpg")
-        if let (_, modifyDate) = grubImage(snapshot.key) {
+        if let (_, modifyDate) = grubImage(foodItem[Grub.GrubKeys.img.rawValue] as! String) {
             //File Exists
             imageRef.getMetadata { metadata, error in
                 guard error == nil else {

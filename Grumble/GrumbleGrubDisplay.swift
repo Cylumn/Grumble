@@ -99,7 +99,7 @@ public struct GrumbleGrubDisplay: View {
     
     //MARK: Subviews
     private func tagIcon(_ tag: GrubTag, index: Int) -> some View {
-        let size = sWidth() * 0.18
+        let size = sWidth() * 0.58
         return gTagView(tag, CGSize(width: size, height: size), idleData: self.gc.idleData,
                         tossData: grumbleDragData(self.gc, self.ggc, index))
     }
@@ -109,14 +109,14 @@ public struct GrumbleGrubDisplay: View {
         var coverShadowOpacity: CGFloat = 0.2
         var coverShadowWidth: CGFloat = 0.7
         var coverShadowHeight: CGFloat = 0.23
-        var coverShadowOffsetY: CGFloat = -0.09
+        var coverShadowOffsetY: CGFloat = 0.35
         
         var grubShadowWidth: CGFloat = 0.3
         var grubShadowHeight: CGFloat = 0.08
-        var grubShadowOffsetY: CGFloat = -0.08
+        var grubShadowOffsetY: CGFloat = 0.34
         
-        var grubOffsetY: CGFloat = -0.12
-        var grubScale: CGFloat = 1.0
+        var grubOffsetY: CGFloat = 0.31
+        var grubScale: CGFloat = 0.3
         
         //CoverDragData
         coverShadowOpacity -= 0.2 * self.coverDragData()
@@ -126,17 +126,17 @@ public struct GrumbleGrubDisplay: View {
         
         grubShadowWidth += 0.1 * self.coverDragData()
         grubShadowHeight += 0.02 * self.coverDragData()
-        grubShadowOffsetY += 0.055 * self.coverDragData()
+        grubShadowOffsetY += 0.01 * self.coverDragData()
         
-        grubOffsetY += 0.065 * self.coverDragData()
-        grubScale += 0.2 * self.coverDragData()
+        grubOffsetY += 0.0 * self.coverDragData()
+        grubScale += 0.1 * self.coverDragData()
         
         //ChooseData
         grubShadowWidth *= 1 + 2 * self.ggc.chooseData
         grubShadowHeight *= 1 + 2 * self.ggc.chooseData
         grubShadowOffsetY += 0.3 * self.ggc.chooseData
         
-        grubScale += 2 * self.ggc.chooseData
+        grubScale += 0.6 * self.ggc.chooseData
         
         //isX
         coverShadowOffsetY += isX() ? 0.03 : 0
@@ -144,10 +144,13 @@ public struct GrumbleGrubDisplay: View {
         grubOffsetY += isX() ? 0.015 : 0
         
         return ZStack {
+            Color.clear
+            
             Ellipse()
                 .fill(Color.black.opacity(Double(coverShadowOpacity)))
                 .frame(width: sWidth() * coverShadowWidth, height: sWidth() * coverShadowHeight)
                 .offset(y: sHeight() * coverShadowOffsetY)
+                .animation(nil)
             
             ForEach(renderingRange(self.gc), id: \.self) { index in
                 ZStack {
@@ -157,22 +160,31 @@ public struct GrumbleGrubDisplay: View {
                         .offset(x: offsetX(self.gc, self.ggc, index), y: sHeight() * grubShadowOffsetY)
                     
                     self.tagIcon(self.gc.grub(index)!.priorityTag, index: index)
+                        .scaleEffect(grubScale)
                         .rotationEffect(self.rotation(index))
                         .offset(x: offsetX(self.gc, self.ggc, index),
                                 y: sHeight() * grubOffsetY + self.offsetY(index) + self.chooseOffsetY())
-                        .scaleEffect(grubScale)
                 }
             }.transition(.identity)
-        }
+        }//.drawingGroup()
     }
 }
 
 public struct GrumbleGrubImageDisplay: View {
+    private static var cachedImages: [String: AnyView] = [:]
     @ObservedObject private var gc: GrumbleCookie = GrumbleCookie.gc()
     @ObservedObject private var ggc: GrumbleGrubCookie = GrumbleGrubCookie.ggc()
     @GestureState(initialValue: CGFloat(0), resetTransaction: Transaction(animation: gAnim(.springSlow))) private var holdData
     
     //MARK: Function Methods
+    public static func cacheImage(_ key: String, value: Image?) {
+        GrumbleGrubImageDisplay.cachedImages[key] =
+            AnyView(value?
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: sWidth() * 0.9))
+    }
+    
     private func expand() {
         withAnimation(gAnim(.spring)) {
             self.ggc.expandedInfo.toggle()
@@ -180,11 +192,12 @@ public struct GrumbleGrubImageDisplay: View {
     }
     
     private func imageItem(_ grub: Grub, index: Int) -> some View {
-        VStack(spacing: 0) {
+        if GrumbleGrubImageDisplay.cachedImages[grub.img] == nil {
+            GrumbleGrubImageDisplay.cacheImage(grub.img, value: grub.image())
+        }
+        return VStack(spacing: 0) {
             ZStack {
-                grub.image()?
-                .resizable()
-                .aspectRatio(contentMode: .fit)
+                GrumbleGrubImageDisplay.cachedImages[grub.img]!
             }.overlay(Color.white.opacity(Double(self.holdData) * 0.5))
             .cornerRadius(0)
             .gesture(LongPressGesture(minimumDuration: 1)
@@ -269,14 +282,15 @@ public struct GrumbleGrubImageDisplay: View {
                 .zIndex(-1)
                 .transition(.identity)
             }
-        }.frame(width: sWidth() * (0.9 - 0.3 * grumbleDragData(self.gc, self.ggc, index)))
-        .background(Color(white: 0.98))
+        }.frame(width: sWidth() * 0.9)
+        .background(Color(white: 0.98).opacity(self.ggc.expandedInfo ? 1 : 0).transition(.scale(scale: 1)))
         .cornerRadius(10)
     }
     
     public var body: some View {
         ForEach(renderingRange(self.gc), id: \.self) { index in
             self.imageItem(self.gc.grub(index)!, index: index)
+                .scaleEffect(1 - 0.4 * grumbleDragData(self.gc, self.ggc, index))
                 .offset(x: offsetX(self.gc, self.ggc, index))
         }.transition(.opacity)
         .position(x: sWidth() * 0.5, y: sHeight() * (self.ggc.expandedInfo ? 0.45 : 0.35))

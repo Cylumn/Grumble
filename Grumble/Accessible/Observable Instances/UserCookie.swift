@@ -67,8 +67,9 @@ public func gTagView(_ tag: GrubTag, _ boundingSize: CGSize, idleData: CGFloat, 
 //MARK: - Grub
 public struct Grub: Decodable, Equatable {
     private static var images: [String: Image] = [:]
-    public var fid: String
     
+    public var fid: String
+    public var img: String
     public var food: String
     public var price: Double?
     public var restaurant: String?
@@ -78,13 +79,22 @@ public struct Grub: Decodable, Equatable {
     public var date: String
     
     enum GrubKeys: String, CodingKey {
-        case fid, food, price, restaurant, address, tags, priorityTag, date
+        case fid = "fid"
+        case img = "img"
+        case food = "food"
+        case price = "price"
+        case restaurant = "restaurant"
+        case address = "address"
+        case tags = "tags"
+        case priorityTag = "priorityTag"
+        case date = "date"
     }
     
     //MARK: Initializers
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: GrubKeys.self)
         self.fid = try values.decode(String.self, forKey: .fid)
+        self.img = try values.decode(String.self, forKey: .img)
         self.food = try values.decode(String.self, forKey: .food)
         self.price = try values.decodeIfPresent(Double.self, forKey: .price)
         self.restaurant = try values.decodeIfPresent(String.self, forKey: .restaurant)
@@ -93,13 +103,14 @@ public struct Grub: Decodable, Equatable {
         self.priorityTag = try values.decode(GrubTag.self, forKey: .priorityTag)
         self.date = try values.decode(String.self, forKey: .date)
         
-        Grub.images[self.fid] = Image(uiImage: grubImage(self.fid)!.0)
+        Grub.images[self.img] = Image(uiImage: grubImage(self.img)!.0)
         ObservedImage.updateImage(self)
+        GrumbleGrubImageDisplay.cacheImage(self.img, value: self.image())
     }
     
     public init(fid: String, _ foodItem: NSDictionary?, image: UIImage? = nil) {
         self.fid = fid
-        
+        self.img = foodItem?.value(forKey: "img") as! String
         self.food = foodItem?.value(forKey: "food") as! String
         self.price = foodItem?.value(forKey: "price") as? Double
         self.restaurant = foodItem?.value(forKey: "restaurant") as? String
@@ -109,13 +120,14 @@ public struct Grub: Decodable, Equatable {
         self.date = foodItem?.value(forKey: "date") as! String
 
         if let image = image {
-            Grub.images[self.fid] = Image(uiImage: image)
-        } else if Grub.images[self.fid] == nil {
-            if let (uiImage, _) = grubImage(self.fid) {
-                Grub.images[self.fid] = Image(uiImage: uiImage)
+            Grub.images[self.img] = Image(uiImage: image)
+        } else if Grub.images[self.img] == nil {
+            if let (uiImage, _) = grubImage(self.img) {
+                Grub.images[self.img] = Image(uiImage: uiImage)
             }
         }
         ObservedImage.updateImage(self)
+        GrumbleGrubImageDisplay.cacheImage(self.img, value: self.image())
     }
     
     //MARK: Class Function Methods
@@ -145,6 +157,7 @@ public struct Grub: Decodable, Equatable {
     @available(*, deprecated) //remove in future
     public static func testGrub() -> Grub {
         var grubTest: [String: Any] = [:]
+        grubTest["img"] = ""
         grubTest["food"] = "Ramen"
         grubTest["price"] = 10.0
         grubTest["restaurant"] = "Ippudo"
@@ -159,7 +172,7 @@ public struct Grub: Decodable, Equatable {
     
     //MARK: Getter Methods
     public func image() -> Image? {
-        return Grub.images[self.fid]
+        return Grub.images[self.img]
     }
 }
 

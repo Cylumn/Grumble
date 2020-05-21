@@ -199,7 +199,7 @@ public struct GrumbleSheet: View {
                     }
                     
                     Button(action: self.completeGrubSheet, label: {
-                        Text("Back")
+                        Text(self.gc.fidList.count > 0 ? "Directions" : "Back")
                             .padding(5)
                             .padding([.leading, .trailing], 10)
                             .background(gColor(.blue0))
@@ -232,12 +232,18 @@ public struct GrumbleSheet: View {
                     GrumbleGhorblinView(self.type, holdData: self.holdData())
                         .scaleEffect(ghorblinScale, anchor: self.holdScaleAnchor)
                 }
-            }.drawingGroup()
+            }
+            
+            Color.clear
+                .contentShape(Rectangle())
+                .gesture(self.grumbleGesture)
+            
+            if self.gc.coverDragState == .completed && self.gc.presentHideModal == .hidden {
+                GrumbleGrubImageDisplay()
+            }
             
             ZStack(alignment: self.gc.presentHideModal == PresentHideModal.shown ? .center : .topTrailing) {
                 Color.clear
-                    .contentShape(Rectangle())
-                    .gesture(self.grumbleGesture)
                 
                 if self.gc.presentHideModal == PresentHideModal.shown {
                     Color.black.opacity(0.4)
@@ -246,10 +252,6 @@ public struct GrumbleSheet: View {
                 
                 self.hideModal
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
-            
-            if self.gc.coverDragState == .completed {
-                GrumbleGrubImageDisplay()
-            }
         }.frame(width: sWidth())
     }
 }
