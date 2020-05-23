@@ -211,7 +211,7 @@ fileprivate struct ConfirmButton: View {
     
     //MARK: Getter Methods
     private func canSubmit() -> Bool {
-        return !self.gft.text(AddFood.FieldIndex.food.rawValue).isEmpty
+        return self.gft.text(AddFood.FieldIndex.food.rawValue).count > 2
     }
     
     public var body: some View {
@@ -383,7 +383,8 @@ public struct AddFood: View, GFieldDelegate {
                         ZStack {
                             self.symbols[index]
                         }.frame(height: fieldHeight)
-                        .foregroundColor(self.gft.text(index).isEmpty ? Color.gray : gColor(.blue0))
+                            .foregroundColor((index == FieldIndex.food.rawValue && self.gft.text(index).count > 2) ||
+                                (index != FieldIndex.food.rawValue && self.gft.text(index).isEmpty) ? Color.gray : gColor(.blue0))
                     }
                 }
             }.frame(width: 50)

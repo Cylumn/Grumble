@@ -33,8 +33,8 @@ public enum PresentHideModal {
 //MARK: Cookies
 public class GrumbleCookie: ObservableObject {
     private static var instance: GrumbleCookie? = nil
-    public var fidList: [String] = []
-    @Published public var fidIndex: Int = 0
+    public var grubList: [(String, Grub)] = []
+    @Published public var index: Int = 0
     
     //MARK: Drag Translations
     @Published public var coverDrag: CGSize = CGSize.zero
@@ -59,14 +59,14 @@ public class GrumbleCookie: ObservableObject {
     
     //MARK: Getter Methods
     public func grub(_ index: Int) -> Grub? {
-        if self.fidList.count == 0 {
+        if self.grubList.count == 0 {
             return nil
         }
-        return UserCookie.uc().foodList()[self.fidList[index]]
+        return self.grubList[index].1
     }
     
     public func grub() -> Grub? {
-        return self.grub(self.fidIndex)
+        return self.grub(self.index)
     }
     
     public func coverDistance() -> CGFloat {

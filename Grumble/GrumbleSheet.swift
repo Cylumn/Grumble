@@ -62,14 +62,14 @@ public struct GrumbleSheet: View {
         self.ggc.chooseData = 0
         
         Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
-            self.gc.fidIndex = 0
-            self.gc.fidList = []
+            self.gc.index = 0
+            self.gc.grubList = []
         }
     }
     
     private func completeGrubSheet() {
-        if self.gc.fidList.count > 0 {
-            Grub.removeFood(self.gc.fidList[self.gc.fidIndex])
+        if self.gc.grubList.count > 0 {
+            Grub.removeFood(self.gc.grubList[self.gc.index].0)
         }
         self.hideSheet()
     }
@@ -95,11 +95,11 @@ public struct GrumbleSheet: View {
                     }
                 }
                 
-                if self.canDragHorizontal && self.gc.fidList.count > 1 {
-                    switch self.gc.fidIndex{
+                if self.canDragHorizontal && self.gc.grubList.count > 1 {
+                    switch self.gc.index{
                     case 0:
                         self.ggc.grumbleDrag = CGSize(width: min(drag.translation.width, 0), height: 0)
-                    case self.gc.fidList.count - 1:
+                    case self.gc.grubList.count - 1:
                         self.ggc.grumbleDrag = CGSize(width: max(drag.translation.width, 0), height: 0)
                     default:
                         self.ggc.grumbleDrag = CGSize(width: drag.translation.width, height: 0)
@@ -134,7 +134,7 @@ public struct GrumbleSheet: View {
                     self.gc.coverDrag = CGSize(width: 0, height: -sHeight() * 0.6)
                     self.gc.coverDragState = .completed
                     
-                    if self.gc.fidList.count == 0 {
+                    if self.gc.grubList.count == 0 {
                         self.ggc.choose()
                     }
                 case .completed:
@@ -147,13 +147,13 @@ public struct GrumbleSheet: View {
                             }
                         }
                         
-                        if self.gc.fidIndex > 0 && drag.predictedEndTranslation.width > sWidth() * 0.5 {
-                            self.gc.fidIndex -= 1
+                        if self.gc.index > 0 && drag.predictedEndTranslation.width > sWidth() * 0.5 {
+                            self.gc.index -= 1
                             self.ggc.grumbleDrag = CGSize.zero
                             
                             self.onToss()
-                        } else if self.gc.fidIndex < self.gc.fidList.count - 1 && drag.predictedEndTranslation.width < -sWidth() * 0.5 {
-                            self.gc.fidIndex += 1
+                        } else if self.gc.index < self.gc.grubList.count - 1 && drag.predictedEndTranslation.width < -sWidth() * 0.5 {
+                            self.gc.index += 1
                             self.ggc.grumbleDrag = CGSize.zero
                             
                             self.onToss()
@@ -178,7 +178,7 @@ public struct GrumbleSheet: View {
                         Color.clear
                         
                         VStack(alignment: .center, spacing: 10) {
-                            if self.gc.fidList.count > 0 {
+                            if self.gc.grubList.count > 0 {
                                 Text("Enjoy Your")
                                 
                                 Text(self.gc.grub()?.food ?? "")
@@ -199,7 +199,7 @@ public struct GrumbleSheet: View {
                     }
                     
                     Button(action: self.completeGrubSheet, label: {
-                        Text(self.gc.fidList.count > 0 ? "Directions" : "Back")
+                        Text(self.gc.grubList.count > 0 ? "Directions" : "Back")
                             .padding(5)
                             .padding([.leading, .trailing], 10)
                             .background(gColor(.blue0))

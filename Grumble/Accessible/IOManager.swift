@@ -12,6 +12,7 @@ import Photos
 
 //MARK: - Constants
 private let imagePath: String = "images/"
+private let immutableImagePath: String = "immutableGrub/"
 
 //MARK: - Decodable Structures
 private struct DataList: Decodable {
@@ -365,6 +366,81 @@ public func setObservers(uid: String) {
     ref.child("users").child(uid).child(DataListKeys.foodList.rawValue).observe(DataEventType.childChanged, with: onCloudFoodChanged)
 }
 
+//MARK: - App Requests
+private func post(path: String, _ onCompletion: @escaping (String?) -> Void) {
+    let url = URL(string: "https://grumbleserver.uc.r.appspot.com/" + path)!
+    var request = URLRequest(url: url)
+    //request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+    request.httpMethod = "POST"
+    var secret: String
+    do {
+        let secretURL = Bundle.main.url(forResource: "clientSecret", withExtension: "txt")!
+        secret = try String(contentsOf: secretURL, encoding: .utf8)
+        secret = trim(secret, char: "\n")
+    }
+    catch {
+        print("error:\(error)")
+        return
+    }
+    let parameters = "client_secret=" + secret
+    request.httpBody = parameters.data(using: .utf8)
+
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        guard let data = data,
+            let response = response as? HTTPURLResponse,
+            error == nil else {                                              // check for fundamental networking error
+            print("error", error ?? "Unknown error")
+            return
+        }
+
+        guard (200 ... 299) ~= response.statusCode else {                    // check for http errors
+            print("statusCode should be 2xx, but is \(response.statusCode)")
+            print("response = \(response)")
+            return
+        }
+
+        let responseString = String(data: data, encoding: .utf8)
+        onCompletion(responseString)
+    }
+
+    DispatchQueue.global(qos: .utility).async {
+        task.resume()
+    }
+}
+
+//MARK: - Gather Immutable Grub
+public func requestImmutableGrub(_ existing: [String] = [], count: Int, _ withCompletion: @escaping ([String: Grub]) -> Void) {
+    if UserAccessCookie.uac().loggedIn() == .loggedIn {
+        post(path: "request-immutable-fid") { response in
+            if let fids = try? JSONSerialization.jsonObject(with: response!.data(using: .utf8)!) as? [String: Bool] {
+                var grubset = fids
+                for fid in existing {
+                    grubset.removeValue(forKey: fid)
+                }
+                
+                let size = grubset.count
+                let keys = grubset.keys.shuffled().prefix(min(count, size))
+                var immutableList: [String: Grub] = [:]
+                
+                let ref = Database.database().reference().child("immutableGrub")
+                for key in keys {
+                    let storage = Storage.storage().reference()
+                    let imageRef = storage.child(immutableImagePath + key + ".jpg")
+                    imageRef.getData(maxSize: .max) { (metadata, error) in
+                        let image = UIImage(data: metadata!)!
+                        ref.child(key).observeSingleEvent(of: .value) { snapshot in
+                            immutableList[key] = Grub(fid: key, snapshot.value as! NSDictionary, image: image)
+                            if immutableList.count == keys.count {
+                                withCompletion(immutableList)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 //MARK: - Machine Learning Input/Output
 public func queueImageTraining(_ fid: String, _ tags: [GrubTag: Double]) {
     var modifiedTags = tags
@@ -388,7 +464,7 @@ public func onLogin(requireCloud: Bool) {
             if foodList != nil && foodList!.count > 0 {
                 var fList: [String: Grub] = [:]
                 for food in foodList! {
-                    fList[food.key as! String] = Grub(fid: food.key as! String, food.value as? NSDictionary)
+                    fList[food.key as! String] = Grub(fid: food.key as! String, food.value as! NSDictionary)
                 }
                 UserCookie.uc().setFoodList(fList)
             }

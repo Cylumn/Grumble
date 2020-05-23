@@ -10,12 +10,12 @@ import SwiftUI
 
 //MARK: Helper Functions
 private func renderingRange(_ gc: GrumbleCookie) -> [Int] {
-    if gc.fidList.count == 0 {
+    if gc.grubList.count == 0 {
         return []
     }
     
-    let small: Int = max(gc.fidIndex - 1, 0)
-    let large: Int = min(gc.fidIndex + 1, gc.fidList.count - 1)
+    let small: Int = max(gc.index - 1, 0)
+    let large: Int = min(gc.index + 1, gc.grubList.count - 1)
     return (small ... large).filter { gc.grub($0) != nil }
 }
 
@@ -23,9 +23,9 @@ private func grumbleDragData(_ gc: GrumbleCookie, _ ggc: GrumbleGrubCookie, _ in
     let data: CGFloat = abs(ggc.grumbleDrag.width) / sWidth()
     
     switch index {
-    case gc.fidIndex - 1, gc.fidIndex + 1:
+    case gc.index - 1, gc.index + 1:
         return (1 - data)
-    case gc.fidIndex:
+    case gc.index:
         return data
     default:
         return 1
@@ -44,13 +44,13 @@ private func offsetX(_ gc: GrumbleCookie, _ ggc: GrumbleGrubCookie, _ index: Int
     let largeDistance: CGFloat = max(distanceFromThreshold, 0) * direction * (2 - speedFraction)
     
     switch index {
-    case _ where index < gc.fidIndex - 1:
+    case _ where index < gc.index - 1:
         return -sWidth()
-    case gc.fidIndex - 1:
+    case gc.index - 1:
         return -sWidth() + smallDistance + largeDistance
-    case gc.fidIndex:
+    case gc.index:
         return smallDistance + largeDistance
-    case gc.fidIndex + 1:
+    case gc.index + 1:
         return sWidth() + smallDistance + largeDistance
     default:
         return sWidth()
@@ -77,13 +77,13 @@ public struct GrumbleGrubDisplay: View {
         let angle: CGFloat = 0.2 * 360
         
         switch index {
-        case _ where index < self.gc.fidIndex - 1:
+        case _ where index < self.gc.index - 1:
             return Angle(degrees: Double(-angle))
-        case self.gc.fidIndex - 1:
+        case self.gc.index - 1:
             return Angle(degrees: Double(-angle + data * angle))
-        case self.gc.fidIndex:
+        case self.gc.index:
             return Angle(degrees: Double(data * angle))
-        case self.gc.fidIndex + 1:
+        case self.gc.index + 1:
             return Angle(degrees: Double(angle + data * angle))
         default:
             return Angle(degrees: Double(angle))
@@ -210,7 +210,7 @@ public struct GrumbleGrubImageDisplay: View {
                 self.expand()
             }))
             
-            if self.gc.fidIndex == index && self.ggc.expandedInfo {
+            if self.gc.index == index && self.ggc.expandedInfo {
                 Text(grub.food)
                     .padding(10)
                     .background(Color.white)
@@ -223,7 +223,7 @@ public struct GrumbleGrubImageDisplay: View {
                     .transition(AnyTransition.move(edge: .bottom).combined(with: .opacity))
             }
             
-            if self.gc.fidIndex == index {
+            if self.gc.index == index {
                 VStack(spacing: 0) {
                     if self.ggc.expandedInfo {
                         VStack(spacing: 10) {
@@ -254,7 +254,7 @@ public struct GrumbleGrubImageDisplay: View {
                             Group {
                                 Button(action: {
                                     withAnimation(gAnim(.easeOut)) {
-                                        ListCookie.lc().selectedFID = self.gc.fidList[self.gc.fidIndex]
+                                        ListCookie.lc().selectedFID = self.gc.grubList[self.gc.index].0
                                     }
                                 }, label: {
                                     Text("Show More Information")

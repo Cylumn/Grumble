@@ -108,16 +108,16 @@ public struct Grub: Decodable, Equatable {
         GrumbleGrubImageDisplay.cacheImage(self.img, value: self.image())
     }
     
-    public init(fid: String, _ foodItem: NSDictionary?, image: UIImage? = nil) {
+    public init(fid: String, _ foodItem: NSDictionary, image: UIImage? = nil) {
         self.fid = fid
-        self.img = foodItem?.value(forKey: "img") as! String
-        self.food = foodItem?.value(forKey: "food") as! String
-        self.price = foodItem?.value(forKey: "price") as? Double
-        self.restaurant = foodItem?.value(forKey: "restaurant") as? String
-        self.address = foodItem?.value(forKey: "address") as? String
-        self.tags = foodItem?.value(forKey: "tags") as! [GrubTag: Double]
-        self.priorityTag = foodItem?.value(forKey: "priorityTag") as! GrubTag
-        self.date = foodItem?.value(forKey: "date") as! String
+        self.img = foodItem.value(forKey: "img") as! String
+        self.food = foodItem.value(forKey: "food") as! String
+        self.price = foodItem.value(forKey: "price") as? Double
+        self.restaurant = foodItem.value(forKey: "restaurant") as? String
+        self.address = foodItem.value(forKey: "address") as? String
+        self.tags = foodItem.value(forKey: "tags") as! [GrubTag: Double]
+        self.priorityTag = foodItem.value(forKey: "priorityTag") as! GrubTag
+        self.date = foodItem.value(forKey: "date") as! String
 
         if let image = image {
             Grub.images[self.img] = Image(uiImage: image)

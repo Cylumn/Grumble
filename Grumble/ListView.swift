@@ -57,7 +57,14 @@ public struct ListView: View {
         }
         
         self.ghorblinType = ghorblinType
-        GrumbleCookie.gc().fidList = self.uc.foodList().keys.shuffled()
+        if ghorblinType == .grumble {
+            GrumbleCookie.gc().grubList = UserCookie.uc().foodList().shuffled()
+        } else {
+            requestImmutableGrub(count: 10) { list in
+                GrumbleCookie.gc().grubList = list.shuffled()
+                print("grubs got")
+            }
+        }
         GrumbleCookie.gc().startIdleAnimation()
         Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
             withAnimation(gAnim(.springSlow)) {
