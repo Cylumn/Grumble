@@ -69,7 +69,7 @@ public struct GrubItem: View {
     //MARK: Function Methods
     private func onClick() {
         withAnimation(gAnim(.easeOut)) {
-            self.lc.selectedFID = self.fid
+            self.lc.selectedGrub = UserCookie.uc().foodList()[self.fid]
         }
         UIApplication.shared.endEditing()
     }
@@ -223,7 +223,7 @@ public struct GrubSearchItem: View {
     //MARK: Function Methods
     private func onClick() {
         withAnimation(gAnim(.easeOut)) {
-            ListCookie.lc().selectedFID = self.fid
+            ListCookie.lc().selectedGrub = UserCookie.uc().foodList()[self.fid]
         }
         UIApplication.shared.endEditing()
     }

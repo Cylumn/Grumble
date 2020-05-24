@@ -409,12 +409,17 @@ private func post(path: String, _ onCompletion: @escaping (String?) -> Void) {
 }
 
 //MARK: - Gather Immutable Grub
-public func requestImmutableGrub(_ existing: [String] = [], count: Int, _ withCompletion: @escaping ([String: Grub]) -> Void) {
+public func requestImmutableGrub(_ existing: ArraySlice<(String, Grub)> = [], count: Int, _ withCompletion: @escaping ([String: Grub]) -> Void) {
     if UserAccessCookie.uac().loggedIn() == .loggedIn {
+        if count == 0 {
+            withCompletion([:])
+            return()
+        }
+        
         post(path: "request-immutable-fid") { response in
             if let fids = try? JSONSerialization.jsonObject(with: response!.data(using: .utf8)!) as? [String: Bool] {
                 var grubset = fids
-                for fid in existing {
+                for (fid, _) in existing {
                     grubset.removeValue(forKey: fid)
                 }
                 
@@ -427,9 +432,9 @@ public func requestImmutableGrub(_ existing: [String] = [], count: Int, _ withCo
                     let storage = Storage.storage().reference()
                     let imageRef = storage.child(immutableImagePath + key + ".jpg")
                     imageRef.getData(maxSize: .max) { (metadata, error) in
-                        let image = UIImage(data: metadata!)!
+                        let image = metadata != nil ? UIImage(data: metadata!) : UIImage(imageLiteralResourceName: "ExplainTraining")
                         ref.child(key).observeSingleEvent(of: .value) { snapshot in
-                            immutableList[key] = Grub(fid: key, snapshot.value as! NSDictionary, image: image)
+                            immutableList[key] = Grub(fid: key, snapshot.value as! NSDictionary, immutable: true, image: image)
                             if immutableList.count == keys.count {
                                 withCompletion(immutableList)
                             }

@@ -9,25 +9,12 @@
 import SwiftUI
 
 public struct GrumbleSheetBackground: View {
-    private var type: GhorblinType
-    private var tableColor: Color
+    @ObservedObject private var gtc: GrumbleTypeCookie = GrumbleTypeCookie.gtc()
     
     private var grubDisplay: GrumbleGrubDisplay
     
     //MARK: Initializers
-    public init(_ type: GhorblinType) {
-        self.type = type
-        switch self.type {
-        case .grumble:
-            self.tableColor = gColor(.blue2)
-        case .orthodox:
-            self.tableColor = gColor(.dandelion)
-        case .defiant:
-            self.tableColor = gColor(.coral)
-        case .grubologist:
-            self.tableColor = gColor(.magenta)
-        }
-        
+    public init() {
         self.grubDisplay = GrumbleGrubDisplay()
     }
     
@@ -41,6 +28,19 @@ public struct GrumbleSheetBackground: View {
             
             LinearGradient(gradient: Gradient(colors: [Color.black.opacity(0.2), Color.clear, Color.black.opacity(0.8)]),
                            startPoint: .top, endPoint: .bottomLeading)
+        }
+    }
+    
+    private var tableColor: Color {
+        switch self.gtc.type {
+        case .grumble:
+            return gColor(.blue2)
+        case .orthodox:
+            return gColor(.dandelion)
+        case .defiant:
+            return gColor(.coral)
+        case .grubologist:
+            return gColor(.magenta)
         }
     }
     
@@ -94,6 +94,6 @@ public struct GrumbleSheetBackground: View {
 
 struct GrumbleSheetBackground_Previews: PreviewProvider {
     static var previews: some View {
-        GrumbleSheetBackground(.grumble)
+        GrumbleSheetBackground()
     }
 }

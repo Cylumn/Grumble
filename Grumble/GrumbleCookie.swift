@@ -33,8 +33,10 @@ public enum PresentHideModal {
 //MARK: Cookies
 public class GrumbleCookie: ObservableObject {
     private static var instance: GrumbleCookie? = nil
-    public var grubList: [(String, Grub)] = []
-    @Published public var index: Int = 0
+    private var grubList: [(String, Grub)] = []
+    @Published public var grubIndex: Int = 0
+    private var maxObservedIndex: Int = 1
+    private var requesting: Bool = false
     
     //MARK: Drag Translations
     @Published public var coverDrag: CGSize = CGSize.zero
@@ -58,6 +60,14 @@ public class GrumbleCookie: ObservableObject {
     }
     
     //MARK: Getter Methods
+    public func listCount() -> Int {
+        return self.grubList.count
+    }
+    
+    public func index() -> Int {
+        return self.grubIndex
+    }
+    
     public func grub(_ index: Int) -> Grub? {
         if self.grubList.count == 0 {
             return nil
@@ -66,14 +76,32 @@ public class GrumbleCookie: ObservableObject {
     }
     
     public func grub() -> Grub? {
-        return self.grub(self.index)
+        return self.grub(self.index())
     }
     
     public func coverDistance() -> CGFloat {
         return self.coverDrag.height * 0.5 + min(self.coverDrag.height + sHeight() * 0.3, 0) * 10
     }
     
+    public func unobservedGrubList() -> ArraySlice<(String, Grub)> {
+        if self.maxObservedIndex + 1 < self.grubList.count {
+            return self.grubList.suffix(from: self.maxObservedIndex + 1)
+        } else {
+            return []
+        }
+    }
+    
     //MARK: Setter Methods
+    public func setGrubList(_ list: [(String, Grub)]) {
+        self.grubList = list
+        self.maxObservedIndex = 1
+    }
+    
+    public func setIndex(_ index: Int) {
+        self.maxObservedIndex = max(self.maxObservedIndex, index + 1)
+        self.grubIndex = index
+    }
+    
     public func startIdleAnimation() {
         if self.idleTimer == nil {
             self.idleTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
@@ -104,6 +132,29 @@ public class GrumbleCookie: ObservableObject {
             self.idleTimer!.invalidate()
             self.idleTimer = nil
         }
+    }
+    
+    public func attemptRequestImmutableGrub() {
+        if GrumbleTypeCookie.gtc().type != .grumble && self.maxObservedIndex >= self.grubList.count - 4 && !self.requesting {
+            self.requesting = true
+            requestImmutableGrub(ArraySlice(self.grubList), count: 10) { list in
+                self.grubList = self.grubList + list.shuffled()
+                self.requesting = false
+            }
+        }
+    }
+}
+
+public class GrumbleTypeCookie: ObservableObject {
+    private static var instance: GrumbleTypeCookie? = nil
+    @Published public var type: GhorblinType = .grumble
+    
+    //MARK: Initializers
+    public static func gtc() -> GrumbleTypeCookie {
+        if GrumbleTypeCookie.instance == nil {
+            GrumbleTypeCookie.instance = GrumbleTypeCookie()
+        }
+        return GrumbleTypeCookie.instance!
     }
 }
 

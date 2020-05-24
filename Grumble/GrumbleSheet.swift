@@ -12,6 +12,7 @@ import AVFoundation
 public struct GrumbleSheet: View {
     @ObservedObject private var uc: UserCookie = UserCookie.uc()
     @ObservedObject private var gc: GrumbleCookie = GrumbleCookie.gc()
+    @ObservedObject private var gtc: GrumbleTypeCookie = GrumbleTypeCookie.gtc()
     private var ggc: GrumbleGrubCookie = GrumbleGrubCookie.ggc()
     private var show: Binding<Bool>
     private var type: GhorblinType
@@ -25,11 +26,11 @@ public struct GrumbleSheet: View {
     @State private var canDragHorizontal: Bool = true
     
     //Initializer
-    public init( _ type: GhorblinType, show: Binding<Bool>) {
-        self.type = type
+    public init(show: Binding<Bool>) {
+        self.type = GrumbleTypeCookie.gtc().type
         self.show = show
         
-        self.background = GrumbleSheetBackground(type)
+        self.background = GrumbleSheetBackground()
         
         self.holdScaleAnchor = UnitPoint.bottom
     }
@@ -60,23 +61,19 @@ public struct GrumbleSheet: View {
         self.gc.presentHideModal = .hidden
         self.gc.endIdleAnimation()
         self.ggc.chooseData = 0
-        
-        Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
-            self.gc.index = 0
-            self.gc.grubList = []
-        }
     }
     
     private func completeGrubSheet() {
-        if self.gc.grubList.count > 0 {
-            Grub.removeFood(self.gc.grubList[self.gc.index].0)
+        if self.gc.listCount() > 0 && !self.gc.grub()!.immutable {
+            Grub.removeFood(self.gc.grub()!.fid)
         }
         self.hideSheet()
     }
     
     private func onToss() {
         self.canDragHorizontal = false
-        UINotificationFeedbackGenerator().notificationOccurred(.error)
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        self.gc.attemptRequestImmutableGrub()
         Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
             self.canDragHorizontal = true
         }
@@ -95,11 +92,11 @@ public struct GrumbleSheet: View {
                     }
                 }
                 
-                if self.canDragHorizontal && self.gc.grubList.count > 1 {
-                    switch self.gc.index{
+                if self.canDragHorizontal && self.gc.listCount() > 1 {
+                    switch self.gc.index() {
                     case 0:
                         self.ggc.grumbleDrag = CGSize(width: min(drag.translation.width, 0), height: 0)
-                    case self.gc.grubList.count - 1:
+                    case self.gc.listCount():
                         self.ggc.grumbleDrag = CGSize(width: max(drag.translation.width, 0), height: 0)
                     default:
                         self.ggc.grumbleDrag = CGSize(width: drag.translation.width, height: 0)
@@ -134,7 +131,7 @@ public struct GrumbleSheet: View {
                     self.gc.coverDrag = CGSize(width: 0, height: -sHeight() * 0.6)
                     self.gc.coverDragState = .completed
                     
-                    if self.gc.grubList.count == 0 {
+                    if self.gtc.type == .grumble && self.gc.listCount() == 0 {
                         self.ggc.choose()
                     }
                 case .completed:
@@ -147,13 +144,13 @@ public struct GrumbleSheet: View {
                             }
                         }
                         
-                        if self.gc.index > 0 && drag.predictedEndTranslation.width > sWidth() * 0.5 {
-                            self.gc.index -= 1
+                        if self.gc.index() > 0 && drag.predictedEndTranslation.width > sWidth() * 0.5 {
+                            self.gc.setIndex(self.gc.index() - 1)
                             self.ggc.grumbleDrag = CGSize.zero
                             
                             self.onToss()
-                        } else if self.gc.index < self.gc.grubList.count - 1 && drag.predictedEndTranslation.width < -sWidth() * 0.5 {
-                            self.gc.index += 1
+                        } else if self.gc.index() < self.gc.listCount() && drag.predictedEndTranslation.width < -sWidth() * 0.5 {
+                            self.gc.setIndex(self.gc.index() + 1)
                             self.ggc.grumbleDrag = CGSize.zero
                             
                             self.onToss()
@@ -178,7 +175,7 @@ public struct GrumbleSheet: View {
                         Color.clear
                         
                         VStack(alignment: .center, spacing: 10) {
-                            if self.gc.grubList.count > 0 {
+                            if self.gc.listCount() > 0 {
                                 Text("Enjoy Your")
                                 
                                 Text(self.gc.grub()?.food ?? "")
@@ -199,7 +196,7 @@ public struct GrumbleSheet: View {
                     }
                     
                     Button(action: self.completeGrubSheet, label: {
-                        Text(self.gc.grubList.count > 0 ? "Directions" : "Back")
+                        Text(self.gc.listCount() > 0 ? "Directions" : "Back")
                             .padding(5)
                             .padding([.leading, .trailing], 10)
                             .background(gColor(.blue0))
@@ -229,7 +226,7 @@ public struct GrumbleSheet: View {
                     .scaleEffect(bgScale, anchor: self.holdScaleAnchor)
                 
                 if self.gc.coverDragState != .completed {
-                    GrumbleGhorblinView(self.type, holdData: self.holdData())
+                    GrumbleGhorblinView(self.gtc.type, holdData: self.holdData())
                         .scaleEffect(ghorblinScale, anchor: self.holdScaleAnchor)
                 }
             }
@@ -259,6 +256,6 @@ public struct GrumbleSheet: View {
 struct GrumbleSheet_Previews: PreviewProvider {
     static var previews: some View {
         UserCookie.uc().setFoodList(["": Grub.testGrub()])
-        return GrumbleSheet(.grumble, show: Binding.constant(true))
+        return GrumbleSheet(show: Binding.constant(true))
     }
 }

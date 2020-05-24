@@ -42,7 +42,10 @@ fileprivate struct GrubSheetContent: View {
     
     //MARK: Getter Methods
     fileprivate func height() -> CGFloat {
-        var height = editHeight + grubContentPadding
+        var height: CGFloat = 0
+        if !self.grub.immutable {
+            height += editHeight + grubContentPadding
+        }
         
         if self.grub.restaurant != nil {
             height += restaurantHeight + grubContentPadding
@@ -53,7 +56,10 @@ fileprivate struct GrubSheetContent: View {
         
         let tagLines = ceil(Double(self.grub.tags.count - 1) / 3.0)
         height += (tagBuilderHeight + tagBuilderPadding) * CGFloat(tagLines) - tagBuilderPadding + grubContentPadding
-        height += deleteHeight
+        
+        if !self.grub.immutable {
+            height += deleteHeight
+        }
         
         return height
     }
@@ -192,12 +198,14 @@ fileprivate struct GrubSheetContent: View {
     
     public var body: some View {
         VStack(alignment: .leading, spacing: grubContentPadding) {
-            self.editButton
-                .frame(height: editHeight)
-                .background(Color.white)
-                .foregroundColor(gTagColors[self.grub.priorityTag])
-                .font(gFont(.ubuntuMedium, .width, 2.5))
-                .cornerRadius(10)
+            if !self.grub.immutable {
+                self.editButton
+                    .frame(height: editHeight)
+                    .background(Color.white)
+                    .foregroundColor(gTagColors[self.grub.priorityTag])
+                    .font(gFont(.ubuntuMedium, .width, 2.5))
+                    .cornerRadius(10)
+            }
             
             if self.grub.restaurant != nil {
                 self.restaurantInfo
@@ -217,19 +225,21 @@ fileprivate struct GrubSheetContent: View {
             
             self.tagBuilder
             
-            Button(action: { self.presentDeleteAlert.toggle() }, label: {
-                Text("Delete")
-                .padding(10)
-                .frame(height: deleteHeight)
-                .background(Color.white)
-                .cornerRadius(8)
-                .font(gFont(.ubuntuBold, .width, 2))
-                .foregroundColor(gColor(.coral))
-            }).alert(isPresented: self.$presentDeleteAlert) {
-                Alert(title: Text("Delete Grub?"), primaryButton: Alert.Button.default(Text("Cancel")), secondaryButton: Alert.Button.destructive(Text("Delete")) {
-                    self.lc.selectedFID = nil
-                    Grub.removeFood(self.selectedFID)
-                })
+            if !self.grub.immutable {
+                Button(action: { self.presentDeleteAlert.toggle() }, label: {
+                    Text("Delete")
+                    .padding(10)
+                    .frame(height: deleteHeight)
+                    .background(Color.white)
+                    .cornerRadius(8)
+                    .font(gFont(.ubuntuBold, .width, 2))
+                    .foregroundColor(gColor(.coral))
+                }).alert(isPresented: self.$presentDeleteAlert) {
+                    Alert(title: Text("Delete Grub?"), primaryButton: Alert.Button.default(Text("Cancel")), secondaryButton: Alert.Button.destructive(Text("Delete")) {
+                        self.lc.selectedGrub = nil
+                        Grub.removeFood(self.selectedFID)
+                    })
+                }
             }
         }.padding([.leading, .trailing], 20)
         .foregroundColor(Color(white: 0.2))
@@ -254,14 +264,14 @@ public struct GrubSheet: View {
     @State private var impactOccurred: Bool = false
     
     //MARK: Initializers
-    public init(_ selectedFID: String, _ grub: Grub) {
-        self.selectedFID = selectedFID
-        self.grub = grub
+    public init(_ selectedGrub: Grub) {
+        self.selectedFID = selectedGrub.fid
+        self.grub = selectedGrub
         
         //MARK: Function Methods
         self.hideSheet = {
             withAnimation(gAnim(.easeInOut)) {
-                ListCookie.lc().selectedFID = nil
+                ListCookie.lc().selectedGrub = nil
             }
         }
         
@@ -363,6 +373,6 @@ public struct GrubSheet: View {
 
 struct GrubSheet_Previews: PreviewProvider {
     static var previews: some View {
-        return GrubSheet("", Grub.testGrub())
+        return GrubSheet(Grub.testGrub())
     }
 }

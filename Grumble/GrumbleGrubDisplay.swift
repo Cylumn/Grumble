@@ -10,12 +10,12 @@ import SwiftUI
 
 //MARK: Helper Functions
 private func renderingRange(_ gc: GrumbleCookie) -> [Int] {
-    if gc.grubList.count == 0 {
+    if gc.listCount() == 0 {
         return []
     }
     
-    let small: Int = max(gc.index - 1, 0)
-    let large: Int = min(gc.index + 1, gc.grubList.count - 1)
+    let small: Int = max(gc.index() - 1, 0)
+    let large: Int = min(gc.index() + 1, gc.listCount() - 1)
     return (small ... large).filter { gc.grub($0) != nil }
 }
 
@@ -23,9 +23,9 @@ private func grumbleDragData(_ gc: GrumbleCookie, _ ggc: GrumbleGrubCookie, _ in
     let data: CGFloat = abs(ggc.grumbleDrag.width) / sWidth()
     
     switch index {
-    case gc.index - 1, gc.index + 1:
+    case gc.index() - 1, gc.index() + 1:
         return (1 - data)
-    case gc.index:
+    case gc.index():
         return data
     default:
         return 1
@@ -44,13 +44,13 @@ private func offsetX(_ gc: GrumbleCookie, _ ggc: GrumbleGrubCookie, _ index: Int
     let largeDistance: CGFloat = max(distanceFromThreshold, 0) * direction * (2 - speedFraction)
     
     switch index {
-    case _ where index < gc.index - 1:
+    case _ where index < gc.index() - 1:
         return -sWidth()
-    case gc.index - 1:
+    case gc.index() - 1:
         return -sWidth() + smallDistance + largeDistance
-    case gc.index:
+    case gc.index():
         return smallDistance + largeDistance
-    case gc.index + 1:
+    case gc.index() + 1:
         return sWidth() + smallDistance + largeDistance
     default:
         return sWidth()
@@ -60,7 +60,14 @@ private func offsetX(_ gc: GrumbleCookie, _ ggc: GrumbleGrubCookie, _ index: Int
 //MARK: Views
 public struct GrumbleGrubDisplay: View {
     @ObservedObject private var gc: GrumbleCookie = GrumbleCookie.gc()
+    @ObservedObject private var gtc: GrumbleTypeCookie = GrumbleTypeCookie.gtc()
     @ObservedObject private var ggc: GrumbleGrubCookie = GrumbleGrubCookie.ggc()
+    private var loadingImage: Image
+    
+    //MARK: Initializers
+    public init() {
+        self.loadingImage = Image("LoadingIcon")
+    }
     
     //MARK: Getter Methods
     private func coverDragData() -> CGFloat {
@@ -77,13 +84,13 @@ public struct GrumbleGrubDisplay: View {
         let angle: CGFloat = 0.2 * 360
         
         switch index {
-        case _ where index < self.gc.index - 1:
+        case _ where index < self.gc.index() - 1:
             return Angle(degrees: Double(-angle))
-        case self.gc.index - 1:
+        case self.gc.index() - 1:
             return Angle(degrees: Double(-angle + data * angle))
-        case self.gc.index:
+        case self.gc.index():
             return Angle(degrees: Double(data * angle))
-        case self.gc.index + 1:
+        case self.gc.index() + 1:
             return Angle(degrees: Double(angle + data * angle))
         default:
             return Angle(degrees: Double(angle))
@@ -166,6 +173,29 @@ public struct GrumbleGrubDisplay: View {
                                 y: sHeight() * grubOffsetY + self.offsetY(index) + self.chooseOffsetY())
                 }
             }.transition(.identity)
+            
+            if self.gc.coverDragState == .completed && self.gc.index() >= self.gc.listCount() - 1 {
+                if self.gtc.type == .grumble {
+                    Text("[EmptyGrub]")
+                        .rotationEffect(self.rotation(self.gc.listCount()))
+                        .offset(x: offsetX(self.gc, self.ggc, self.gc.listCount()),
+                                y: sHeight() * grubOffsetY + self.offsetY(self.gc.listCount()) + self.chooseOffsetY())
+                } else {
+                    self.loadingImage
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: sWidth() * (0.5 + 0.2 * self.gc.idleData))
+                        .offset(x: offsetX(self.gc, self.ggc, self.gc.listCount()),
+                                y: sHeight() * 0.1)
+                        .transition(AnyTransition.asymmetric(insertion: .scale(scale: 1, anchor: .center), removal: .identity))
+                    
+                    Text(".. Loading ..")
+                    .rotationEffect(self.rotation(self.gc.listCount()))
+                    .offset(x: offsetX(self.gc, self.ggc, self.gc.listCount()),
+                            y: sHeight() * grubOffsetY + self.offsetY(self.gc.listCount()) + self.chooseOffsetY())
+                    .transition(AnyTransition.asymmetric(insertion: .opacity, removal: .identity))
+                }
+            }
         }//.drawingGroup()
     }
 }
@@ -210,7 +240,7 @@ public struct GrumbleGrubImageDisplay: View {
                 self.expand()
             }))
             
-            if self.gc.index == index && self.ggc.expandedInfo {
+            if self.gc.index() == index && self.ggc.expandedInfo {
                 Text(grub.food)
                     .padding(10)
                     .background(Color.white)
@@ -223,7 +253,7 @@ public struct GrumbleGrubImageDisplay: View {
                     .transition(AnyTransition.move(edge: .bottom).combined(with: .opacity))
             }
             
-            if self.gc.index == index {
+            if self.gc.index() == index {
                 VStack(spacing: 0) {
                     if self.ggc.expandedInfo {
                         VStack(spacing: 10) {
@@ -254,7 +284,7 @@ public struct GrumbleGrubImageDisplay: View {
                             Group {
                                 Button(action: {
                                     withAnimation(gAnim(.easeOut)) {
-                                        ListCookie.lc().selectedFID = self.gc.grubList[self.gc.index].0
+                                        ListCookie.lc().selectedGrub = self.gc.grub()
                                     }
                                 }, label: {
                                     Text("Show More Information")

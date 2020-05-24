@@ -20,7 +20,7 @@ private let maxOverlayOpacity: Double = 0.5
 //MARK: - Cookies
 public class ListCookie: ObservableObject {
     private static var instance: ListCookie? = nil
-    @Published public var selectedFID: String? = nil
+    @Published public var selectedGrub: Grub? = nil
     
     public static func lc() -> ListCookie {
         if ListCookie.instance == nil {
@@ -30,7 +30,7 @@ public class ListCookie: ObservableObject {
     }
     
     public func presentGrubSheet() -> Bool {
-        return self.selectedFID != nil && UserCookie.uc().foodList()[self.selectedFID!] != nil
+        return self.selectedGrub != nil
     }
 }
 
@@ -42,7 +42,6 @@ public struct ListView: View {
     private var searchList: SearchList
     
     @State private var presentGrumbleSheet: Bool = false
-    @State private var ghorblinType: GhorblinType = .grumble
     
     @State private var presentAddImage: Bool = false
     
@@ -52,25 +51,22 @@ public struct ListView: View {
     
     //MARK: Function Methods
     private func showGrumbleSheet(_ ghorblinType: GhorblinType) {
+        GrumbleCookie.gc().setIndex(0)
+        GrumbleTypeCookie.gtc().type = ghorblinType
+        if ghorblinType == .grumble {
+            GrumbleCookie.gc().setGrubList(UserCookie.uc().foodList().shuffled())
+        } else {
+            let unobserved = GrumbleCookie.gc().unobservedGrubList()
+            requestImmutableGrub(unobserved, count: max(10 - unobserved.count, 0)) { list in
+                GrumbleCookie.gc().setGrubList(unobserved + list.shuffled())
+            }
+            GrumbleCookie.gc().setGrubList(Array(unobserved))
+        }
+        
         withAnimation(gAnim(.easeOut)) {
             self.presentGrumbleSheet = true
         }
-        
-        self.ghorblinType = ghorblinType
-        if ghorblinType == .grumble {
-            GrumbleCookie.gc().grubList = UserCookie.uc().foodList().shuffled()
-        } else {
-            requestImmutableGrub(count: 10) { list in
-                GrumbleCookie.gc().grubList = list.shuffled()
-                print("grubs got")
-            }
-        }
         GrumbleCookie.gc().startIdleAnimation()
-        Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
-            withAnimation(gAnim(.springSlow)) {
-                GrumbleCookie.gc().dripData = 1
-            }
-        }
     }
     
     private func showAddImage(isPresented: Bool, animate: Bool) {
@@ -221,14 +217,14 @@ public struct ListView: View {
             Color.black.opacity(self.lc.presentGrubSheet() ? maxOverlayOpacity : 0)
             
             if self.presentGrumbleSheet {
-                GrumbleSheet(self.ghorblinType, show: self.$presentGrumbleSheet)
+                GrumbleSheet(show: self.$presentGrumbleSheet)
                     .transition(.move(edge: .bottom))
                     .zIndex(1)
                     .edgesIgnoringSafeArea(.all)
             }
             
             if self.lc.presentGrubSheet() {
-                GrubSheet(self.lc.selectedFID!, self.uc.foodList()[self.lc.selectedFID!]!)
+                GrubSheet(self.lc.selectedGrub!)
                     .transition(.move(edge: .bottom))
                     .zIndex(1)
             }

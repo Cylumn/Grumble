@@ -20,13 +20,13 @@ public let dessert: GrubTag = "dessert"
 public let egg: GrubTag = "egg"
 public let fried: GrubTag = "fried"
 public let fruit: GrubTag = "fruit"
-public let grain: GrubTag = "grain"
+public let grains: GrubTag = "grains"
 public let meat: GrubTag = "meat"
 public let noodles: GrubTag = "noodles"
 public let salad: GrubTag = "salad"
 public let seafood: GrubTag = "seafood"
 public let soup: GrubTag = "soup"
-public let gTags: [GrubTag] = [food, bread, burger, dairy, dessert, egg, fried, fruit, grain, meat, noodles, salad, seafood, soup]
+public let gTags: [GrubTag] = [food, bread, burger, dairy, dessert, egg, fried, fruit, grains, meat, noodles, salad, seafood, soup]
 
 public let gTagColors: [GrubTag: Color] =
     [food: gColor(.blue2),
@@ -37,7 +37,7 @@ public let gTagColors: [GrubTag: Color] =
      egg: gColor(.yolk),
      fried: gColor(.poppy),
      fruit: gColor(.grass),
-     grain: gColor(.dew),
+     grains: gColor(.dew),
      meat: gColor(.crimson),
      noodles: gColor(.cerulean),
      salad: gColor(.neon),
@@ -53,7 +53,7 @@ private let gTagIcons: [GrubTag: (CGSize, CGFloat, CGFloat) -> AnyView] =
      egg: GFood.genericInit,
      fried: GFood.genericInit,
      fruit: GFood.genericInit,
-     grain: GFood.genericInit,
+     grains: GFood.genericInit,
      meat: GFood.genericInit,
      noodles: GFood.genericInit,
      salad: GSalad.genericInit,
@@ -77,6 +77,8 @@ public struct Grub: Decodable, Equatable {
     public var tags: [GrubTag: Double]
     public var priorityTag: GrubTag
     public var date: String
+    
+    public var immutable: Bool
     
     enum GrubKeys: String, CodingKey {
         case fid = "fid"
@@ -103,12 +105,14 @@ public struct Grub: Decodable, Equatable {
         self.priorityTag = try values.decode(GrubTag.self, forKey: .priorityTag)
         self.date = try values.decode(String.self, forKey: .date)
         
+        self.immutable = false
+        
         Grub.images[self.img] = Image(uiImage: grubImage(self.img)!.0)
         ObservedImage.updateImage(self)
         GrumbleGrubImageDisplay.cacheImage(self.img, value: self.image())
     }
     
-    public init(fid: String, _ foodItem: NSDictionary, image: UIImage? = nil) {
+    public init(fid: String, _ foodItem: NSDictionary, immutable: Bool = false, image: UIImage? = nil) {
         self.fid = fid
         self.img = foodItem.value(forKey: "img") as! String
         self.food = foodItem.value(forKey: "food") as! String
@@ -118,6 +122,8 @@ public struct Grub: Decodable, Equatable {
         self.tags = foodItem.value(forKey: "tags") as! [GrubTag: Double]
         self.priorityTag = foodItem.value(forKey: "priorityTag") as! GrubTag
         self.date = foodItem.value(forKey: "date") as! String
+        
+        self.immutable = immutable
 
         if let image = image {
             Grub.images[self.img] = Image(uiImage: image)
