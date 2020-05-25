@@ -432,7 +432,7 @@ public func requestImmutableGrub(_ existing: ArraySlice<(String, Grub)> = [], co
                     let storage = Storage.storage().reference()
                     let imageRef = storage.child(immutableImagePath + key + ".jpg")
                     imageRef.getData(maxSize: .max) { (metadata, error) in
-                        let image = metadata != nil ? UIImage(data: metadata!) : UIImage(imageLiteralResourceName: "ExplainTraining")
+                        let image = UIImage(data: metadata!)
                         ref.child(key).observeSingleEvent(of: .value) { snapshot in
                             immutableList[key] = Grub(fid: key, snapshot.value as! NSDictionary, immutable: true, image: image)
                             if immutableList.count == keys.count {

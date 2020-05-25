@@ -20,7 +20,7 @@ private func renderingRange(_ gc: GrumbleCookie) -> [Int] {
 }
 
 private func grumbleDragData(_ gc: GrumbleCookie, _ ggc: GrumbleGrubCookie, _ index: Int) -> CGFloat {
-    let data: CGFloat = abs(ggc.grumbleDrag.width) / sWidth()
+    let data: CGFloat = abs(ggc.dragData(.horizontal)) / sWidth()
     
     switch index {
     case gc.index() - 1, gc.index() + 1:
@@ -33,7 +33,7 @@ private func grumbleDragData(_ gc: GrumbleCookie, _ ggc: GrumbleGrubCookie, _ in
 }
 
 private func offsetX(_ gc: GrumbleCookie, _ ggc: GrumbleGrubCookie, _ index: Int) -> CGFloat {
-    let translation: CGFloat = ggc.grumbleDrag.width
+    let translation: CGFloat = ggc.dragData(.horizontal)
     let accelerateThreshold: CGFloat = 0.5 * sWidth()
     let speedFraction: CGFloat = abs(translation) / sWidth()
     
@@ -80,7 +80,7 @@ public struct GrumbleGrubDisplay: View {
     }
     
     private func rotation(_ index: Int) -> Angle {
-        let data: CGFloat = self.ggc.grumbleDrag.width / sWidth()
+        let data: CGFloat = self.ggc.dragData(.horizontal) / sWidth()
         let angle: CGFloat = 0.2 * 360
         
         switch index {
@@ -157,7 +157,6 @@ public struct GrumbleGrubDisplay: View {
                 .fill(Color.black.opacity(Double(coverShadowOpacity)))
                 .frame(width: sWidth() * coverShadowWidth, height: sWidth() * coverShadowHeight)
                 .offset(y: sHeight() * coverShadowOffsetY)
-                .animation(nil)
             
             ForEach(renderingRange(self.gc), id: \.self) { index in
                 ZStack {
@@ -190,10 +189,12 @@ public struct GrumbleGrubDisplay: View {
                         .transition(AnyTransition.asymmetric(insertion: .scale(scale: 1, anchor: .center), removal: .identity))
                     
                     Text(".. Loading ..")
+                    .font(gFont(.ubuntuBold, .width, 3))
                     .rotationEffect(self.rotation(self.gc.listCount()))
                     .offset(x: offsetX(self.gc, self.ggc, self.gc.listCount()),
                             y: sHeight() * grubOffsetY + self.offsetY(self.gc.listCount()) + self.chooseOffsetY())
                     .transition(AnyTransition.asymmetric(insertion: .opacity, removal: .identity))
+                    .shadow(color: Color.black.opacity(0.5), radius: 3)
                 }
             }
         }//.drawingGroup()
@@ -215,12 +216,6 @@ public struct GrumbleGrubImageDisplay: View {
             .frame(width: sWidth() * 0.9))
     }
     
-    private func expand() {
-        withAnimation(gAnim(.spring)) {
-            self.ggc.expandedInfo.toggle()
-        }
-    }
-    
     private func imageItem(_ grub: Grub, index: Int) -> some View {
         if GrumbleGrubImageDisplay.cachedImages[grub.img] == nil {
             GrumbleGrubImageDisplay.cacheImage(grub.img, value: grub.image())
@@ -228,9 +223,9 @@ public struct GrumbleGrubImageDisplay: View {
         return VStack(spacing: 0) {
             ZStack {
                 GrumbleGrubImageDisplay.cachedImages[grub.img]!
-            }.overlay(Color.white.opacity(Double(self.holdData) * 0.5))
+            }.overlay(Color.white.opacity(Double(self.ggc.tapData) * 0.5))
             .cornerRadius(0)
-            .gesture(LongPressGesture(minimumDuration: 1)
+            /*.gesture(LongPressGesture(minimumDuration: 1)
                 .updating(self.$holdData) { value, state, transaction in
                     transaction.animation = gAnim(.spring)
                     state = 1
@@ -238,7 +233,7 @@ public struct GrumbleGrubImageDisplay: View {
                 self.expand()
             }.simultaneously(with: TapGesture().onEnded {
                 self.expand()
-            }))
+            }))*/
             
             if self.gc.index() == index && self.ggc.expandedInfo {
                 Text(grub.food)
@@ -282,22 +277,26 @@ public struct GrumbleGrubImageDisplay: View {
                             }
                             
                             Group {
-                                Button(action: {
-                                    withAnimation(gAnim(.easeOut)) {
-                                        ListCookie.lc().selectedGrub = self.gc.grub()
-                                    }
-                                }, label: {
+                                Button(action: {}, label: {
                                     Text("Show More Information")
                                         .padding(10)
                                         .font(gFont(.ubuntuMedium, .width, 2))
+                                        .onTapGesture {
+                                            withAnimation(gAnim(.easeOut)) {
+                                                ListCookie.lc().selectedGrub = self.gc.grub()
+                                            }
+                                        }
                                 }).background(Color.white)
                                 .foregroundColor(gTagColors[grub.priorityTag])
                                 .cornerRadius(5)
                                 
-                                Button(action: self.ggc.choose, label: {
+                                Button(action: {}, label: {
                                     Text("Bon Appetit!")
                                         .padding(10)
                                         .font(gFont(.ubuntuMedium, .width, 2.5))
+                                        .onTapGesture {
+                                            self.ggc.choose()
+                                        }
                                 }).background(gTagColors[grub.priorityTag])
                                 .foregroundColor(Color.white)
                                 .cornerRadius(5)

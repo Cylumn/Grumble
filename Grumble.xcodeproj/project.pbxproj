@@ -74,6 +74,7 @@
 		D5F0895A24253AC6000D375D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D5F0895824253AC6000D375D /* LaunchScreen.storyboard */; };
 		D5F0898A24257849000D375D /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = D5F0898924257849000D375D /* Podfile */; };
 		D5F8EB2A2478B2A100E95CAD /* clientSecret.txt in Resources */ = {isa = PBXBuildFile; fileRef = D5F8EB292478B2A100E95CAD /* clientSecret.txt */; };
+		D5F8EB2C247AE6B300E95CAD /* GrumbleHideModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F8EB2B247AE6B300E95CAD /* GrumbleHideModal.swift */; };
 		D5FF430E2468DDE100B348C4 /* GTagClassifier.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = D5FF430D2468DDE100B348C4 /* GTagClassifier.mlmodel */; };
 /* End PBXBuildFile section */
 
@@ -174,6 +175,7 @@
 		D5F0897124253AC6000D375D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D5F0898924257849000D375D /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		D5F8EB292478B2A100E95CAD /* clientSecret.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = clientSecret.txt; sourceTree = "<group>"; };
+		D5F8EB2B247AE6B300E95CAD /* GrumbleHideModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrumbleHideModal.swift; sourceTree = "<group>"; };
 		D5FF430D2468DDE100B348C4 /* GTagClassifier.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = GTagClassifier.mlmodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -433,6 +435,7 @@
 				D5EFA65E24723F250064F726 /* GrumbleSheetBackground.swift */,
 				D5EFA660247241E60064F726 /* GrumbleGrubDisplay.swift */,
 				D59678DC247352EC00B199FA /* GrumbleGhorblinView.swift */,
+				D5F8EB2B247AE6B300E95CAD /* GrumbleHideModal.swift */,
 				D541F5E5244A4B8F00E98EF1 /* GrumbleSheet.swift */,
 			);
 			name = GrumbleSheet;
@@ -748,6 +751,7 @@
 				D5DFD71C24579EC100B78451 /* SecurityForm.swift in Sources */,
 				D54006FA246323BD0053B51C /* AddImage.swift in Sources */,
 				D573A82824386DDC00DB6067 /* GField.swift in Sources */,
+				D5F8EB2C247AE6B300E95CAD /* GrumbleHideModal.swift in Sources */,
 				D5EFA65F24723F250064F726 /* GrumbleSheetBackground.swift in Sources */,
 				D5EFA661247241E60064F726 /* GrumbleGrubDisplay.swift in Sources */,
 				D5AA593A2425E996000BEC5C /* MainView.swift in Sources */,

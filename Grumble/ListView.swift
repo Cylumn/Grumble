@@ -52,7 +52,6 @@ public struct ListView: View {
     //MARK: Function Methods
     private func showGrumbleSheet(_ ghorblinType: GhorblinType) {
         GrumbleCookie.gc().setIndex(0)
-        GrumbleTypeCookie.gtc().type = ghorblinType
         if ghorblinType == .grumble {
             GrumbleCookie.gc().setGrubList(UserCookie.uc().foodList().shuffled())
         } else {
@@ -62,6 +61,7 @@ public struct ListView: View {
             }
             GrumbleCookie.gc().setGrubList(Array(unobserved))
         }
+        GrumbleTypeCookie.gtc().type = ghorblinType
         
         withAnimation(gAnim(.easeOut)) {
             self.presentGrumbleSheet = true

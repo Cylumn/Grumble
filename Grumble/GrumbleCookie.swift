@@ -84,7 +84,7 @@ public class GrumbleCookie: ObservableObject {
     }
     
     public func unobservedGrubList() -> ArraySlice<(String, Grub)> {
-        if self.maxObservedIndex + 1 < self.grubList.count {
+        if GrumbleTypeCookie.gtc().type != .grumble && self.maxObservedIndex + 1 < self.grubList.count {
             return self.grubList.suffix(from: self.maxObservedIndex + 1)
         } else {
             return []
@@ -163,10 +163,12 @@ public class GrumbleGrubCookie: ObservableObject {
     @Published public var expandedInfo: Bool = false
     
     //MARK: Drag Translations
-    @Published public var grumbleDrag: CGSize = CGSize.zero
+    @Published private var grumbleDrag: CGSize = CGSize.zero
+    private var mostRecentDrag: CGSize? = nil
     
     //MARK: Data
     @Published public var chooseData: CGFloat = 0
+    @Published public var tapData: CGFloat = 0
     
     //MARK: Initializers
     public static func ggc() -> GrumbleGrubCookie {
@@ -174,6 +176,50 @@ public class GrumbleGrubCookie: ObservableObject {
             GrumbleGrubCookie.instance = GrumbleGrubCookie()
         }
         return GrumbleGrubCookie.instance!
+    }
+    
+    //MARK: Getter Methods
+    public func dragData(_ axis: GAxis) -> CGFloat {
+        if axis == GAxis.horizontal {
+            return self.grumbleDrag.width
+        } else {
+            return self.grumbleDrag.height
+        }
+    }
+    
+    //MARK: Setter Methods
+    public func setGrumbleDrag(_ translation: CGSize, force: Bool = false, animation: Animation? = nil) {
+        let requiredSizeChange: CGSize = CGSize(width: 10, height: Int.max)
+        if force || abs(translation.width - self.grumbleDrag.width) > requiredSizeChange.width ||
+            abs(translation.height - self.grumbleDrag.height) > requiredSizeChange.height {
+            
+            self.mostRecentDrag = translation
+            if force {
+                withAnimation(animation) {
+                    self.grumbleDrag = self.mostRecentDrag!
+                }
+                count += 1
+            } else {
+                Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
+                    if self.grumbleDrag != self.mostRecentDrag {
+                        withAnimation(animation) {
+                            self.grumbleDrag = self.mostRecentDrag!
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    //MARK: Function Methods
+    public func expand(_ shouldExpand: Bool? = nil) {
+        withAnimation(gAnim(.spring)) {
+            if let shouldExpand = shouldExpand {
+                self.expandedInfo = shouldExpand
+            } else {
+                self.expandedInfo.toggle()
+            }
+        }
     }
     
     public func choose() {
