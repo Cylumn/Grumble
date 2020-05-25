@@ -9,21 +9,21 @@
 import SwiftUI
 
 //MARK: Helper Functions
-private func renderingRange(_ gc: GrumbleCookie) -> [Int] {
+private func renderingRange(_ gc: GrumbleCookie, _ ggc: GrumbleGrubCookie) -> [Int] {
     if gc.listCount() == 0 {
         return []
     }
     
-    let small: Int = max(gc.index() - 1, 0)
-    let large: Int = min(gc.index() + 1, gc.listCount() - 1)
-    return (small ... large).filter { gc.grub($0) != nil }
+    let small: Int = max(gc.leadingIndex(), 0)
+    let large: Int = min(gc.trailingIndex(), gc.listCount() - 1)
+    return (small ... large).filter { !(ggc.appendIndex != $0 && gc.removed.contains($0)) && gc.grub($0) != nil }
 }
 
 private func grumbleDragData(_ gc: GrumbleCookie, _ ggc: GrumbleGrubCookie, _ index: Int) -> CGFloat {
     let data: CGFloat = abs(ggc.dragData(.horizontal)) / sWidth()
     
     switch index {
-    case gc.index() - 1, gc.index() + 1:
+    case gc.leadingIndex(), gc.trailingIndex():
         return (1 - data)
     case gc.index():
         return data
@@ -33,6 +33,10 @@ private func grumbleDragData(_ gc: GrumbleCookie, _ ggc: GrumbleGrubCookie, _ in
 }
 
 private func offsetX(_ gc: GrumbleCookie, _ ggc: GrumbleGrubCookie, _ index: Int) -> CGFloat {
+    if index == ggc.appendIndex {
+        return 0
+    }
+    
     let translation: CGFloat = ggc.dragData(.horizontal)
     let accelerateThreshold: CGFloat = 0.5 * sWidth()
     let speedFraction: CGFloat = abs(translation) / sWidth()
@@ -43,18 +47,24 @@ private func offsetX(_ gc: GrumbleCookie, _ ggc: GrumbleGrubCookie, _ index: Int
     let smallDistance: CGFloat = min(abs(translation), accelerateThreshold) * direction * speedFraction
     let largeDistance: CGFloat = max(distanceFromThreshold, 0) * direction * (2 - speedFraction)
     
+    let leadingIndex: Int = gc.leadingIndex()
+    let trailingIndex: Int = gc.trailingIndex()
     switch index {
-    case _ where index < gc.index() - 1:
+    case _ where index < leadingIndex:
         return -sWidth()
-    case gc.index() - 1:
+    case leadingIndex:
         return -sWidth() + smallDistance + largeDistance
     case gc.index():
         return smallDistance + largeDistance
-    case gc.index() + 1:
+    case trailingIndex:
         return sWidth() + smallDistance + largeDistance
     default:
         return sWidth()
     }
+}
+
+private func appendOffsetY(_ ggc: GrumbleGrubCookie, _ index: Int) -> CGFloat {
+    return ggc.appendIndex == index ? sHeight() * -0.6 : 0
 }
 
 //MARK: Views
@@ -76,21 +86,23 @@ public struct GrumbleGrubDisplay: View {
     
     private func offsetY(_ index: Int) -> CGFloat {
         let magnitude: CGFloat = -150
-        return grumbleDragData(self.gc, self.ggc, index) * magnitude
+        return grumbleDragData(self.gc, self.ggc, index) * magnitude + min(self.ggc.dragData(.vertical), 0)
     }
     
     private func rotation(_ index: Int) -> Angle {
         let data: CGFloat = self.ggc.dragData(.horizontal) / sWidth()
         let angle: CGFloat = 0.2 * 360
         
+        let leadingIndex: Int = self.gc.leadingIndex()
+        let trailingIndex: Int = self.gc.trailingIndex()
         switch index {
-        case _ where index < self.gc.index() - 1:
+        case _ where index < leadingIndex:
             return Angle(degrees: Double(-angle))
-        case self.gc.index() - 1:
+        case leadingIndex:
             return Angle(degrees: Double(-angle + data * angle))
         case self.gc.index():
             return Angle(degrees: Double(data * angle))
-        case self.gc.index() + 1:
+        case trailingIndex:
             return Angle(degrees: Double(angle + data * angle))
         default:
             return Angle(degrees: Double(angle))
@@ -158,7 +170,7 @@ public struct GrumbleGrubDisplay: View {
                 .frame(width: sWidth() * coverShadowWidth, height: sWidth() * coverShadowHeight)
                 .offset(y: sHeight() * coverShadowOffsetY)
             
-            ForEach(renderingRange(self.gc), id: \.self) { index in
+            ForEach(renderingRange(self.gc, self.ggc), id: \.self) { index in
                 ZStack {
                     Ellipse()
                         .fill(Color.black.opacity(Double(0.3 - 0.3 * grumbleDragData(self.gc, self.ggc, index))))
@@ -169,7 +181,7 @@ public struct GrumbleGrubDisplay: View {
                         .scaleEffect(grubScale)
                         .rotationEffect(self.rotation(index))
                         .offset(x: offsetX(self.gc, self.ggc, index),
-                                y: sHeight() * grubOffsetY + self.offsetY(index) + self.chooseOffsetY())
+                                y: sHeight() * grubOffsetY + self.offsetY(index) + self.chooseOffsetY() + appendOffsetY(self.ggc, index))
                 }
             }.transition(.identity)
             
@@ -207,6 +219,11 @@ public struct GrumbleGrubImageDisplay: View {
     @ObservedObject private var ggc: GrumbleGrubCookie = GrumbleGrubCookie.ggc()
     @GestureState(initialValue: CGFloat(0), resetTransaction: Transaction(animation: gAnim(.springSlow))) private var holdData
     
+    //MARK: Getter Methods
+    private func offsetY(_ index: Int) -> CGFloat {
+        return self.gc.index() == index ? min(self.ggc.dragData(.vertical), 0) : 0
+    }
+    
     //MARK: Function Methods
     public static func cacheImage(_ key: String, value: Image?) {
         GrumbleGrubImageDisplay.cachedImages[key] =
@@ -221,19 +238,8 @@ public struct GrumbleGrubImageDisplay: View {
             GrumbleGrubImageDisplay.cacheImage(grub.img, value: grub.image())
         }
         return VStack(spacing: 0) {
-            ZStack {
-                GrumbleGrubImageDisplay.cachedImages[grub.img]!
-            }.overlay(Color.white.opacity(Double(self.ggc.tapData) * 0.5))
-            .cornerRadius(0)
-            /*.gesture(LongPressGesture(minimumDuration: 1)
-                .updating(self.$holdData) { value, state, transaction in
-                    transaction.animation = gAnim(.spring)
-                    state = 1
-            }.onEnded { _ in
-                self.expand()
-            }.simultaneously(with: TapGesture().onEnded {
-                self.expand()
-            }))*/
+            GrumbleGrubImageDisplay.cachedImages[grub.img]!
+                .cornerRadius(0)
             
             if self.gc.index() == index && self.ggc.expandedInfo {
                 Text(grub.food)
@@ -317,12 +323,13 @@ public struct GrumbleGrubImageDisplay: View {
     }
     
     public var body: some View {
-        ForEach(renderingRange(self.gc), id: \.self) { index in
+        ForEach(renderingRange(self.gc, self.ggc), id: \.self) { index in
             self.imageItem(self.gc.grub(index)!, index: index)
                 .scaleEffect(1 - 0.4 * grumbleDragData(self.gc, self.ggc, index))
-                .offset(x: offsetX(self.gc, self.ggc, index))
-        }.transition(.opacity)
+                .offset(x: offsetX(self.gc, self.ggc, index), y: self.offsetY(index) + appendOffsetY(self.ggc, index))
+        }.transition(.identity)
         .position(x: sWidth() * 0.5, y: sHeight() * (self.ggc.expandedInfo ? 0.45 : 0.35))
+        .zIndex(1)
     }
 }
 

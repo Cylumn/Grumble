@@ -34,9 +34,12 @@ public enum PresentHideModal {
 public class GrumbleCookie: ObservableObject {
     private static var instance: GrumbleCookie? = nil
     private var grubList: [(String, Grub)] = []
+    public var removed: Set<Int> = []
     @Published public var grubIndex: Int = 0
     private var maxObservedIndex: Int = 1
     private var requesting: Bool = false
+    
+    public var dragAxis: GAxis? = nil
     
     //MARK: Drag Translations
     @Published public var coverDrag: CGSize = CGSize.zero
@@ -68,6 +71,26 @@ public class GrumbleCookie: ObservableObject {
         return self.grubIndex
     }
     
+    public func startIndex() -> Int {
+        return removed.contains(0) ? self.trailingIndex(0) : 0
+    }
+    
+    public func leadingIndex(_ index: Int? = nil) -> Int {
+        var index = (index ?? self.index()) - 1
+        while removed.contains(index) {
+            index -= 1
+        }
+        return index
+    }
+    
+    public func trailingIndex(_ index: Int? = nil) -> Int {
+        var index = (index ?? self.index()) + 1
+       while removed.contains(index) {
+           index += 1
+       }
+       return index
+    }
+    
     public func grub(_ index: Int) -> Grub? {
         if self.grubList.count == 0 {
             return nil
@@ -97,9 +120,15 @@ public class GrumbleCookie: ObservableObject {
         self.maxObservedIndex = 1
     }
     
-    public func setIndex(_ index: Int) {
+    public func setIndex(_ index: Int, animation: Animation? = nil) {
         self.maxObservedIndex = max(self.maxObservedIndex, index + 1)
-        self.grubIndex = index
+        withAnimation(animation) {
+            self.grubIndex = index
+        }
+    }
+    
+    public func removeGrub(_ index: Int) {
+        self.removed.insert(index)
     }
     
     public func startIdleAnimation() {
@@ -162,13 +191,15 @@ public class GrumbleGrubCookie: ObservableObject {
     private static var instance: GrumbleGrubCookie? = nil
     @Published public var expandedInfo: Bool = false
     
+    public var verticalDragPositive: Bool? = nil
+    
     //MARK: Drag Translations
     @Published private var grumbleDrag: CGSize = CGSize.zero
     private var mostRecentDrag: CGSize? = nil
     
     //MARK: Data
     @Published public var chooseData: CGFloat = 0
-    @Published public var tapData: CGFloat = 0
+    @Published public var appendIndex: Int? = nil
     
     //MARK: Initializers
     public static func ggc() -> GrumbleGrubCookie {
@@ -189,7 +220,7 @@ public class GrumbleGrubCookie: ObservableObject {
     
     //MARK: Setter Methods
     public func setGrumbleDrag(_ translation: CGSize, force: Bool = false, animation: Animation? = nil) {
-        let requiredSizeChange: CGSize = CGSize(width: 10, height: Int.max)
+        let requiredSizeChange: CGSize = CGSize(width: 10, height: 20)
         if force || abs(translation.width - self.grumbleDrag.width) > requiredSizeChange.width ||
             abs(translation.height - self.grumbleDrag.height) > requiredSizeChange.height {
             
@@ -198,7 +229,6 @@ public class GrumbleGrubCookie: ObservableObject {
                 withAnimation(animation) {
                     self.grumbleDrag = self.mostRecentDrag!
                 }
-                count += 1
             } else {
                 Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
                     if self.grumbleDrag != self.mostRecentDrag {

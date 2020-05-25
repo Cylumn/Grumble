@@ -24,7 +24,6 @@ public struct GrumbleSheet: View {
     @State private var impactOccurred: Bool = false
     
     @State private var canTossHorizontally: Bool = true
-    @State private var dragAxis: GAxis? = nil
     
     //Initializer
     public init(show: Binding<Bool>) {
@@ -62,6 +61,8 @@ public struct GrumbleSheet: View {
         self.gc.presentHideModal = .hidden
         self.gc.endIdleAnimation()
         self.ggc.chooseData = 0
+        self.gc.removed = []
+        self.ggc.appendIndex = nil
     }
     
     private func onToss() {
@@ -73,6 +74,16 @@ public struct GrumbleSheet: View {
         }
     }
     
+    private func onAppend(_ index: Int) {
+        withAnimation(gAnim(.easeOut)) {
+            self.ggc.appendIndex = index
+        }
+        self.gc.setIndex(self.gc.trailingIndex(), animation: gAnim(.easeOut))
+        self.gc.removeGrub(index)
+        
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+    
     private var grumbleGesture: some Gesture {
         return LongPressGesture(minimumDuration: .infinity, maximumDistance: .infinity)
             .updating(self.$holdState) { value, state, transaction in
@@ -80,12 +91,12 @@ public struct GrumbleSheet: View {
                 state = 1
         }.simultaneously(with: DragGesture().onChanged { drag in
             if self.gc.coverDragState == .completed {
-                let boundingSize: CGSize = CGSize(width: sWidth() * 0.1, height: 30)
+                let boundingSize: CGSize = CGSize(width: sWidth() * 0.2, height: 30)
                 
                 var width: CGFloat = 0
                 if self.canTossHorizontally && self.gc.listCount() > 1 {
                     switch self.gc.index() {
-                    case 0:
+                    case self.gc.startIndex():
                         width = min(drag.translation.width, 0)
                     case self.gc.listCount():
                         width = max(drag.translation.width, 0)
@@ -93,7 +104,7 @@ public struct GrumbleSheet: View {
                         width = drag.translation.width
                     }
                 }
-                if self.dragAxis == GAxis.vertical {
+                if self.gc.dragAxis == GAxis.vertical {
                     var slurredWidth: CGFloat = width > 0 ? max(width - boundingSize.width, 0) : min(width + boundingSize.width, 0)
                     slurredWidth *= 0.3
                     width = min(max(width, -boundingSize.width), boundingSize.width) + slurredWidth
@@ -101,12 +112,12 @@ public struct GrumbleSheet: View {
                 
                 var height: CGFloat = 0
                 if self.gc.index() < self.gc.listCount() {
-                    height = self.dragAxis == GAxis.horizontal ?
+                    height = self.gc.dragAxis == GAxis.horizontal ?
                         min(max(drag.translation.height, -boundingSize.height), boundingSize.height) :
                         drag.translation.height
                     
-                    if self.dragAxis == GAxis.vertical {
-                        if !self.ggc.expandedInfo && height > sHeight() * 0.1 {
+                    if self.gc.dragAxis == GAxis.vertical {
+                        if !self.ggc.expandedInfo && (self.ggc.verticalDragPositive ?? false) && height > sHeight() * 0.1 {
                             self.ggc.expand(true)
                         } else if self.ggc.expandedInfo && height < sHeight() * -0.1 {
                             self.ggc.expand(false)
@@ -114,19 +125,27 @@ public struct GrumbleSheet: View {
                     }
                 }
                 
-                if self.dragAxis == nil {
+                if self.gc.dragAxis == nil {
                     if abs(width) > boundingSize.width {
-                        self.dragAxis = GAxis.horizontal
+                        self.gc.dragAxis = GAxis.horizontal
                         
                         if self.ggc.expandedInfo {
                             self.ggc.expand(false)
                         }
                     } else if abs(height) > boundingSize.height {
-                        self.dragAxis = GAxis.vertical
+                        self.gc.dragAxis = GAxis.vertical
+                        
+                        if self.ggc.verticalDragPositive == nil {
+                            self.ggc.verticalDragPositive = height > 0
+                        }
                     }
                 }
                 
-                self.ggc.setGrumbleDrag(CGSize(width: width, height: height), animation: gAnim(.springSlow))
+                if self.gtc.type == .grumble || self.ggc.verticalDragPositive ?? false {
+                    height = max(height, 0)
+                }
+                
+                self.ggc.setGrumbleDrag(CGSize(width: width, height: height), animation: gAnim(.easeOut))
             } else if drag.translation.height > sHeight() * 0.1 {
                 withAnimation(gAnim(.easeOut)) {
                     self.gc.coverDragState = .cancelled
@@ -169,33 +188,38 @@ public struct GrumbleSheet: View {
                             }
                         }
                         
-                        if self.dragAxis != GAxis.horizontal {
-                            if !self.ggc.expandedInfo && drag.predictedEndTranslation.height > sHeight() * 0.1 {
+                        if self.gc.dragAxis != GAxis.horizontal {
+                            if !self.ggc.expandedInfo && (self.ggc.verticalDragPositive ?? false) && drag.predictedEndTranslation.height > sHeight() * 0.1 {
                                 self.ggc.expand(true)
                             } else if self.ggc.expandedInfo && drag.predictedEndTranslation.height < sHeight() * -0.1 {
                                 self.ggc.expand(false)
                             }
+                            
+                            if self.gc.index() < self.gc.listCount() && !(self.ggc.verticalDragPositive ?? true) && drag.predictedEndTranslation.height < sHeight() * -0.6 {
+                                if self.gtc.type != .grumble {
+                                    self.onAppend(self.gc.index())
+                                }
+                            }
                         }
                         
-                        if self.dragAxis != GAxis.vertical {
-                            if self.gc.index() > 0 && drag.predictedEndTranslation.width > sWidth() * 0.5 {
-                                self.gc.setIndex(self.gc.index() - 1)
-                                
+                        if self.gc.dragAxis != GAxis.vertical {
+                            if self.gc.index() > self.gc.startIndex() && drag.predictedEndTranslation.width > sWidth() * 0.5 {
+                                self.gc.setIndex(self.gc.leadingIndex(), animation: gAnim(.easeOut))
                                 self.onToss()
                             } else if self.gc.index() < self.gc.listCount() && drag.predictedEndTranslation.width < -sWidth() * 0.5 {
-                                self.gc.setIndex(self.gc.index() + 1)
-                                
+                                self.gc.setIndex(self.gc.trailingIndex(), animation: gAnim(.easeOut))
                                 self.onToss()
                             }
                         }
                         
                         self.ggc.setGrumbleDrag(CGSize.zero, force: true, animation: gAnim(.easeOut))
-                        self.dragAxis = nil
+                        self.gc.dragAxis = nil
+                        self.ggc.verticalDragPositive = self.ggc.expandedInfo ? true : nil
                     }
                 }
             }
         }).simultaneously(with: TapGesture().onEnded {
-            if self.gc.coverDragState == .completed {
+            if self.gc.coverDragState == .completed && self.gc.index() < self.gc.listCount() {
                 self.ggc.expand()
             }
         })
