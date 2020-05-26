@@ -13,6 +13,7 @@ import Photos
 //MARK: - Constants
 private let imagePath: String = "images/"
 private let immutableImagePath: String = "immutableGrub/"
+public let immutableGrubImagePrefix: String = "ig."
 
 //MARK: - Decodable Structures
 private struct DataList: Decodable {
@@ -79,8 +80,12 @@ public func grubImage(_ filename: String) -> (UIImage, Date)? {
     let filePath = docPath.appendingPathComponent(imagePath + grubImagePath)
     let imageURL = URL(fileURLWithPath: filePath)
     do {
-        let attributes = try FileManager.default.attributesOfItem(atPath: filePath)
-        return (UIImage(contentsOfFile: imageURL.path)!, attributes[FileAttributeKey.modificationDate] as! Date)
+        if FileManager.default.fileExists(atPath: filePath) {
+            let attributes = try FileManager.default.attributesOfItem(atPath: filePath)
+            return (UIImage(contentsOfFile: imageURL.path)!, attributes[FileAttributeKey.modificationDate] as! Date)
+        } else {
+            return nil
+        }
     } catch {
         print("error:\(error)")
         return nil
@@ -258,7 +263,11 @@ public func onCloudFoodAdded(_ snapshot: DataSnapshot) {
     
     let downloadItem: () -> Void = {
         let storage = Storage.storage().reference()
-        let imageRef = storage.child(imagePath + snapshot.key + ".jpg")
+        let img = (snapshot.value as! NSDictionary)[Grub.GrubKeys.img.rawValue] as! String
+        let path = img.contains(immutableGrubImagePrefix) ?
+            immutableImagePath + img.replacingOccurrences(of: immutableGrubImagePrefix, with: "") :
+            imagePath + img
+        let imageRef = storage.child(path + ".jpg")
         imageRef.getData(maxSize: .max) { (metadata, error) in
             guard error == nil else {
                 print("error:\(error!)")
@@ -276,7 +285,10 @@ public func onCloudFoodAdded(_ snapshot: DataSnapshot) {
     DispatchQueue.global(qos: .utility).async {
         let foodItem = snapshot.value as! NSDictionary
         let storage = Storage.storage().reference()
-        let imageRef = storage.child(imagePath + snapshot.key + ".jpg")
+        let path = (foodItem[Grub.GrubKeys.img.rawValue] as! String).contains(immutableGrubImagePrefix) ?
+            immutableImagePath + (foodItem[Grub.GrubKeys.img.rawValue] as! String).replacingOccurrences(of: immutableGrubImagePrefix, with: "") :
+            imagePath + (foodItem[Grub.GrubKeys.img.rawValue] as! String)
+        let imageRef = storage.child(path + ".jpg")
         if let (_, modifyDate) = grubImage(foodItem[Grub.GrubKeys.img.rawValue] as! String) {
             //File Exists
             imageRef.getMetadata { metadata, error in
@@ -285,7 +297,7 @@ public func onCloudFoodAdded(_ snapshot: DataSnapshot) {
                     return
                 }
                 
-                if metadata!.updated!.advanced(by: 60 * 5) <= modifyDate {
+                if metadata!.timeCreated!.advanced(by: 60 * -5) <= modifyDate {
                     //Updated
                     createItem(nil)
                 } else {

@@ -234,11 +234,11 @@ public struct GrumbleGrubImageDisplay: View {
     }
     
     private func imageItem(_ grub: Grub, index: Int) -> some View {
-        if GrumbleGrubImageDisplay.cachedImages[grub.img] == nil {
+        if GrumbleGrubImageDisplay.cachedImages[grub.imgPath()] == nil {
             GrumbleGrubImageDisplay.cacheImage(grub.img, value: grub.image())
         }
         return VStack(spacing: 0) {
-            GrumbleGrubImageDisplay.cachedImages[grub.img]!
+            GrumbleGrubImageDisplay.cachedImages[grub.imgPath()]!
                 .cornerRadius(0)
             
             if self.gc.index() == index && self.ggc.expandedInfo {

@@ -66,7 +66,7 @@ public func gTagView(_ tag: GrubTag, _ boundingSize: CGSize, idleData: CGFloat, 
 
 //MARK: - Grub
 public struct Grub: Decodable, Equatable {
-    private static var images: [String: Image] = [:]
+    private static var images: [String: UIImage] = [:]
     
     public var fid: String
     public var img: String
@@ -107,33 +107,47 @@ public struct Grub: Decodable, Equatable {
         
         self.immutable = false
         
-        Grub.images[self.img] = Image(uiImage: grubImage(self.img)!.0)
+        Grub.images[self.imgPath()] = grubImage(self.img)!.0
         ObservedImage.updateImage(self)
-        GrumbleGrubImageDisplay.cacheImage(self.img, value: self.image())
+        GrumbleGrubImageDisplay.cacheImage(self.imgPath(), value: self.image())
     }
     
     public init(fid: String, _ foodItem: NSDictionary, immutable: Bool = false, image: UIImage? = nil) {
         self.fid = fid
-        self.img = foodItem.value(forKey: "img") as! String
-        self.food = foodItem.value(forKey: "food") as! String
-        self.price = foodItem.value(forKey: "price") as? Double
-        self.restaurant = foodItem.value(forKey: "restaurant") as? String
-        self.address = foodItem.value(forKey: "address") as? String
-        self.tags = foodItem.value(forKey: "tags") as! [GrubTag: Double]
-        self.priorityTag = foodItem.value(forKey: "priorityTag") as! GrubTag
-        self.date = foodItem.value(forKey: "date") as! String
+        self.img = foodItem.value(forKey: GrubKeys.img.rawValue) as! String
+        self.food = foodItem.value(forKey: GrubKeys.food.rawValue) as! String
+        self.price = foodItem.value(forKey: GrubKeys.price.rawValue) as? Double
+        self.restaurant = foodItem.value(forKey: GrubKeys.restaurant.rawValue) as? String
+        self.address = foodItem.value(forKey: GrubKeys.address.rawValue) as? String
+        self.tags = foodItem.value(forKey: GrubKeys.tags.rawValue) as! [GrubTag: Double]
+        self.priorityTag = foodItem.value(forKey: GrubKeys.priorityTag.rawValue) as! GrubTag
+        self.date = foodItem.value(forKey: GrubKeys.date.rawValue) as! String
         
         self.immutable = immutable
 
         if let image = image {
-            Grub.images[self.img] = Image(uiImage: image)
-        } else if Grub.images[self.img] == nil {
+            Grub.images[self.imgPath()] = image
+        } else if Grub.images[self.imgPath()] == nil {
             if let (uiImage, _) = grubImage(self.img) {
-                Grub.images[self.img] = Image(uiImage: uiImage)
+                Grub.images[self.imgPath()] = uiImage
             }
         }
         ObservedImage.updateImage(self)
-        GrumbleGrubImageDisplay.cacheImage(self.img, value: self.image())
+        GrumbleGrubImageDisplay.cacheImage(self.imgPath(), value: self.image())
+    }
+    
+    public init(_ original: Grub) {
+        self.fid = original.fid
+        self.img = original.img
+        self.food = original.food
+        self.price = original.price
+        self.restaurant = original.restaurant
+        self.address = original.address
+        self.tags = original.tags
+        self.priorityTag = original.priorityTag
+        self.date = original.date
+        
+        self.immutable = false
     }
     
     //MARK: Class Function Methods
@@ -163,22 +177,48 @@ public struct Grub: Decodable, Equatable {
     @available(*, deprecated) //remove in future
     public static func testGrub() -> Grub {
         var grubTest: [String: Any] = [:]
-        grubTest["img"] = ""
-        grubTest["food"] = "Ramen"
-        grubTest["price"] = 10.0
-        grubTest["restaurant"] = "Ippudo"
-        grubTest["address"] = "Saratoga Avenue"
+        grubTest[GrubKeys.img.rawValue] = ""
+        grubTest[GrubKeys.food.rawValue] = "Ramen"
+        grubTest[GrubKeys.price.rawValue] = 10.0
+        grubTest[GrubKeys.restaurant.rawValue] = "Ippudo"
+        grubTest[GrubKeys.address.rawValue] = "Saratoga Avenue"
         let tags = ["food": 1, soup: 1]
-        grubTest["tags"] = tags
-        grubTest["priorityTag"] = soup
-        grubTest["date"] = getDate()
+        grubTest[GrubKeys.tags.rawValue] = tags
+        grubTest[GrubKeys.priorityTag.rawValue] = soup
+        grubTest[GrubKeys.date.rawValue] = getDate()
         
         return Grub(fid: "", grubTest as NSDictionary, image: UIImage(imageLiteralResourceName: "ExplainTraining"))
     }
     
     //MARK: Getter Methods
+    public func imgPath() -> String {
+        return self.img.replacingOccurrences(of: immutableGrubImagePrefix, with: "")
+    }
+    
+    public func uiImage() -> UIImage? {
+        return Grub.images[self.imgPath()]
+    }
+    
     public func image() -> Image? {
-        return Grub.images[self.img]
+        if let uiImage = self.uiImage() {
+            return Image(uiImage: uiImage)
+        } else {
+            return nil
+        }
+    }
+    
+    public func dictionary() -> [String: Any] {
+        var dictionary: [String: Any] = [:]
+        dictionary[GrubKeys.fid.rawValue] = self.fid
+        dictionary[GrubKeys.img.rawValue] = self.img
+        dictionary[GrubKeys.food.rawValue] = self.food
+        dictionary[GrubKeys.price.rawValue] = self.price
+        dictionary[GrubKeys.restaurant.rawValue] = self.restaurant
+        dictionary[GrubKeys.address.rawValue] = self.address
+        dictionary[GrubKeys.tags.rawValue] = self.tags
+        dictionary[GrubKeys.priorityTag.rawValue] = self.priorityTag
+        dictionary[GrubKeys.date.rawValue] = self.date
+        return dictionary
     }
 }
 

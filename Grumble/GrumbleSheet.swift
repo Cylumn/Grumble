@@ -75,6 +75,19 @@ public struct GrumbleSheet: View {
     }
     
     private func onAppend(_ index: Int) {
+        var appendGrub = Grub(self.gc.grub(index)!)
+        appendGrub.date = getDate()
+        let date = dateComponent()
+        let prefix = String(trim(appendGrub.food).lowercased().prefix(3))
+        let fid = prefix + randomString(length: 4) + String(date.hour!) + "_" + String(date.minute!) + "_" + String(date.second!)
+        appendGrub.fid = fid
+        appendGrub.img = immutableGrubImagePrefix + appendGrub.img
+        
+        let dictionary = appendGrub.dictionary()
+        UserCookie.uc().appendFoodList(fid, appendGrub)
+        appendLocalFood(fid, dictionary as NSDictionary, appendGrub.uiImage())
+        appendCloudFood(fid, dictionary as NSDictionary)
+        
         withAnimation(gAnim(.easeOut)) {
             self.ggc.appendIndex = index
         }
@@ -91,7 +104,7 @@ public struct GrumbleSheet: View {
                 state = 1
         }.simultaneously(with: DragGesture().onChanged { drag in
             if self.gc.coverDragState == .completed {
-                let boundingSize: CGSize = CGSize(width: sWidth() * 0.2, height: 30)
+                let boundingSize: CGSize = CGSize(width: sWidth() * 0.15, height: 30)
                 
                 var width: CGFloat = 0
                 if self.canTossHorizontally && self.gc.listCount() > 1 {
