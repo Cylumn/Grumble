@@ -90,6 +90,7 @@ public struct Grub: Decodable, Equatable {
         case tags = "tags"
         case priorityTag = "priorityTag"
         case date = "date"
+        case immutable = "immutable"
     }
     
     //MARK: Initializers
@@ -104,15 +105,14 @@ public struct Grub: Decodable, Equatable {
         self.tags = try values.decode([GrubTag: Double].self, forKey: .tags)
         self.priorityTag = try values.decode(GrubTag.self, forKey: .priorityTag)
         self.date = try values.decode(String.self, forKey: .date)
+        self.immutable = try values.decodeIfPresent(Bool.self, forKey: .immutable) ?? false
         
-        self.immutable = false
-        
-        Grub.images[self.imgPath()] = grubImage(self.img)!.0
+        Grub.images[self.imgPath()] = grubImage(self.img)?.0
         ObservedImage.updateImage(self)
         GrumbleGrubImageDisplay.cacheImage(self.imgPath(), value: self.image())
     }
     
-    public init(fid: String, _ foodItem: NSDictionary, immutable: Bool = false, image: UIImage? = nil) {
+    public init(fid: String, _ foodItem: NSDictionary, immutable: Bool? = nil, image: UIImage? = nil) {
         self.fid = fid
         self.img = foodItem.value(forKey: GrubKeys.img.rawValue) as! String
         self.food = foodItem.value(forKey: GrubKeys.food.rawValue) as! String
@@ -122,8 +122,7 @@ public struct Grub: Decodable, Equatable {
         self.tags = foodItem.value(forKey: GrubKeys.tags.rawValue) as! [GrubTag: Double]
         self.priorityTag = foodItem.value(forKey: GrubKeys.priorityTag.rawValue) as! GrubTag
         self.date = foodItem.value(forKey: GrubKeys.date.rawValue) as! String
-        
-        self.immutable = immutable
+        self.immutable = immutable ?? foodItem.value(forKey: GrubKeys.immutable.rawValue) as? Bool ?? false
 
         if let image = image {
             Grub.images[self.imgPath()] = image
@@ -168,9 +167,9 @@ public struct Grub: Decodable, Equatable {
         return newGrubs
     }
     
-    public static func removeFood(_ fid: String) {
+    public static func removeFood(_ fid: String, deleteImage: Bool) {
         UserCookie.uc().removeFoodList(fid)
-        removeLocalFood(fid)
+        removeLocalFood(fid, deleteImage: deleteImage)
         removeCloudFood(fid)
     }
     
@@ -218,6 +217,7 @@ public struct Grub: Decodable, Equatable {
         dictionary[GrubKeys.tags.rawValue] = self.tags
         dictionary[GrubKeys.priorityTag.rawValue] = self.priorityTag
         dictionary[GrubKeys.date.rawValue] = self.date
+        dictionary[GrubKeys.immutable.rawValue] = self.immutable
         return dictionary
     }
 }
@@ -285,16 +285,23 @@ public class UserAccessCookie: ObservableObject {
 public class UserCookie: ObservableObject {
     private static var instance: UserCookie?
     @Published private var ghorblinName: String? = loadLocalData(.ghorblinName) as? String
-    @Published private var fList: [String: Grub] = loadLocalData(.foodList) as! [String: Grub]
-    private var grubsByDate: [(String, Grub)] = []
+    @Published private var lists: [[String: Grub]] = [loadLocalData(.foodList) as! [String: Grub], loadLocalData(.archivedList) as! [String: Grub]]
+    private var grubsByDate: [[(String, Grub)]] = [[], []]
     @Published public var loadingStatus: LoadingStatus = LoadingStatus.loading
     
-    //Getter Methods
+    //MARK: Enumerations
+    public enum ListType: Int {
+        case foodList = 0
+        case archivedList = 1
+    }
+    
+    //MARK: Getter Methods
     public static func uc() -> UserCookie {
         if UserCookie.instance == nil {
             UserCookie.instance = UserCookie()
-            GrubItemCookie.gic().calibrateText(UserCookie.instance!.fList)
-            UserCookie.instance!.sortFoodListByDate()
+            GrubItemCookie.gic().calibrateText(UserCookie.instance!.lists)
+            UserCookie.instance!.sortListByDate(.foodList)
+            UserCookie.instance!.sortListByDate(.archivedList)
         }
         return UserCookie.instance!
     }
@@ -304,14 +311,22 @@ public class UserCookie: ObservableObject {
     }
     
     public func foodList() -> [String: Grub] {
-        return self.fList
+        return self.lists[ListType.foodList.rawValue]
     }
     
     public func foodListByDate() -> [(String, Grub)] {
-        return self.grubsByDate
+        return self.grubsByDate[ListType.foodList.rawValue]
     }
     
-    //FList Modifier Methods
+    public func archivedList() -> [String: Grub] {
+        return self.lists[ListType.archivedList.rawValue]
+    }
+    
+    public func archivedListByDate() -> [(String, Grub)] {
+        return self.grubsByDate[ListType.archivedList.rawValue]
+    }
+    
+    //MARK: FList Modifier Methods
     public func setGhorblinName(_ name: String?) {
         if self.ghorblinName != name {
             self.ghorblinName = name
@@ -319,31 +334,68 @@ public class UserCookie: ObservableObject {
         }
     }
     
-    public func setFoodList(_ foodList: [String: Grub]) {
-        if self.fList != foodList {
-            self.fList = foodList
+    public func setLists(_ lists: [[String: Grub]]) {
+        if self.lists != lists {
+            self.lists = lists
+            for var (_, grub) in self.lists[ListType.archivedList.rawValue] {
+                grub.immutable = true
+            }
             GrubItemCookie.gic().reset()
-            GrubItemCookie.gic().calibrateText(self.fList)
-            self.sortFoodListByDate()
+            GrubItemCookie.gic().calibrateText(self.lists)
+            self.sortListByDate(.foodList)
+            self.sortListByDate(.archivedList)
+        }
+    }
+    
+    public func setList(_ type: ListType, _ list: [String: Grub]) {
+        if self.lists[type.rawValue] != list {
+            self.lists[type.rawValue] = list
+            GrubItemCookie.gic().reset()
+            GrubItemCookie.gic().calibrateText(self.lists)
+            self.sortListByDate(type)
+        }
+    }
+    
+    public func setFoodList(_ foodList: [String: Grub]) {
+        self.setList(.foodList, foodList)
+    }
+    
+    public func setArchivedList(_ foodList: [String: Grub]) {
+        self.setList(.archivedList, foodList)
+    }
+    
+    public func appendList(_ type: ListType, _ key: String, _ value: Grub) {
+        if self.lists[type.rawValue][key] != value {
+            self.lists[type.rawValue][key] = value
+            GrubItemCookie.gic().calibrateText(self.lists)
+            self.sortListByDate(type)
         }
     }
     
     public func appendFoodList(_ key: String, _ value: Grub) {
-        if self.fList[key] != value {
-            self.fList[key] = value
-            GrubItemCookie.gic().calibrateText(self.fList)
-            self.sortFoodListByDate()
-        }
+        self.appendList(.foodList, key, value)
+    }
+    
+    public func appendArchivedList(_ key: String, _ value: Grub) {
+        self.appendList(.archivedList, key, value)
+    }
+    
+    public func removeList(_ type: ListType, _ key: String) {
+        self.lists[type.rawValue][key] = nil
+        GrubItemCookie.gic().reset()
+        GrubItemCookie.gic().calibrateText(self.lists)
+        self.sortListByDate(type)
     }
     
     public func removeFoodList(_ key: String) {
-        self.fList[key] = nil
-        GrubItemCookie.gic().reset()
-        GrubItemCookie.gic().calibrateText(self.fList)
-        self.sortFoodListByDate()
+        self.removeList(.foodList, key)
     }
     
-    private func sortFoodListByDate() {
-        self.grubsByDate = Grub.sortByDate(self.fList)
+    public func removeArchivedList(_ key: String) {
+        self.removeList(.archivedList, key)
+    }
+    
+    private func sortListByDate(_ type: ListType) {
+        self.grubsByDate[type.rawValue] = Grub.sortByDate(self.lists[type.rawValue])
     }
 }

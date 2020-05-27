@@ -18,6 +18,7 @@ public let immutableGrubImagePrefix: String = "ig."
 //MARK: - Decodable Structures
 private struct DataList: Decodable {
     var foodList: [String: Grub]?
+    var archivedList: [String: Grub]?
     var ghorblinName: String?
     var linkToken: String?
 }
@@ -25,6 +26,7 @@ private struct DataList: Decodable {
 //MARK: - Enumerations
 public enum DataListKeys: String {
     case foodList = "foodList"
+    case archivedList = "archivedList"
     case ghorblinName = "ghorblinName"
     case linkToken = "linkToken"
 }
@@ -147,6 +149,7 @@ public func loadLocalData() {
         
         DispatchQueue.main.async {
             UserCookie.uc().setFoodList(data.foodList ?? [:] as [String: Grub])
+            UserCookie.uc().setArchivedList(data.archivedList ?? [:] as [String: Grub])
         }
     }
 }
@@ -158,7 +161,9 @@ public func loadLocalData(_ key: DataListKeys) -> Any? {
     if let data = data {
         switch key {
         case .foodList:
-            return data.foodList
+            return data.foodList ?? [:]
+        case .archivedList:
+            return data.archivedList ?? [:]
         case .ghorblinName:
             return data.ghorblinName
         case .linkToken:
@@ -206,7 +211,11 @@ public func appendLocalFood(_ key: String, _ foodItem: NSDictionary, _ image: UI
     }
     DispatchQueue.global(qos: .utility).async {
         if let rootDataDictionary = NSMutableDictionary(contentsOfFile: dataPath()) {
-            (rootDataDictionary[DataListKeys.foodList.rawValue] as! NSDictionary).setValue(foodItem, forKey: key)
+            if rootDataDictionary.value(forKey: DataListKeys.foodList.rawValue) == nil {
+                rootDataDictionary.setValue([:] as [String: NSDictionary], forKey: DataListKeys.foodList.rawValue)
+            }
+            
+            (rootDataDictionary.value(forKey: DataListKeys.foodList.rawValue) as! NSDictionary).setValue(foodItem, forKey: key)
             rootDataDictionary.write(toFile: dataPath(), atomically: true)
         }
     }
@@ -232,10 +241,36 @@ public func appendCloudFood(_ key: String, _ foodItem: NSDictionary, _ image: UI
     }
 }
 
-public func removeLocalFood(_ key: String) {
-    removeLocalGrubImage(key)
+public func appendLocalArchive(_ key: String, _ foodItem: NSDictionary, _ image: UIImage? = nil) {
+    if image != nil {
+        writeLocalGrubImage(foodItem[Grub.GrubKeys.img.rawValue] as! String, image: image!)
+    }
+    
+    DispatchQueue.global(qos: .utility).async {
+        if let rootDataDictionary = NSMutableDictionary(contentsOfFile: dataPath()) {
+            if rootDataDictionary.value(forKey: DataListKeys.archivedList.rawValue) == nil {
+                rootDataDictionary.setValue([:] as [String: NSDictionary], forKey: DataListKeys.archivedList.rawValue)
+            }
+            
+            (rootDataDictionary.value(forKey: DataListKeys.archivedList.rawValue) as! NSDictionary).setValue(foodItem, forKey: key)
+            rootDataDictionary.write(toFile: dataPath(), atomically: true)
+        }
+    }
+}
+
+public func appendCloudArchive(_ key: String, _ foodItem: NSDictionary) {
+    if let uid = Auth.auth().currentUser?.uid {
+        Database.database().reference().child("users").child(uid).child(DataListKeys.archivedList.rawValue).child(key).setValue(foodItem)
+    }
+}
+
+public func removeLocalFood(_ key: String, deleteImage: Bool) {
     if let rootDataDictionary = NSMutableDictionary(contentsOfFile: dataPath()) {
-        (rootDataDictionary[DataListKeys.foodList.rawValue] as! NSMutableDictionary).removeObject(forKey: key)
+        let fList = (rootDataDictionary[DataListKeys.foodList.rawValue] as! NSMutableDictionary)
+        if deleteImage {
+            removeLocalGrubImage((fList[key] as! NSDictionary)[Grub.GrubKeys.img.rawValue] as! String)
+        }
+        fList.removeObject(forKey: key)
         rootDataDictionary.write(toFile: dataPath(), atomically: true)
     }
 }
@@ -246,6 +281,23 @@ public func removeCloudFood(_ key: String) {
     }
 }
 
+public func removeLocalArchive(_ key: String, deleteImage: Bool) {
+    if let rootDataDictionary = NSMutableDictionary(contentsOfFile: dataPath()) {
+        let aList = (rootDataDictionary[DataListKeys.archivedList.rawValue] as! NSMutableDictionary)
+        if deleteImage {
+            removeLocalGrubImage((aList[key] as! NSDictionary)[Grub.GrubKeys.img.rawValue] as! String)
+        }
+        aList.removeObject(forKey: key)
+        rootDataDictionary.write(toFile: dataPath(), atomically: true)
+    }
+}
+
+public func removeCloudArchive(_ key: String) {
+    if let uid = Auth.auth().currentUser?.uid {
+        Database.database().reference().child("users").child(uid).child(DataListKeys.archivedList.rawValue).child(key).removeValue()
+    }
+}
+
 //MARK: - Cloud Observers
 /* 1. Check if file exists
  * 2. -- if exists, download & compare Metadatas
@@ -253,11 +305,16 @@ public func removeCloudFood(_ key: String) {
  * 3. ---- if not updated, download & create food item
  * 2. -- if doesn't exist, download & create food item
  */
-public func onCloudFoodAdded(_ snapshot: DataSnapshot) {
+public func onCloudListItemAdded(_ list: UserCookie.ListType, _ snapshot: DataSnapshot) {
     let createItem: (UIImage?) -> Void = { image in
         if let foodItem = snapshot.value as? NSDictionary {
-            UserCookie.uc().appendFoodList(snapshot.key, Grub(fid: snapshot.key, foodItem, image: image))
-            appendLocalFood(snapshot.key, foodItem, image)
+            UserCookie.uc().appendList(list, snapshot.key, Grub(fid: snapshot.key, foodItem, image: image))
+            switch list {
+            case .foodList:
+                appendLocalFood(snapshot.key, foodItem, image)
+            case .archivedList:
+                appendLocalArchive(snapshot.key, foodItem, image)
+            }
         }
     }
     
@@ -274,11 +331,7 @@ public func onCloudFoodAdded(_ snapshot: DataSnapshot) {
                 return
             }
             
-            if let foodItem = snapshot.value as? NSDictionary {
-                let image = UIImage(data: metadata!)!
-                UserCookie.uc().appendFoodList(snapshot.key, Grub(fid: snapshot.key, foodItem, image: image))
-                appendLocalFood(snapshot.key, foodItem, image)
-            }
+            createItem(UIImage(data: metadata!))
         }
     }
     
@@ -312,6 +365,14 @@ public func onCloudFoodAdded(_ snapshot: DataSnapshot) {
     }
 }
 
+public func onCloudFoodAdded(_ snapshot: DataSnapshot) {
+    onCloudListItemAdded(.foodList, snapshot)
+}
+
+public func onCloudArchiveAdded(_ snapshot: DataSnapshot) {
+    onCloudListItemAdded(.archivedList, snapshot)
+}
+
 public func onCloudDataAdded(_ snapshot: DataSnapshot) {
     switch snapshot.key {
     case DataListKeys.ghorblinName.rawValue:
@@ -328,7 +389,12 @@ public func onCloudDataAdded(_ snapshot: DataSnapshot) {
 
 public func onCloudFoodRemoved(_ snapshot: DataSnapshot) {
     UserCookie.uc().removeFoodList(snapshot.key)
-    removeLocalFood(snapshot.key)
+    removeLocalFood(snapshot.key, deleteImage: false)
+}
+
+public func onCloudArchiveRemoved(_ snapshot: DataSnapshot) {
+    UserCookie.uc().removeArchivedList(snapshot.key)
+    removeLocalArchive(snapshot.key, deleteImage: true)
 }
 
 public func onCloudDataRemoved(_ snapshot: DataSnapshot) {
@@ -348,6 +414,13 @@ public func onCloudFoodChanged(_ snapshot: DataSnapshot) {
     if let foodItem = snapshot.value as? NSDictionary {
         UserCookie.uc().appendFoodList(snapshot.key, Grub(fid: snapshot.key, foodItem))
         appendLocalFood(snapshot.key, foodItem)
+    }
+}
+
+public func onCloudArchiveChanged(_ snapshot: DataSnapshot) {
+    if let foodItem = snapshot.value as? NSDictionary {
+        UserCookie.uc().appendArchivedList(snapshot.key, Grub(fid: snapshot.key, foodItem))
+        appendLocalArchive(snapshot.key, foodItem)
     }
 }
 
@@ -376,6 +449,11 @@ public func setObservers(uid: String) {
     ref.child("users").child(uid).child(DataListKeys.foodList.rawValue).observe(DataEventType.childAdded, with: onCloudFoodAdded)
     ref.child("users").child(uid).child(DataListKeys.foodList.rawValue).observe(DataEventType.childRemoved, with: onCloudFoodRemoved)
     ref.child("users").child(uid).child(DataListKeys.foodList.rawValue).observe(DataEventType.childChanged, with: onCloudFoodChanged)
+    
+    ref.child("users").child(DataListKeys.archivedList.rawValue).removeAllObservers()
+    ref.child("users").child(uid).child(DataListKeys.archivedList.rawValue).observe(DataEventType.childAdded, with: onCloudArchiveAdded)
+    ref.child("users").child(uid).child(DataListKeys.archivedList.rawValue).observe(DataEventType.childRemoved, with: onCloudArchiveRemoved)
+    ref.child("users").child(uid).child(DataListKeys.archivedList.rawValue).observe(DataEventType.childChanged, with: onCloudArchiveChanged)
 }
 
 //MARK: - App Requests
@@ -477,14 +555,17 @@ public func onLogin(requireCloud: Bool) {
         }
         
         loadCloudData() { data in
-            let foodList: NSDictionary? = data?[DataListKeys.foodList.rawValue] as? NSDictionary
-            if foodList != nil && foodList!.count > 0 {
-                var fList: [String: Grub] = [:]
-                for food in foodList! {
-                    fList[food.key as! String] = Grub(fid: food.key as! String, food.value as! NSDictionary)
+            let dictionaryLists: [NSDictionary?] = [data?[DataListKeys.foodList.rawValue] as? NSDictionary,
+                                         data?[DataListKeys.archivedList.rawValue] as? NSDictionary]
+            var lists: [[String: Grub]] = [[:], [:]]
+            for index in 0 ..< dictionaryLists.count {
+                if dictionaryLists[index] != nil && dictionaryLists[index]!.count > 0 {
+                    for food in dictionaryLists[index]! {
+                        lists[index][food.key as! String] = Grub(fid: food.key as! String, food.value as! NSDictionary)
+                    }
                 }
-                UserCookie.uc().setFoodList(fList)
             }
+            UserCookie.uc().setLists(lists)
             UserCookie.uc().loadingStatus = .loaded
             setObservers(uid: uid)
             
@@ -508,6 +589,7 @@ public func onLogout() {
         try Auth.auth().signOut()
         UserAccessCookie.uac().setLoggedIn(nil)
         UserCookie.uc().setFoodList([:] as [String: Grub])
+        UserCookie.uc().setArchivedList([:] as [String: Grub])
         UserAccessCookie.uac().setLinkToken(nil)
         UserCookie.uc().setGhorblinName(nil)
         UserCookie.uc().loadingStatus = LoadingStatus.loading

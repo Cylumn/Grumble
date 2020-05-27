@@ -184,11 +184,34 @@ public struct ListView: View {
                             
                             Spacer()
                         }.padding(.leading, 20)
-                        .padding(.bottom, 40)
+                        .padding(.bottom, 20)
                         .frame(minWidth: sWidth())
                     }.frame(width: sWidth())
                     
-                    Spacer()
+                    if self.uc.archivedListByDate().count > 0 {
+                        HStack {
+                            Text("Recently Eaten At")
+                                .font(gFont(.ubuntuBold, .width, 3))
+                                .frame(height: myListTitleHeight)
+                                .foregroundColor(Color(white: 0.2))
+                            
+                            Spacer()
+                        }.padding([.leading, .trailing], 20)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 20) {
+                                ForEach((0 ..< self.uc.archivedListByDate().count).reversed(), id: \.self) { index in
+                                    GrubItem(self.uc.archivedListByDate()[index].1)
+                                }
+                                
+                                Spacer()
+                            }.padding(.leading, 20)
+                            .padding(.bottom, 20)
+                            .frame(minWidth: sWidth())
+                        }.frame(width: sWidth())
+                    }
+                    
+                    Spacer().frame(minHeight: 60)
                 }
                 
                 self.searchList

@@ -20,10 +20,12 @@ public class GrubItemCookie: ObservableObject {
         return GrubItemCookie.instance!
     }
     
-    public func calibrateText(_ foodList: [String: Grub]) {
+    public func calibrateText(_ lists: [[String: Grub]]) {
         var textSize: CGFloat = 2.5
-        for grub in foodList.values {
-            textSize = max(min(27.0 / CGFloat(grub.food.count), textSize), 2)
+        for list in lists {
+            for grub in list.values {
+                textSize = max(min(27.0 / CGFloat(grub.food.count), textSize), 2)
+            }
         }
         if textSize != self.textSize {
             self.textSize = textSize
@@ -69,7 +71,7 @@ public struct GrubItem: View {
     //MARK: Function Methods
     private func onClick() {
         withAnimation(gAnim(.easeOut)) {
-            self.lc.selectedGrub = UserCookie.uc().foodList()[self.fid]
+            self.lc.selectedGrub = self.grub
         }
         UIApplication.shared.endEditing()
     }
@@ -83,23 +85,6 @@ public struct GrubItem: View {
                     self.oi.image?
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                    
-                    HStack(alignment: .bottom) {
-                        Text(self.grub.food)
-                            .padding(10)
-                            .font(gFont(.ubuntuBold, .width, self.gic.textSize))
-                            .foregroundColor(Color.white)
-                            .lineLimit(1)
-                    
-                        Spacer()
-                        
-                        if self.grub.price != nil {
-                            Text("$" + String(format:"%.2f", self.grub.price!))
-                                .padding(10)
-                                .font(gFont(.ubuntuBold, .width, self.gic.textSize))
-                                .foregroundColor(Color.white)
-                        }
-                    }.background(LinearGradient(gradient: Gradient(colors: [gTagColors[self.grub.priorityTag]!.opacity(0), gTagColors[self.grub.priorityTag]!]), startPoint: .top, endPoint: .bottom))
                 }.frame(width: 200, height: 150)
                 .cornerRadius(10)
                 .onTapGesture {
@@ -108,10 +93,16 @@ public struct GrubItem: View {
                     self.onClick()
                 }
             }).buttonStyle(PlainButtonStyle())
-                .shadow(color: gTagColors[self.grub.priorityTag]!.opacity(0.2), radius: 10, y: 10)
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(gTagColors[self.grub.priorityTag]!, lineWidth: 4))
+            
+            Text(self.grub.food)
+                .padding([.top, .leading], 10)
+                .font(gFont(.ubuntuBold, .width, self.gic.textSize))
+                .foregroundColor(gTagColors[self.grub.priorityTag]!)
+                .lineLimit(1)
             
             Text(self.grub.restaurant ?? " ")
-                .padding([.top, .leading], 10)
+                .padding(.leading, 10)
                 .font(gFont(.ubuntuLight, .width, 2))
                 .foregroundColor(Color.black)
                 .lineLimit(1)
@@ -121,7 +112,8 @@ public struct GrubItem: View {
                 .font(gFont(.ubuntuLightItalic, .width, 1.5))
                 .foregroundColor(Color(white: 0.1))
                 .lineLimit(1)
-        }.frame(width: 200)
+        }.padding(.top, 4)
+        .frame(width: 200)
     }
 }
 
@@ -266,7 +258,7 @@ public struct GrubSearchItem: View {
                 .stroke(gColor(.coral), lineWidth: 2))
             }).alert(isPresented: self.$presentDeleteAlert) {
                 Alert(title: Text("Delete Grub?"), primaryButton: Alert.Button.default(Text("Cancel")), secondaryButton: Alert.Button.destructive(Text("Delete")) {
-                    Grub.removeFood(self.fid)
+                    Grub.removeFood(self.fid, deleteImage: true)
                 })
             }
         }.padding(10)

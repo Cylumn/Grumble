@@ -237,7 +237,7 @@ fileprivate struct GrubSheetContent: View {
                 }).alert(isPresented: self.$presentDeleteAlert) {
                     Alert(title: Text("Delete Grub?"), primaryButton: Alert.Button.default(Text("Cancel")), secondaryButton: Alert.Button.destructive(Text("Delete")) {
                         self.lc.selectedGrub = nil
-                        Grub.removeFood(self.selectedFID)
+                        Grub.removeFood(self.selectedFID, deleteImage: true)
                     })
                 }
             }

@@ -18,8 +18,30 @@ public struct GrumbleHideModal: View {
     }
     
     private func completeGrubSheet() {
-        if self.gc.listCount() > 0 && !self.gc.grub()!.immutable {
-            Grub.removeFood(self.gc.grub()!.fid)
+        if self.gc.listCount() > 0 {
+            var archivedGrub = Grub(self.gc.grub()!)
+            archivedGrub.date = getDate()
+            archivedGrub.immutable = true
+            
+            if !self.gc.grub()!.immutable {
+                UserCookie.uc().appendArchivedList(archivedGrub.fid, archivedGrub)
+                let dictionary = archivedGrub.dictionary() as NSDictionary
+                appendLocalArchive(archivedGrub.fid, dictionary)
+                appendCloudArchive(archivedGrub.fid, dictionary)
+                
+                Grub.removeFood(self.gc.grub()!.fid, deleteImage: false)
+            } else {
+                archivedGrub.img = immutableGrubImagePrefix + archivedGrub.img
+                
+                UserCookie.uc().appendArchivedList(archivedGrub.fid, archivedGrub)
+                let dictionary = archivedGrub.dictionary() as NSDictionary
+                appendLocalArchive(archivedGrub.fid, dictionary, archivedGrub.uiImage())
+                appendCloudArchive(archivedGrub.fid, dictionary)
+            }
+            
+            withAnimation(gAnim(.easeOut)) {
+                ListCookie.lc().selectedGrub = archivedGrub
+            }
         }
         self.hideSheet()
     }
