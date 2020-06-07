@@ -27,6 +27,22 @@ public let salad: GrubTag = "salad"
 public let seafood: GrubTag = "seafood"
 public let soup: GrubTag = "soup"
 public let gTags: [GrubTag] = [food, bread, burger, dairy, dessert, egg, fried, fruit, grains, meat, noodles, salad, seafood, soup]
+public let gTagMap: [GrubTag: Int] =
+    [food: 0,
+    bread: 1,
+    burger: 2,
+    dairy: 3,
+    dessert: 4,
+    egg: 5,
+    fried: 6,
+    fruit: 7,
+    grains: 8,
+    meat: 9,
+    noodles: 10,
+    salad: 11,
+    seafood: 12,
+    soup: 13]
+
 
 public let gTagColors: [GrubTag: Color] =
     [food: gColor(.blue2),

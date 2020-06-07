@@ -53,6 +53,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
                 }
             }
             
+            //First SignIn Google
             if !hasEmailProvider {
                 let linkToken: String = randomString(length: 10)
                 UserAccessCookie.uac().setLinkToken(linkToken)
@@ -88,6 +89,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
         _ = GTagLabeler.gtl()
         _ = ImageLibrary.library()
         _ = GCamera.camera()
+        
+        var imageIDs: [String] = []
+        var tagList: [[GrubTag: Double]] = []
+        for (_, grub) in UserCookie.uc().foodList() {
+            imageIDs.append(grub.img)
+            tagList.append(grub.tags)
+        }
+        print("requesting preferences for: ")
+        print(imageIDs)
+        print(tagList)
+        requestPreferences(imageIDs: imageIDs, tagList: tagList) { preferences in
+            print("found preferences!")
+            print(preferences)
+        }
         
         return true
     }

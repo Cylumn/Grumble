@@ -457,11 +457,20 @@ public func setObservers(uid: String) {
 }
 
 //MARK: - App Requests
-private func post(path: String, _ onCompletion: @escaping (String?) -> Void) {
+private func getPostString(_ params: [String: Any]) -> String {
+    var data: [String] = []
+    for (key, value) in params {
+        data.append(key + "=\(value)")
+    }
+    return data.map{String($0)}.joined(separator: "&")
+}
+
+private func post(path: String, formData: [String: Any] = [:], _ onCompletion: @escaping (String?) -> Void) {
     let url = URL(string: "https://grumbleserver.uc.r.appspot.com/" + path)!
     var request = URLRequest(url: url)
-    //request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+    request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
     request.httpMethod = "POST"
+    var formData = formData
     var secret: String
     do {
         let secretURL = Bundle.main.url(forResource: "clientSecret", withExtension: "txt")!
@@ -472,8 +481,10 @@ private func post(path: String, _ onCompletion: @escaping (String?) -> Void) {
         print("error:\(error)")
         return
     }
-    let parameters = "client_secret=" + secret
-    request.httpBody = parameters.data(using: .utf8)
+    formData["user"] = Auth.auth().currentUser!.uid
+    formData["client_secret"] = secret
+    print("form data: " + getPostString(formData))
+    request.httpBody = getPostString(formData).data(using: .utf8)
 
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         guard let data = data,
@@ -536,6 +547,29 @@ public func requestImmutableGrub(_ existing: ArraySlice<(String, Grub)> = [], co
     }
 }
 
+//MARK: - Request Preferences
+public func requestPreferences(imageIDs: [String], tagList: [[GrubTag: Double]], _ withCompletion: @escaping ([Double]) -> Void) {
+    if UserAccessCookie.uac().loggedIn() == .loggedIn {
+        var rawTagList: [[Double]] = []
+        for tagDict in tagList {
+            var tags = Array(repeating: 0.0, count: 14)
+            for tag in tagDict.keys {
+                tags[gTagMap[tag]!] = tagDict[tag]!
+            }
+            rawTagList.append(tags)
+        }
+        
+        let formData: [String: Any] = ["image_ids": imageIDs, "tags": rawTagList]
+        post(path: "predict-preference", formData: formData) { response in
+            if let preferences = try? JSONSerialization.jsonObject(with: response!.data(using: .utf8)!) as? [Double] {
+                withCompletion(preferences)
+            } else {
+                print(response)
+            }
+        }
+    }
+}
+
 //MARK: - Machine Learning Input/Output
 public func queueImageTraining(_ fid: String, _ tags: [GrubTag: Double]) {
     var modifiedTags = tags
@@ -553,6 +587,8 @@ public func onLogin(requireCloud: Bool) {
         } else {
             UserAccessCookie.uac().setLoggedIn(Auth.auth().currentUser)
         }
+        
+        Database.database().reference().child("userList").child(uid).setValue(true)
         
         loadCloudData() { data in
             let dictionaryLists: [NSDictionary?] = [data?[DataListKeys.foodList.rawValue] as? NSDictionary,
