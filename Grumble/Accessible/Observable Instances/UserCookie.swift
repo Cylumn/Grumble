@@ -222,6 +222,16 @@ public struct Grub: Decodable, Equatable {
         }
     }
     
+    public func duplicate() -> Grub {
+        var grub = Grub(self)
+        grub.date = getDate()
+        let date = dateComponent()
+        let prefix = String(trim(grub.food).lowercased().prefix(3))
+        let fid = prefix + randomString(length: 4) + String(date.hour!) + "_" + String(date.minute!) + "_" + String(date.second!)
+        grub.fid = fid
+        return grub
+    }
+    
     public func dictionary() -> [String: Any] {
         var dictionary: [String: Any] = [:]
         dictionary[GrubKeys.fid.rawValue] = self.fid

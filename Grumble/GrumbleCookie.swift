@@ -122,6 +122,18 @@ public class GrumbleCookie: ObservableObject {
     
     public func setIndex(_ index: Int, animation: Animation? = nil) {
         self.maxObservedIndex = max(self.maxObservedIndex, index + 1)
+        if self.maxObservedIndex % 5 == 0 {
+            requestLikeableGrub(count: 1, precision: 1) { grubs in
+                var (_, grub) = grubs.first!
+                grub = grub.duplicate()
+                grub.img = immutableGrubImagePrefix + grub.img
+                let dictionary = grub.dictionary() as NSDictionary
+                
+                UserCookie.uc().appendFoodList(grub.fid, grub)
+                appendLocalFood(grub.fid, dictionary, grub.uiImage())
+                appendCloudFood(grub.fid, dictionary)
+            }
+        }
         withAnimation(animation) {
             self.grubIndex = index
         }
@@ -170,6 +182,21 @@ public class GrumbleCookie: ObservableObject {
                 self.grubList = self.grubList + list.shuffled()
                 self.requesting = false
             }
+        }
+    }
+    
+    //MARK: Function Methods
+    public func fitGrub() {
+        if GrumbleTypeCookie.gtc().type != .grumble {
+            var imageIDs: [String] = []
+            var tagList: [[GrubTag: Double]] = []
+            var preferred: [Int] = []
+            for index in 0 ..< self.index() {
+                imageIDs.append(self.grub(index)!.img)
+                tagList.append(self.grub(index)!.tags)
+                preferred.append(self.removed.contains(index) ? 1 : 0)
+            }
+            fitPreferences(imageIDs: imageIDs, tagList: tagList, preferred: preferred)
         }
     }
 }
@@ -253,6 +280,11 @@ public class GrumbleGrubCookie: ObservableObject {
     }
     
     public func choose() {
+        let imageIDs: [String] = [GrumbleCookie.gc().grub()!.img]
+        let tagList: [[GrubTag: Double]] = [GrumbleCookie.gc().grub()!.tags]
+        let preferred: [Int] = [1]
+        fitPreferences(imageIDs: imageIDs, tagList: tagList, preferred: preferred)
+        
         withAnimation(Animation.easeOut(duration: 0.3)) {
             self.chooseData = 0.3
             GrumbleCookie.gc().presentHideModal = PresentHideModal.inProgress

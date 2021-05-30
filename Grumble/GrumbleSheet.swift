@@ -51,6 +51,7 @@ public struct GrumbleSheet: View {
     
     //MARK: Function Methods
     private func hideSheet() {
+        self.gc.fitGrub()
         withAnimation(gAnim(.spring)) {
             self.show.wrappedValue = false
             self.gc.dripData = 0
@@ -75,18 +76,13 @@ public struct GrumbleSheet: View {
     }
     
     private func onAppend(_ index: Int) {
-        var appendGrub = Grub(self.gc.grub(index)!)
-        appendGrub.date = getDate()
-        let date = dateComponent()
-        let prefix = String(trim(appendGrub.food).lowercased().prefix(3))
-        let fid = prefix + randomString(length: 4) + String(date.hour!) + "_" + String(date.minute!) + "_" + String(date.second!)
-        appendGrub.fid = fid
+        var appendGrub = self.gc.grub(index)!.duplicate()
         appendGrub.img = immutableGrubImagePrefix + appendGrub.img
         
         let dictionary = appendGrub.dictionary()
-        UserCookie.uc().appendFoodList(fid, appendGrub)
-        appendLocalFood(fid, dictionary as NSDictionary, appendGrub.uiImage())
-        appendCloudFood(fid, dictionary as NSDictionary)
+        UserCookie.uc().appendFoodList(appendGrub.fid, appendGrub)
+        appendLocalFood(appendGrub.fid, dictionary as NSDictionary, appendGrub.uiImage())
+        appendCloudFood(appendGrub.fid, dictionary as NSDictionary)
         
         withAnimation(gAnim(.easeOut)) {
             self.ggc.appendIndex = index

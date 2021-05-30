@@ -56,8 +56,14 @@ public struct ListView: View {
             GrumbleCookie.gc().setGrubList(UserCookie.uc().foodList().shuffled())
         } else {
             let unobserved = GrumbleCookie.gc().unobservedGrubList()
-            requestImmutableGrub(unobserved, count: max(10 - unobserved.count, 0)) { list in
-                GrumbleCookie.gc().setGrubList(unobserved + list.shuffled())
+            if ghorblinType == .orthodox {
+                requestLikeableGrub(unobserved, count: max(20 - unobserved.count, 0)) { list in
+                    GrumbleCookie.gc().setGrubList(unobserved + list.shuffled())
+                }
+            } else {
+                requestImmutableGrub(unobserved, count: max(10 - unobserved.count, 0)) { list in
+                    GrumbleCookie.gc().setGrubList(unobserved + list.shuffled())
+                }
             }
             GrumbleCookie.gc().setGrubList(Array(unobserved))
         }

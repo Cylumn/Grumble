@@ -483,7 +483,6 @@ private func post(path: String, formData: [String: Any] = [:], _ onCompletion: @
     }
     formData["user"] = Auth.auth().currentUser!.uid
     formData["client_secret"] = secret
-    print("form data: " + getPostString(formData))
     request.httpBody = getPostString(formData).data(using: .utf8)
 
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
@@ -547,6 +546,68 @@ public func requestImmutableGrub(_ existing: ArraySlice<(String, Grub)> = [], co
     }
 }
 
+public func requestLikeableGrub(_ existing: ArraySlice<(String, Grub)> = [], count: Int, precision: Double = 0.3, _ withCompletion: @escaping ([String: Grub]) -> Void) {
+    requestImmutableGrub(existing, count: Int(Double(count) * min(precision, 1) * 10.0)) { list in
+        var imageIDs: [String] = []
+        var tagList: [[GrubTag: Double]] = []
+        let list = list.shuffled()
+        for (_, grub) in list {
+            imageIDs.append(grub.img)
+            tagList.append(grub.tags)
+        }
+        requestPreferences(imageIDs: imageIDs, tagList: tagList) { preferences in
+            var indices: [(Int, Double)] = []
+            for index in 0 ..< preferences.count {
+                if indices.count < count {
+                    indices.append((index, preferences[index]))
+                    if indices.count >= count {
+                        indices.sort(by: { first, second in
+                            return first.1 < second.1
+                        })
+                    }
+                } else {
+                    var j = -1
+                    while indices[j + 1].1 < preferences[index] {
+                        j += 1
+                    }
+                    
+                    if j >= 0 {
+                        indices.insert((index, preferences[index]), at: j + 1)
+                        indices.removeFirst()
+                    }
+                }
+            }
+            var newList: [String: Grub] = [:]
+            for (index, _) in indices {
+                newList[list[index].key] = list[index].value
+            }
+            
+            withCompletion(newList)
+        }
+    }
+}
+
+//MARK: - Request Preferences
+public func fitPreferences(imageIDs: [String], tagList: [[GrubTag: Double]], preferred: [Int], _ withCompletion: @escaping (String) -> Void = { _ in }) {
+    if UserAccessCookie.uac().loggedIn() == .loggedIn {
+        var rawTagList: [[Double]] = []
+        for tagDict in tagList {
+            var tags = Array(repeating: 0.0, count: 14)
+            for tag in tagDict.keys {
+                tags[gTagMap[tag]!] = tagDict[tag]!
+            }
+            rawTagList.append(tags)
+        }
+        
+        let formData: [String: Any] = ["image_ids": imageIDs, "tags": rawTagList, "preferred": preferred]
+        post(path: "fit-preference", formData: formData) { response in
+            if let response = response {
+                withCompletion(response)
+            }
+        }
+    }
+}
+
 //MARK: - Request Preferences
 public func requestPreferences(imageIDs: [String], tagList: [[GrubTag: Double]], _ withCompletion: @escaping ([Double]) -> Void) {
     if UserAccessCookie.uac().loggedIn() == .loggedIn {
@@ -563,8 +624,6 @@ public func requestPreferences(imageIDs: [String], tagList: [[GrubTag: Double]],
         post(path: "predict-preference", formData: formData) { response in
             if let preferences = try? JSONSerialization.jsonObject(with: response!.data(using: .utf8)!) as? [Double] {
                 withCompletion(preferences)
-            } else {
-                print(response)
             }
         }
     }
